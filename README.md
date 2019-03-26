@@ -8,7 +8,19 @@ Repository for constraint programming assignments for the *Advanced Programming 
 - [Constraint Handling Rules (Thom Fruhwirth)](/books/Constraint%20Handling%20Rules%20(Thom%20Fruhwirth).pdf).
 - [Handbook of Constraint Programming (book chapter)](/books/Handbook%20of%20Constraint%20Programming.pdf).
 
+**Slides**
+
+- [Introduction](/slides/Introduction.pdf).
+- [Passive Constraints](/slides/Passive.pdf).
+- [Active Constraints](/slides/Active.pdf).
+- [Optimization with Active Constraints](/slides/Optimization.pdf).
+- [Other CP Systems](/slides/Other.pdf).
+- [Constraints on Reals](/slides/Reals.pdf).
+- [Constraint Handling Rules](/slides/CHR.pdf).
+
 ## CHR
+
+Commited choice language ; unlike Prolog, once you make a choice, you're stuck with it.
 
 **CHR rules**
 
