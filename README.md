@@ -1,6 +1,6 @@
 Repository for constraint programming assignments for the *Advanced Programming Languages for A.I.* course [H02A8A].
 
-*Sources*
+# Sources
 
 **Books**
 
@@ -8,7 +8,7 @@ Repository for constraint programming assignments for the *Advanced Programming 
 - [Constraint Handling Rules (Thom Fruhwirth)](/books/Constraint%20Handling%20Rules%20(Thom%20Fruhwirth).pdf).
 - [Handbook of Constraint Programming (book chapter)](/books/Handbook%20of%20Constraint%20Programming.pdf).
 
-*CHR*
+# CHR
 
 **CHR rules**
 
