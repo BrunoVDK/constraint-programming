@@ -18,7 +18,7 @@ Repository for constraint programming assignments for the *Advanced Programming 
 - [Constraints on Reals](/slides/Reals.pdf).
 - [Constraint Handling Rules](/slides/CHR.pdf).
 
-## CHR
+## Constraint Handling Rules
 
 Commited choice language ; unlike Prolog, once you make a choice, you're stuck with it.
 
