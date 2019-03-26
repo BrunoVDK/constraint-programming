@@ -18,6 +18,17 @@ Repository for constraint programming assignments for the *Advanced Programming 
 - [Constraints on Reals](/slides/Reals.pdf).
 - [Constraint Handling Rules](/slides/CHR.pdf).
 
+**Research**
+
+ - [LibGen](http://libgen.io)
+ - [LIMO](http://limo.libis.be)
+ - [Google Scholar](http://scholar.google.com)
+
+## ECLiPSe
+
+ - [Download](http://eclipseclp.org/download.html)
+ - [Tutorial](http://eclipseclp.org/doc/tutorial/tutorial.html)
+
 ## Constraint Handling Rules
 
 Commited choice language ; unlike Prolog, once you make a choice, you're stuck with it.
