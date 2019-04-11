@@ -12,8 +12,13 @@
 %
 % @param    Name The name of the sudoku puzzle.
 sudoku(Name) :-
-    puzzles(Puzzle, Name), % Find the puzzle with the given name
+    puzzles(PuzzleList, Name), % Find the puzzle with the given name
+    (foreach(RowList, PuzzleList), foreach(Row, Rows) do
+        array_list(Row, RowList)
+    ),
+    array_list(Puzzle, Rows),
     dim(Puzzle, [N,N]), % Get the puzzle dimension
+    write('Input dimension = '), write(N), nl,
     declare_domains(Puzzle, N),
     generate_constraints(Puzzle, N),
     labeling(Puzzle).
