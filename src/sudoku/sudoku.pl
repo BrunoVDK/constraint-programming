@@ -5,7 +5,7 @@
 % @version  1.0
 %
 
-:- lib(ic)
+:- lib(ic).
 
 % Entry point
 sudoku(Name) :-
@@ -17,12 +17,12 @@ sudoku(Name) :-
 
 % Declare the domains
 declare_domains(Puzzle, N) :-
-    Puzzle :: 1..N.
+    Puzzle :: 1..N. % All squares should have an integer from 1 to 9
 
 % Generate the constraints
 generate_constraints(Puzzle, N) :-
     for(I,1,N), param(Puzzle) do
-        alldifferent(Puzzle[I,*]),
+        alldifferent(Puzzle[I,*]), % Different integer in every element of the row
         alldifferent(Puzzle[*,J]),
     RootN is integer(sqrt(N)),
     multifor([I,J], 1, N, RootN), param(Puzzle, RootN) do
