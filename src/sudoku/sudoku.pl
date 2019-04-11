@@ -6,19 +6,25 @@
 %
 
 :- lib(ic).
-:- compile(sudex_toledo).
+:- compile(sudex_toledo). % Example puzzles
+:- compile(../count_backtracks). % Count backtracks
 
 % Solve the Sudoku with the given name.
 %
 % @param    Name The name of the sudoku puzzle.
 sudoku(Name) :-
     puzzles(PuzzleList, Name), % Find the puzzle with the given name
+    % Transform the input list to an array of arrays
+    %   First, the rows are transformed to arrays.
+    %   The resulting list of arrays is transformed to an array.
     (foreach(RowList, PuzzleList), foreach(Row, Rows) do
         array_list(Row, RowList)
     ),
     array_list(Puzzle, Rows),
-    dim(Puzzle, [N,N]), % Get the puzzle dimension
+    % Get the puzzle dimension
+    dim(Puzzle, [N,N]),
     write('Input dimension = '), write(N), nl,
+    % Solve the Sudoku
     declare_domains(Puzzle, N),
     generate_constraints(Puzzle, N),
     labeling(Puzzle).
@@ -45,7 +51,9 @@ generate_constraints(Puzzle, N) :-
     % This code goes through I = 1->9, J = 1->9, step = RootN
     %   Then it
     %   multifor/3 is described here http://eclipseclp.org/doc/tutorial/tutorial025.html
+    %   concat/2 is described here http://eclipseclp.org/doc/bips/lib/matrix_util/concat-2.html
     (multifor([I,J], 1, N, RootN), param(Puzzle, RootN) do
         % Different integer in every element of every block
         alldifferent(concat(Puzzle[I..I+RootN-1,J..J+RootN-1]))
     ).
+
