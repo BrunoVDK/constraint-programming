@@ -7,6 +7,7 @@ Possible viewpoints
  - Natural combined model
  - Mixed Integer Programming
  - Graph colouring problem
+ - Thibault's thing
 
 
 (Simonis, 2005) lists 5 examples of redundant constraints. He also mentions the use of inverse constraints when using ic's all_different (because that one assigns values if only one remains, but doesn't select a value if it is only part of one variable's domain).
