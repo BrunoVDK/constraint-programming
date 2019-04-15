@@ -28,7 +28,7 @@
 \DeclareOption{peerreview}{%
     \setboolean{anonymize}{true}%
 }
-\PassOptionsToClass{10pt,a4paper}{report}
+\PassOptionsToClass{10pt,a4paper}{article}
 \PassOptionsToPackage{english}{babel}
 \PassOptionsToPackage{utf8}{inputenc}
 \PassOptionsToPackage{T1}{fontenc}
@@ -38,7 +38,7 @@
 \PassOptionsToPackage{first=0,last=1000}{lcg}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{report}}
 \ProcessOptions\relax
-\LoadClass{report}
+\LoadClass{article}
 \RequirePackage{babel}
 \RequirePackage{inputenc}
 \RequirePackage{fontenc}
@@ -50,6 +50,14 @@
 \RequirePackage{expl3}
 \RequirePackage{enumitem}
 \RequirePackage{minitoc}
+\RequirePackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
 \IfFileExists{fontawesome.sty}{%
     \RequirePackage{fontawesome}
 }{%
@@ -532,7 +540,6 @@
         }{}
     }
 \sortAuthors
-\dominilof
 \fakelistoffigures
 }
 \endinput
