@@ -10,17 +10,24 @@
 % 5. sum constraint
 % 6. connectedness
 
-
 hashi(Name) :-
         board(Name, Board),
         dim(Board, [Imax,Jmax]),
         dim(NESW, [Imax,Jmax,4]),   % 4 variables N,E,S,W for each field
-        ( foreachindex([I,J],Board), param(Board,NESW,Imax,Jmax) do
+        dim(FlowNESW, [Imax,Jmax,4]), % 4 variables FN,FE,FS,FW for each field
+        getIslands(Board, Imax, Jmax, Islands),
+        Islands = [[A,B]|_],  % pick a sink
+        Total is length(Islands),
+        ( foreachindex([I,J],Board), param(Board,NESW,FlowNESW,Imax,Jmax,A,B,Total) do
             Sum is Board[I,J],
             N is NESW[I,J,1],
             E is NESW[I,J,2],
             S is NESW[I,J,3],
             W is NESW[I,J,4],
+            FN is FlowNESW[I,J,1],
+            FE is FlowNESW[I,J,2],
+            FS is FlowNESW[I,J,3],
+            FW is FlowNESW[I,J,4],
 
             % Constraints 1 and 2:
             % The combination of N=S etc on tiles without island
@@ -45,7 +52,24 @@ hashi(Name) :-
             
             % Constraint 3
             (N #= 0) or (E #= 0)
-            )
+            ),
+
+            % Constraint 6:
+            % Consists of 5 flow constraints.
+
+            % Flow constraint 1
+            ( ((N+E+S+W #= 0), (Sum = 0)) ->  [FN,FE,FS,FW] #:: 0 ; true),
+            % Flow constraint 2
+            ( Sum = 0 -> (FN #= -(FS), FE #= -(FW)) ; true),
+            % Flow constraint 3
+            ( I > 1     -> FN #= -(FlowNESW[I-1,J,3]) ; FN = 0 ),
+            ( I < Imax  -> FS #= -(FlowNESW[I+1,J,1]) ; FS = 0 ),
+            ( J > 1     -> FW #= -(FlowNESW[I,J-1,2]) ; FW = 0 ),
+            ( J < Jmax  -> FE #= -(FlowNESW[I,J+1,4]) ; FE = 0 ),
+            % Flow constraint 4
+            ( (([I,J] \= [A,B]), (Sum > 0))  ->  FN+FE+FS+FW #= 1 ; true),
+            % Flow constraint 5
+            ( [I,J] = [A,B] -> FN+FE+FS+FW #= -(Total-1) ; true)
         ),
 
         % find a solution
@@ -76,7 +100,67 @@ symbol(1, 0, '|').
 symbol(2, 0, 'X').
 
 
+getIslands(Name, Islands) :-
+    board(Name, Board),
+    dim(Board, [Imax,Jmax]),
+    getIslands(Board, Imax, Jmax, Islands).
+getIslands(Board, Imax, Jmax, Islands) :-
+    getIslands(Board, Imax, Jmax, 1, 1, [], Islands).
+getIslands(Board, Imax, Jmax, A, B, L, Islands) :-
+    ( Board[A,B] > 0 ->
+        Lnew = [[A,B]|L]
+        ;
+        Lnew = L
+    ),
+    Btemp is B+1,
+    (Btemp > Jmax ->
+        Bnew is 1,
+        Anew is A+1
+        ;
+        Bnew is Btemp,
+        Anew is A
+    ),
+    (Anew > Imax ->
+        Islands = Lnew
+        ;
+        getIslands(Board, Imax, Jmax, Anew, Bnew, Lnew, Islands)
+    ). 
+
 % Examples
+
+board(simple,
+     []([](0,1),
+        [](0,1))
+    ).
+
+board(simple2,
+     []([](0,1),
+        [](0,0),
+        [](0,1))
+    ).
+
+board(simple3,
+     []([](1,0,2),
+        [](0,0,0),
+        [](0,0,1))
+    ).
+
+board(simple4,
+     []([](0,1),
+        [](0,0),
+        [](0,0),
+        [](0,1))
+    ).
+
+board(simple5,
+     []([](1,0,1),
+        [](0,0,0))
+    ).
+
+board(simple6,
+     []([](1,1),
+        [](0,0))
+    ).
 
 board(stackoverflow,
      []([](4, 0, 6, 0, 0, 0, 6, 0, 3),
