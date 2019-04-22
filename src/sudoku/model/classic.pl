@@ -4,14 +4,14 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-% Declare the domains for the given Sudoku puzzle.
+% Declare the domains for the given puzzle.
 %
 % @param    Puzzle The puzzle array to declare the domains for.
 % @param    N The dimension of the puzzle.
 declare_domains_classic(Puzzle, N, _K) :-
     Puzzle :: 1..N. % All squares should have an integer from 1 to 9
 
-% Generate the constraints for the given Sudoku puzzle.
+% Generate the constraints for the given puzzle.
 %
 % @param Puzzle The puzzle array to generate constraints for.
 % @param N      The dimension of the puzzle.
