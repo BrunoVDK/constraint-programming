@@ -4,11 +4,15 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-:- compile(minimum_puzzles). % Minimum sudokus
-:- compile(sudex_toledo). % Example puzzles
+:- compile('puzzles/minimum_puzzles'). % Minimum sudokus (minimum_puzzles_all for complete list)
+:- compile('puzzles/sudex_toledo'). % Example puzzles
+
+nb_minimum(10). % Number of minimum puzzles to use
 
 % Automatic benchmarking with the provided puzzles.
-benchmark :-
+%
+% @param Verbose    Flag denoting whether or not intermediate results should be printed.
+benchmark(Verbose) :-
     Puzzles = [ lambda,
                 hard17,
                 eastermonster,
@@ -24,28 +28,45 @@ benchmark :-
                 sudowiki_nb28,
                 sudowiki_nb49],
     length(Puzzles, Nb),
-    (foreach(Puzzle, Puzzles), fromto(0, In, Out, Total) do
-        sudoku_named(Puzzle, Time),
-        Out is In + Time
+    (   foreach(Puzzle, Puzzles), param(Verbose),
+        fromto(0, InTime, OutTime, TotalTime),
+        fromto(0, InBacktracks, OutBacktracks, TotalBacktracks) do
+        sudoku_named(Puzzle, Time, Backtracks, Verbose),
+        OutTime is InTime + Time,
+        OutBacktracks is InBacktracks + Backtracks
     ),
-    write('Total time : '), write(Total), write(' ms'), nl,
-    Average is Total / Nb,
-    write('Average time : '), write(Average), write(' s'), nl.
+    print_results(TotalTime, TotalBacktracks, Nb).
 
 % Automatic benchmarking with the minimum puzzles.
 %
+% @param Verbose    Flag denoting whether or not intermediate results should be printed.
 % @note The minimum puzzles are puzzles with 17 pre-filled cells. Less isn't possible.
 %       Courtesy of Gordon Royle : http://staffhome.ecm.uwa.edu.au/~00013890/sudokumin.php
 %       Minimum sudokus were converted to a readable format with a Haskell script included
 %       in the repository.
-benchmark_minimum :-
-    nb_minimum(Nb), % Number of minimum puzzles to use
-    (for(I, 1, Nb), fromto(0, In, Out, Total) do
-        minimum_puzzles(Puzzle, I),
-        sudoku(Puzzle, Time),
-        Out is In + Time
+benchmark_minimum(Verbose) :-
+    nb_minimum(Nb),
+    (   for(I, 1, Nb),
+        fromto(0, InTime, OutTime, TotalTime),
+        fromto(0, InBacktracks, OutBacktracks, TotalBacktracks),
+        param(Verbose) do
+            minimum_puzzles(Puzzle, I),
+            sudoku(Puzzle, Time, Backtracks, Verbose),
+            OutTime is InTime + Time,
+            OutBacktracks is InBacktracks + Backtracks
     ),
-    write('Total time : '), write(Total), write(' s'), nl,
-    Average is Total / Nb,
-    write('Average time : '), write(Average), write(' s'), nl.
-nb_minimum(10).
+    print_results(TotalTime, TotalBacktracks, Nb).
+
+% Print the results of the tests.
+%
+% @param Time       The total time spent searching for solutions.
+% @param Backtracks The total recorded number of backtracks.
+% @param Nb         The number of puzzles that were considered.
+print_results(Time, Backtracks, Nb) :-
+    write('Total time : '), write(Time), write(' s'), nl,
+    AverageTime is Time / Nb,
+    write('Average time : '), write(AverageTime), write(' s'), nl,
+    write('Total backtracks : '), write(Backtracks), nl,
+    AverageBacktracks is Backtracks / Nb,
+    write('Average backtracks : '), write(AverageBacktracks), nl.
+

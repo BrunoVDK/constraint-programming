@@ -7,9 +7,11 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
+eliminate_redundancy :- fail.
+
 % Set up the classic model for the given puzzle.
 %
-% @param Puzzle     The puzzle list to declare domains for.
+% @param Puzzle     The input puzzle (a list).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 setup_model(classic, Puzzle, N, K, flatten(Puzzle)) :-
@@ -19,8 +21,8 @@ setup_model(classic, Puzzle, N, K, flatten(Puzzle)) :-
 
 % Declare the domains for the given puzzle.
 %
-% @param    Puzzle The puzzle array to declare the domains for.
-% @param    N The dimension of the puzzle.
+% @param Puzzle The puzzle array to declare the domains for.
+% @param N      The dimension of the puzzle.
 declare_domains_classic(Puzzle, N, _K) :-
     Puzzle :: 1..N. % All squares should have an integer from 1 to N
 
@@ -37,9 +39,13 @@ generate_constraints_classic(Puzzle, N, K) :-
         %   See changelog http://eclipseclp.org/relnotes/rel70.html
         % alldifferent(Puzzle[I,*]), % Different integer in row cells
         % alldifferent(Puzzle[*,I])) % Different integer in column cells
-        alldifferent(Puzzle[I,1..N]), % Different integer in row cells
-        alldifferent(Puzzle[1..N,I])) % Different integer in column cells
-    ,
+        (\+ skip(I, N) ->
+            alldifferent(Puzzle[I,1..N]), % Different integer in row cells
+            alldifferent(Puzzle[1..N,I]) % Different integer in column cells
+        ;
+            true
+        )
+    ),
     % This code goes through I = 1->N, J = 1->N, step = K
     %   It considers each block and enforces the constraint that each of the block's
     %   elements should be different
@@ -50,3 +56,14 @@ generate_constraints_classic(Puzzle, N, K) :-
         % alldifferent(concat(Puzzle[I..I+K-1,J..J+K-1])) % Different integers in block cells
         alldifferent(flatten(Puzzle[I..I+K-1,J..J+K-1])) % Different integers in block cells
     ).
+
+% Define rows and columns that are to be skipped if redundant 'big constraints' are disregarded.
+% This corresponds to the first Missing(6) model in appendix of (Demoen, 2012).
+skip(I, 9) :- eliminate_redundancy, (I = 2 ; I = 5 ; I = 8).
+
+% Transform the assignments to the decision variables to a solved puzzle.
+%
+% @param Variables  The decision variables (should be assigned).
+% @param Puzzle     The input puzzle (this is a list).
+% @param Solution   The puzzle's solution corresponding to the assignments to the variables.
+read_solution(classic, _, Puzzle, Puzzle).
