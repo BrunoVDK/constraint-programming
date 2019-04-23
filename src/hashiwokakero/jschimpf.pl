@@ -56,20 +56,68 @@ hashi(Name) :-
 
             % Constraint 6:
             % Consists of 5 flow constraints.
-
+			%(N #= 0 -> FN = 0),
+			%(E #= 0 -> FE = 0),
+			%(S #= 0 -> FS = 0),
+			%(W #= 0 -> FW = 0),
             % Flow constraint 1
-            ( ((N+E+S+W #= 0), (Sum = 0)) ->  [FN,FE,FS,FW] #:: 0 ; true),
+            %( ((N+E+S+W #= 0), (Sum = 0)) ->  [FN,FE,FS,FW] #:: 0 ; true),
             % Flow constraint 2
-            ( Sum = 0 -> (FN #= -(FS), FE #= -(FW)) ; true),
+            %( ((Sum = 0), (N+E+S+W #\= 0)) -> (FN #= -(FS), FE #= -(FW), FN+FE+FS+FW #= 0) ; true),
             % Flow constraint 3
-            ( I > 1     -> FN #= -(FlowNESW[I-1,J,3]) ; FN = 0 ),
-            ( I < Imax  -> FS #= -(FlowNESW[I+1,J,1]) ; FS = 0 ),
-            ( J > 1     -> FW #= -(FlowNESW[I,J-1,2]) ; FW = 0 ),
-            ( J < Jmax  -> FE #= -(FlowNESW[I,J+1,4]) ; FE = 0 ),
+            %( ((I > 1), (Sum = 0))     -> FN #= -(FlowNESW[I-1,J,3]) ; FN = 0 ),
+            %( ((I < Imax ), (Sum = 0)) -> FS #= -(FlowNESW[I+1,J,1]) ; FS = 0 ),
+            %( ((J > 1), (Sum = 0))     -> FW #= -(FlowNESW[I,J-1,2]) ; FW = 0 ),
+            %( ((J < Jmax), (Sum = 0))  -> FE #= -(FlowNESW[I,J+1,4]) ; FE = 0 ),
             % Flow constraint 4
-            ( (([I,J] \= [A,B]), (Sum > 0))  ->  FN+FE+FS+FW #= 1 ; true),
+            %( (([I,J] \= [A,B]), (Sum > 0))  ->  FN+FE+FS+FW #= 1 ; true),
             % Flow constraint 5
-            ( [I,J] = [A,B] -> FN+FE+FS+FW #= -(Total-1) ; true)
+            %( [I,J] = [A,B] -> FN+FE+FS+FW #= -(Total-1) ; true)
+			%(N #= 0 -> FN = 0 ; true),
+			%(E #= 0 -> FE = 0 ; true),
+			%(S #= 0 -> FS = 0 ; true),
+			%(W #= 0 -> FW = 0 ; true),
+			( I > 1 ->
+				FN #= -(FlowNESW[I-1,J,3])
+				;
+				FN = 0
+			),
+			( I < Imax  -> 
+				FS #= -(FlowNESW[I+1,J,1]) 
+				;
+				FS = 0 
+			),
+			( J > 1	-> 
+				FW #= -(FlowNESW[I,J-1,2]) 
+				; 
+				FW = 0 
+				),
+			( J < Jmax -> 
+				FE #= -(FlowNESW[I,J+1,4]) 
+				; 
+				FE = 0 
+			),
+			( Sum > 0 ->
+				[FN,FE,FS,FW] #:: -(Total-1)..(Total-1),
+				( [I,J] = [A,B] ->
+					FN+FE+FS+FW #= -(Total-1)
+					;
+					FN+FE+FS+FW #= 1
+				)
+				;
+				FN #= -(FS), %
+				FE #= -(FW), %
+				(FN #= 0) or (FE #= 0), %
+				FN+FE+FS+FW #= 0 %
+				%( N+E+S+W #= 0 ->
+				%	[FN,FE,FS,FW] :: 0
+				%	;
+				%	FN #= -(FS),
+				%	FE #= -(FW),
+				%	(FN #= 0) or (FE #= 0),
+				%	FN+FE+FS+FW #= 0
+				%)
+			)
         ),
 
         % find a solution
@@ -160,6 +208,31 @@ board(simple5,
 board(simple6,
      []([](1,1),
         [](0,0))
+    ).
+	
+board(simple7,
+     []([](1,1))
+    ).
+	
+board(simple8,
+     []([](1,0,0,1))
+    ).
+	
+board(simple9,
+     []([](0,0,0),
+        [](1,0,1))
+    ).
+	
+board(simple10,
+     []([](0,0,1,0,0),
+		[](0,0,0,0,0),
+        [](1,0,3,0,1))
+    ).
+
+board(simple11,
+     []([](0,1,0),
+        [](0,0,0),
+        [](0,1,0))
     ).
 
 board(stackoverflow,
