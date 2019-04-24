@@ -2,6 +2,8 @@
 % https://stackoverflow.com/questions/20337029/hashi-puzzle-representation-to-solve-all-solutions-with-prolog-restrictions
 
 :- lib(ic).  % uses the integer constraint library
+:- compile('benchmarks/hashi_benchmarks.pl').
+	
 
 % 1. bridges run horizontally or vertically
 % 2. bridges run in one straight line
@@ -11,23 +13,23 @@
 % 6. connectedness
 
 hashi(Name) :-
-        board(Name, Board),
+		(
+			board(Name, Board)
+		;
+			makeFromPuzzle(Name, Board)
+		),
         dim(Board, [Imax,Jmax]),
         dim(NESW, [Imax,Jmax,4]),   % 4 variables N,E,S,W for each field
         dim(FlowNESW, [Imax,Jmax,4]), % 4 variables FN,FE,FS,FW for each field
         getIslands(Board, Imax, Jmax, Islands),
-        Islands = [[A,B]|_],  % pick a sink
+        Islands = [[A,B]|_],  % pick a sink, always picks the first from the list, this is the island in the lowest row, in the furthest column
         Total is length(Islands),
-        ( foreachindex([I,J],Board), param(Board,NESW,FlowNESW,Imax,Jmax,A,B,Total) do
+        ( foreachindex([I,J],Board), param(Board,NESW,Imax,Jmax) do
             Sum is Board[I,J],
             N is NESW[I,J,1],
             E is NESW[I,J,2],
             S is NESW[I,J,3],
             W is NESW[I,J,4],
-            FN is FlowNESW[I,J,1],
-            FE is FlowNESW[I,J,2],
-            FS is FlowNESW[I,J,3],
-            FW is FlowNESW[I,J,4],
 
             % Constraints 1 and 2:
             % The combination of N=S etc on tiles without island
@@ -52,31 +54,36 @@ hashi(Name) :-
             
             % Constraint 3
             (N #= 0) or (E #= 0)
-            ),
+            )
+		),
 
-            % Constraint 6:
-            % Consists of 5 flow constraints.
-			%(N #= 0 -> FN = 0),
-			%(E #= 0 -> FE = 0),
-			%(S #= 0 -> FS = 0),
-			%(W #= 0 -> FW = 0),
-            % Flow constraint 1
-            %( ((N+E+S+W #= 0), (Sum = 0)) ->  [FN,FE,FS,FW] #:: 0 ; true),
-            % Flow constraint 2
-            %( ((Sum = 0), (N+E+S+W #\= 0)) -> (FN #= -(FS), FE #= -(FW), FN+FE+FS+FW #= 0) ; true),
-            % Flow constraint 3
-            %( ((I > 1), (Sum = 0))     -> FN #= -(FlowNESW[I-1,J,3]) ; FN = 0 ),
-            %( ((I < Imax ), (Sum = 0)) -> FS #= -(FlowNESW[I+1,J,1]) ; FS = 0 ),
-            %( ((J > 1), (Sum = 0))     -> FW #= -(FlowNESW[I,J-1,2]) ; FW = 0 ),
-            %( ((J < Jmax), (Sum = 0))  -> FE #= -(FlowNESW[I,J+1,4]) ; FE = 0 ),
-            % Flow constraint 4
-            %( (([I,J] \= [A,B]), (Sum > 0))  ->  FN+FE+FS+FW #= 1 ; true),
-            % Flow constraint 5
-            %( [I,J] = [A,B] -> FN+FE+FS+FW #= -(Total-1) ; true)
-			%(N #= 0 -> FN = 0 ; true),
-			%(E #= 0 -> FE = 0 ; true),
-			%(S #= 0 -> FS = 0 ; true),
-			%(W #= 0 -> FW = 0 ; true),
+        % find a solution
+        labeling(NESW),
+		
+		( foreachindex([I,J],Board), param(Board,NESW,FlowNESW,Imax,Jmax,A,B,Total) do
+            Sum is Board[I,J],
+            N is NESW[I,J,1],
+            E is NESW[I,J,2],
+            S is NESW[I,J,3],
+            W is NESW[I,J,4],
+            FN is FlowNESW[I,J,1],
+            FE is FlowNESW[I,J,2],
+            FS is FlowNESW[I,J,3],
+            FW is FlowNESW[I,J,4],
+			
+		% Connectedness constraint:
+        % Consists of 5 flow constraints.
+            
+			% Define the domain of the variables 
+			% Implied constraint: if there's no bridge in a direction, there is no flow in that direction. 
+			% Remark: the domain definition is not an implied constraint, it is necessary.
+			(N = 0 -> FN #= 0 ; FN #:: -(Total-1)..(Total-1)),
+			(E = 0 -> FE #= 0 ; FE #:: -(Total-1)..(Total-1)),
+			(S = 0 -> FS #= 0 ; FS #:: -(Total-1)..(Total-1)),
+			(W = 0 -> FW #= 0 ; FW #:: -(Total-1)..(Total-1)),
+			% Flow constraint 3:
+			% If a cell has a flow n in the direction of neighbor, that neighbor has a flow -n in the opposite
+			% direction.
 			( I > 1 ->
 				FN #= -(FlowNESW[I-1,J,3])
 				;
@@ -98,30 +105,31 @@ hashi(Name) :-
 				FE = 0 
 			),
 			( Sum > 0 ->
-				[FN,FE,FS,FW] #:: -(Total-1)..(Total-1),
 				( [I,J] = [A,B] ->
+					% Flow constraint 5:
+					% The net flow arriving at the sink island is equal to the amount of islands in the puzzle,
+					% minus 1.
 					FN+FE+FS+FW #= -(Total-1)
 					;
+					% Flow constraint 4:
+					% Every non-sink island has a net flow is +1.
 					FN+FE+FS+FW #= 1
 				)
 				;
-				FN #= -(FS), %
-				FE #= -(FW), %
-				(FN #= 0) or (FE #= 0), %
-				FN+FE+FS+FW #= 0 %
-				%( N+E+S+W #= 0 ->
-				%	[FN,FE,FS,FW] :: 0
-				%	;
-				%	FN #= -(FS),
-				%	FE #= -(FW),
-				%	(FN #= 0) or (FE #= 0),
-				%	FN+FE+FS+FW #= 0
-				%)
+				( N+E+S+W #= 0 ->
+					% Flow constraint 1:
+					% A cell that isn't an island, neither a bridge, has no flow.
+					[FN,FE,FS,FW] #:: 0
+					;
+					% Flow constraint 2:
+					% The net flow in a bridge cell is 0.
+					FN #= -(FS),
+					FE #= -(FW),
+					FN+FE+FS+FW #= 0
+				)
 			)
         ),
-
-        % find a solution
-        labeling(NESW),
+		labeling(FlowNESW),
         print_board(Board, NESW).
 
 
@@ -147,7 +155,8 @@ symbol(0, 2, '=').
 symbol(1, 0, '|').
 symbol(2, 0, 'X').
 
-
+% For a puzzle, given as an array, returns a list containing all the islands. 
+% An island is represented as [X,Y], the coordinates in the board.
 getIslands(Name, Islands) :-
     board(Name, Board),
     dim(Board, [Imax,Jmax]),
@@ -173,6 +182,19 @@ getIslands(Board, Imax, Jmax, A, B, L, Islands) :-
         ;
         getIslands(Board, Imax, Jmax, Anew, Bnew, Lnew, Islands)
     ). 
+	
+% Turns a puzzle given in the format of the benchmark puzzles into an array.
+makeFromPuzzle(Id, Board) :-
+	puzzle(Id, Imax, P),
+	dim(Board, [Imax,Imax]),
+	( foreachindex([I,J],Board), param(Board,P) do
+		( member((I,J,A), P) ->
+			Board[I,J] #= A
+		;
+			Board[I,J] #= 0 
+		)
+	),
+	labeling(Board).
 
 % Examples
 
@@ -233,6 +255,12 @@ board(simple11,
      []([](0,1,0),
         [](0,0,0),
         [](0,1,0))
+    ).
+	
+board(simple12,
+     []([](2,0,2),
+        [](0,0,0),
+        [](1,0,1))
     ).
 
 board(stackoverflow,
