@@ -18,7 +18,7 @@
 % @version  1.0
 
 %use_global. % Uncomment if ic_global is to be used
-use_model(laburthe). % The model that is to be used
+use_model(member). % The model that is to be used
 
 :- lib(ic).
 :- import alldifferent/1 from ic_global.
@@ -27,9 +27,10 @@ use_model(laburthe). % The model that is to be used
 :- compile('../utils.pl'). % Import utility functions
 :- compile('benchmarks/benchmarks').
 
-%:- compile('model/natural').
+:- compile('model/natural').
+%:- compile('model/member').
 %:- compile('model/classic').
-:- compile('model/laburthe').
+%:- compile('model/laburthe').
 
 % Solve the Sudoku with the given name.
 %

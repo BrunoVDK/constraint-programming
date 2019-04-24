@@ -1,8 +1,12 @@
 %
 % Natural combined model for the Sudoku CLP solver.
+%   With some modification, using ic_global:occurrences/3 to get a global cardinality
+%   constraint.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
+
+%:- lib(ic_global_gac).
 
 % Set up the model for the given puzzle.
 %
@@ -39,6 +43,12 @@ declare_domains_natural(Variables) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 generate_constraints_natural(Variables, N, K) :-
+    % The original model
+    %(for(I, 1, N), param(N, Variables) do
+        %fd_global:alldifferent(Variables[1..N,I,1..N]),
+        %fd_global:alldifferent(Variables[1..N,1..N,I])
+    %),
+    % Now comes the boolean interpretation
     % Primal/Row/Column variables
     (multifor([I,J], 1, N), param(N, Variables) do
         ic_global:occurrences(1, Variables[I,J,1..N], 1),
