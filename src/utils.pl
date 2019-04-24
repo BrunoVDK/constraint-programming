@@ -15,3 +15,41 @@ list_2d_to_array(List, Array) :-
         array_list(Row, RowList)
     ),
     array_list(Array, Rows).
+
+% For a given Sudoku row and column, determine the block where the cell is located.
+%
+% @param K          The block size.
+% @param Row        The row of the cell.
+% @param Column     The column of the cell.
+block(K, Row, Column, Block) :-
+    Block is K * ((Row-1) // K) + ((Column-1) // K) + 1.
+
+% For a given Sudoku block and cell index (relative to that block),
+%   determine the row where the respective cell is located.
+%
+% @param K       The block size.
+% @param Block   The block in which the cell is located.
+% @param Cell    The block cell.
+row(K, Block, Cell, Row) :-
+    BlockRow is (Block-1) // K,
+    Row is (BlockRow * K) + ((Cell-1) // K) + 1.
+
+% For a given Sudoku block and cell index (relative to that block),
+%   determine the column where the respective cell is located.
+%
+% @param K       The block size.
+% @param Block   The block in which the cell is located.
+% @param Cell    The block cell.
+column(K, Block, Cell, Column) :-
+    BlockColumn is (Block-1) mod K,
+    Column is (BlockColumn * K) + ((Cell-1) mod K) + 1.
+
+% Checks whether the given column and block intersect.
+%
+% @param K      The block size.
+% @param Column The column number.
+% @param Block  The block number.
+block_column(K, Column, Block) :-
+    Max is K * ((Block-1) mod K) + 3,
+    Column =< Max,
+    Column > Max - K.

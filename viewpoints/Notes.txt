@@ -1,19 +1,7 @@
-
-Possible viewpoints
-
- - DUAL
- - ABSTRACT
- - SAT
- - Natural combined model
- - Mixed Integer Programming
- - Graph colouring problem
- - Thibault's thing
-
-
 (Simonis, 2005) lists 5 examples of redundant constraints. He also mentions the use of inverse constraints when using ic's all_different (because that one assigns values if only one remains, but doesn't select a value if it is only part of one variable's domain).
 
-(Laburthe, 2006) gives 3 viewpoints, the last one (ABSTRACT) is probably a good one to use. One of those is the dual viewpoint as mentioned in Fransesca Rossi's book.
+(Laburthe, 2006) gives 3 viewpoints, the last one (ABSTRACT) is probably a good one to use. One of those is a variant of the dual viewpoint. This means that variables become values and vice versa, as mentioned in the book chapter given on Toledo.
 
-(Thibault, 2006) discusses the classic viewpoint (either with binary or all_different constraints) and disscusses performance. Then he tries to improve upon this by the use of other models and channeling, first considering the dual viewpoint (same as in Laburthe's study, though he discusses it for rows and columns). Finally he considers blocks, with variables for each block-value pair, with each variable implying a position. Then he looks at redundant constraints as done by Simonis. He discusses the results. Not the most interesting study (thesis), but worth considering.
+(Thibault, 2006) discusses the classic viewpoint (either with binary or all_different constraints) and measures performance. Then he tries to improve upon this by the use of other models and channeling, first considering the dual viewpoint (he discusses it for rows and columns separately). Finally he considers blocks, with variables for each block-value pair, with each variable implying a position. Then he looks at redundant constraints as done by Simonis. He discusses the results. Not the most interesting study (thesis), but worth considering.
 
 (Demoen, 2012) shows that up to 6 all_different constraints can be disregarded and gives a list of Missing(6) models that are still Sudoku. Missing(7) models are never Sudoku. It is possible to remove more constraints by removing small constraints, but it may be a pain to do so.
