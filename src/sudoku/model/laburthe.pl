@@ -33,10 +33,10 @@ declare_domains_laburthe(Puzzle, Dual, Abstract, N, K) :-
     % PRIMAL
     Puzzle :: 1..N,
     % DUAL
-    dim(Dual, [3,N,N]), % Dual variables
+    dim(Dual, [3,N,N]), % Dual variables, each row has one series
     Dual :: 1..N,
     % ABSTRACT
-    dim(Abstract, [4,N,N]), % Abstract variables
+    dim(Abstract, [4,N,N]), % Abstract variables, each row has one series
     % Abstract :: 1..N,
     (for(I, 1, N, K), param(Abstract, K, N) do
         J is I + K - 1,
@@ -44,9 +44,9 @@ declare_domains_laburthe(Puzzle, Dual, Abstract, N, K) :-
         Abstract[3,I..J,1..N] :: I..J
     ),
     (for(I, 1, N), param(Abstract, K, N) do
-        findall(B, (between(1, N, 1, B), block_column(K, I, B)), Blocks),
+        findall(B, (block_column(N, K, I, B)), Blocks),
         Abstract[2,I,1..N] :: Blocks,
-        findall(C, (between(1, N, 1, C), block_column(K, C, I)), Columns),
+        findall(C, (block_column(N, K, C, I)), Columns),
         Abstract[4,I,1..N] :: Columns
     ).
 
@@ -86,13 +86,13 @@ generate_constraints_laburthe(Puzzle, Dual, Abstract, N, K) :-
         Dual[3,I,V] #= X => Abstract[4,I,V] #= Column
     ),
     (for(V, 1, N), param(Abstract, N, K) do % Multifor is less readable
-        (for(I, 1, N, K), param(Abstract, K, _N, V) do
+        (for(I, 1, N, K), param(Abstract, K, N, V) do
             J is I + K - 1,
             alldifferent(Abstract[1,I..J,V]),
             alldifferent(Abstract[2,I..J,V]),
             alldifferent(Abstract[3,I..J,V])
-            % findall(X, (between(1,N,1,B), block_column(K,I,B), X is Abstract[4,B,V]), Xs),
-            % alldifferent(Xs)
+            %findall(X, (block_column(N,K,I,B), X is Abstract[4,B,V]), Xs),
+            %alldifferent(Xs)
         )
     ).
 
@@ -100,5 +100,7 @@ generate_constraints_laburthe(Puzzle, Dual, Abstract, N, K) :-
 %
 % @param Variables  The decision variables (should be assigned).
 % @param Puzzle     The input puzzle (this is a list).
+% @param N          The dimension of the puzzle.
+% @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(laburthe, _, Puzzle, Puzzle).
+read_solution(laburthe, _, Puzzle, _, _, Puzzle).

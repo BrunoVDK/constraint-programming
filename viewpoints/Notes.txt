@@ -5,3 +5,6 @@
 (Thibault, 2006) discusses the classic viewpoint (either with binary or all_different constraints) and measures performance. Then he tries to improve upon this by the use of other models and channeling, first considering the dual viewpoint (he discusses it for rows and columns separately). Finally he considers blocks, with variables for each block-value pair, with each variable implying a position. Then he looks at redundant constraints as done by Simonis. He discusses the results. Not the most interesting study (thesis), but worth considering.
 
 (Demoen, 2012) shows that up to 6 all_different constraints can be disregarded and gives a list of Missing(6) models that are still Sudoku. Missing(7) models are never Sudoku. It is possible to remove more constraints by removing small constraints, but it may be a pain to do so.
+
+Misc. comments :
+ - 'exactly' constraint isn't implemented in ECLiPSe as pointed out by H. Simonis, meaning that having just one '1' value in a list has to be done by emulation with other constraints (with gcc = global cardinality constraint, see http://www.hakank.org/eclipse/). We did this in the Natural Combined Model.

@@ -4,10 +4,10 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-:- compile('puzzles/minimum_puzzles'). % Minimum sudokus (minimum_puzzles_all for complete list)
+:- compile('puzzles/minimum_puzzles_100'). % Minimum sudokus
 :- compile('puzzles/sudex_toledo'). % Example puzzles
 
-nb_minimum(10). % Number of minimum puzzles to use
+nb_minimum(100). % Number of minimum puzzles to use
 
 % Automatic benchmarking with the provided puzzles.
 %

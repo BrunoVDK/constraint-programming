@@ -7,9 +7,8 @@
 %   Several models can be made use of :
 %       - classic : the classic ('primal') model
 %       - laburthe : experiments with Laburthe's models (primal + dual + abstract)
-%       - dual : the dual model
-%       - abstract : the abstract model (Laburthe)
-%       - natural : the natural combined model
+%       - natural : the natural combined model, really a boolean model
+%       - dual : various forms of the dual model
 %       - linear : the linear programming model
 %       - misc : the model from Thibault's thesis
 %       - combined : the model which combines the classic model with the most performant model
@@ -18,12 +17,18 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
+%use_global. % Uncomment if ic_global is to be used
 use_model(laburthe). % The model that is to be used
+
+:- lib(ic).
+:- import alldifferent/1 from ic_global.
+:- import bool_channeling/3 from ic_global.
 
 :- compile('../utils.pl'). % Import utility functions
 :- compile('benchmarks/benchmarks').
 
-:- compile('model/classic').
+%:- compile('model/natural').
+%:- compile('model/classic').
 :- compile('model/laburthe').
 
 % Solve the Sudoku with the given name.
@@ -49,15 +54,16 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     (Verbose -> write('Puzzle size : '), write(N), nl ; true),
     % Set up model
     use_model(Model),
+    statistics(hr_time, Start), % http://eclipseclp.org/doc/bips/kernel/env/statistics-2.html
     setup_model(Model, Puzzle, N, K, Variables),
     % Start search procedure
     (Verbose -> write('Search prodecure started.'), nl ; true),
-    statistics(hr_time, Start), % http://eclipseclp.org/doc/bips/kernel/env/statistics-2.html
     search(Variables, 0, first_fail, indomain, complete, [backtrack(Backtracks)]),
     statistics(hr_time, End),
     Time is End - Start,
+    (Verbose -> write('Solution found ...'), nl ; true),
     % Display solution
-    read_solution(Model, Variables, Puzzle, Solution),
+    read_solution(Model, Variables, Puzzle, N, K, Solution),
     (Verbose -> write('Solution : '), print_sudoku(Solution), nl ; true),
     (Verbose -> write('Backtracks : '), write(Backtracks), nl ; true),
     (Verbose -> write('Time : '), write(Time), nl ; true).

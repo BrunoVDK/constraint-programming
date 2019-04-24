@@ -9,12 +9,12 @@
 % @param    The list to convert to an array.
 % @param    The array representing the same collection as the given list.
 list_2d_to_array(List, Array) :-
-    % First, the rows are transformed to arrays.
-    % The resulting list of arrays is transformed to an array.
-    (foreach(RowList, List), foreach(Row, Rows) do
-        array_list(Row, RowList)
-    ),
-    array_list(Array, Rows).
+    length(List, N),
+    dim(Array, [N,N]),
+    array_list(Array, Rows),
+    (foreach(ListRow, List), foreach(Row, Rows) do
+        array_list(Row, ListRow)
+    ).
 
 % For a given Sudoku row and column, determine the block where the cell is located.
 %
@@ -46,10 +46,13 @@ column(K, Block, Cell, Column) :-
 
 % Checks whether the given column and block intersect.
 %
+% @param N      The puzzle size.
 % @param K      The block size.
 % @param Column The column number.
 % @param Block  The block number.
-block_column(K, Column, Block) :-
+block_column(N, K, Column, Block) :-
+    between(1, N, 1, Block),
     Max is K * ((Block-1) mod K) + 3,
+    between(1, N, 1, Column),
     Column =< Max,
     Column > Max - K.

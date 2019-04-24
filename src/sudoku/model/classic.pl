@@ -65,5 +65,7 @@ skip(I, 9) :- eliminate_redundancy, (I = 2 ; I = 5 ; I = 8).
 %
 % @param Variables  The decision variables (should be assigned).
 % @param Puzzle     The input puzzle (this is a list).
+% @param N          The dimension of the puzzle.
+% @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(classic, _, Puzzle, Puzzle).
+read_solution(classic, _, Puzzle, _, _, Puzzle).
