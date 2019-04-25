@@ -12,7 +12,7 @@
 % 5. sum constraint
 % 6. connectedness
 
-hashi(Name) :-
+hashi(Name, Time, Backtracks) :-
 		(
 			board(Name, Board)
 		;
@@ -58,7 +58,11 @@ hashi(Name) :-
 		),
 
         % find a solution
-        labeling(NESW),
+		statistics(hr_time, Start1),
+        %labeling(NESW),
+		search(NESW, 0, input_order, indomain, complete, [backtrack(Backtracks1)]),
+		statistics(hr_time, End1),
+		Time1 is End1 - Start1,
 		
 		( foreachindex([I,J],Board), param(Board,NESW,FlowNESW,Imax,Jmax,A,B,Total) do
             Sum is Board[I,J],
@@ -129,7 +133,13 @@ hashi(Name) :-
 				)
 			)
         ),
-		labeling(FlowNESW),
+		statistics(hr_time, Start2),
+		%labeling(FlowNESW),
+		search(FlowNESW, 0, input_order, indomain, complete, [backtrack(Backtracks2)]),
+		statistics(hr_time, End2),
+		Time2 is End2 - Start2,
+		Time is Time1 + Time2,
+		Backtracks is Backtracks1 + Backtracks2,
         print_board(Board, NESW).
 
 
@@ -154,6 +164,12 @@ symbol(0, 1, '-').
 symbol(0, 2, '=').
 symbol(1, 0, '|').
 symbol(2, 0, 'X').
+
+benchmark_hashi(Name) :-
+	(write('Puzzle name : '), write(Name), nl ),
+	hashi(Name, Time, Backtracks),
+	(write('Backtracks : '), write(Backtracks), nl ),
+    (write('Time : '), write(Time), nl ).
 
 % For a puzzle, given as an array, returns a list containing all the islands. 
 % An island is represented as [X,Y], the coordinates in the board.
