@@ -4,6 +4,11 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
+% Logging/Debugging utility functions.
+enable(debug) :- true.
+log :- (enable(debug) -> write('---'), nl ; true).
+log(Var) :- (enable(debug) -> write(Var), nl ; true).
+
 % Convert the given 2-dimensional list to an array.
 %
 % @param    The list to convert to an array.

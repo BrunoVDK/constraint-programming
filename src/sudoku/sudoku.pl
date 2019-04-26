@@ -17,17 +17,17 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-%use_global. % Uncomment if ic_global is to be used
-use_model(member). % The model that is to be used
+use_model(dual). % The model that is to be used
 
 :- lib(ic).
-:- import alldifferent/1 from ic_global.
-:- import bool_channeling/3 from ic_global.
+%:- import alldifferent/1 from ic_global.
+%:- import bool_channeling/3 from ic_global.
 
 :- compile('../utils.pl'). % Import utility functions
 :- compile('benchmarks/benchmarks').
 
-:- compile('model/natural').
+:- compile('model/dual').
+%:- compile('model/boolean').
 %:- compile('model/member').
 %:- compile('model/classic').
 %:- compile('model/laburthe').
@@ -59,7 +59,7 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     setup_model(Model, Puzzle, N, K, Variables),
     % Start search procedure
     (Verbose -> write('Search prodecure started.'), nl ; true),
-    search(Variables, 0, first_fail, indomain, complete, [backtrack(Backtracks)]),
+    search(Variables, 0, first_fail, indomain, complete, [backtrack(Backtracks)]), !,
     statistics(hr_time, End),
     Time is End - Start,
     (Verbose -> write('Solution found ...'), nl ; true),

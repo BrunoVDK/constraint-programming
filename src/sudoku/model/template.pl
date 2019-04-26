@@ -36,5 +36,5 @@ generate_constraints_template(Puzzle, N, K) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(_, Puzzle, N, K, Solution) :-
+read_solution(_, Variables, Puzzle, N, K, Solution) :-
     fail.

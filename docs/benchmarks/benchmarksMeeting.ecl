@@ -162,7 +162,7 @@ bench3e(Start,EndTime , Viol) :-
 	     OnWeekend = [](0,0,0,0,0,0,0,0,0,0, 0,0,0,0 ),
 	     Precs= []( [](1,9),[](3,8)),
 	     StartingDay = 2,
-	     Rank = [](2,2,2,3,3,1,1,1,1,5, 2,2,2,3,10),
+	     Rank = [](2,2,2,3,3,1,1,1,1,5, 2,2,3,10),
 	     meeting(NbofPersons, Durations, OnWeekend, Rank, Precs,StartingDay,Start, EndTime , Viol).
 bench3f(Start,EndTime , Viol) :-
 	     NbofPersons = 16,
@@ -170,7 +170,7 @@ bench3f(Start,EndTime , Viol) :-
 	     OnWeekend = [](0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0  ),
 	     Precs= []( [](1,9),[](3,8)),
 	     StartingDay = 2,
-	     Rank = [](2,2,2,3,3,1,1,1,1,5, 2,2,2,3,3,1,10),
+	     Rank = [](2,2,2,3,3,1,1,1,1,5, 2,2,3,3,1,10),
 	     meeting(NbofPersons, Durations, OnWeekend, Rank, Precs,StartingDay,Start, EndTime , Viol).
 bench3g(Start,EndTime , Viol) :-
 	     NbofPersons = 16,
@@ -178,6 +178,6 @@ bench3g(Start,EndTime , Viol) :-
 	     OnWeekend = [](1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1  ),
 	     Precs= []( [](1,9),[](3,8)),
 	     StartingDay = 2,
-	     Rank = [](2,2,2,3,3,1,1,1,1,5, 2,2,2,3,3,1,10),
+	     Rank = [](2,2,2,3,3,1,1,1,1,5, 2,2,3,3,1,10),
 	     meeting(NbofPersons, Durations, OnWeekend, Rank, Precs,StartingDay,Start, EndTime , Viol).
 

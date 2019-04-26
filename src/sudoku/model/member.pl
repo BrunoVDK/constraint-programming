@@ -6,6 +6,8 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
+:- import occurrences/3 from ic_global.
+
 % Set up the model for the given puzzle.
 %
 % @param Puzzle     The input puzzle (a list).

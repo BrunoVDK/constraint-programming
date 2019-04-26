@@ -1,6 +1,6 @@
 \section{Sudoku}
 
-The Sudoku problem is classically modelled as a constraint problem through the use of \texttt{all\_different} constraints on rows, columns and blocks. Such global inequalities tend to improve upon the use of binary inequalities (see Thibault, M\'emoire de Stage de Master). \texttt{ECLiPSe} and \texttt{CHR} implementations are available in \texttt{code\_file.pl} and in \texttt{code\_file\_chr.pl} respectively. The constraint generating code is fairly trivial and needn't be detailed here. \\\par
+The Sudoku problem is classically modelled as a constraint problem with \texttt{all\_different} constraints on rows, columns and blocks. Such global inequalities tend to improve upon the use of binary inequalities (see Thibault, M\'emoire de Stage de Master). \texttt{ECLiPSe} and \texttt{CHR} implementations are available in \texttt{code\_file.pl} and in \texttt{code\_file\_chr.pl} respectively. The constraint generating code is fairly trivial and needn't be detailed here. \\\par
 
 Several alternative viewpoints are possible. The widely cited study by Simonis and subsequent studies (that of Laburthe in particular) provide some ideas :\\
  - DUAL\\
@@ -15,7 +15,7 @@ Laburthe lists rules and models for the puzzles, and proposes a link between the
 
 Number of backtracks and running time of solvers for each of these models are displayed in table 1. Aside from the provided set of puzzles we also made use of a set of nearly 50.000 puzzles having a minimal amount of pre-filled cells (that would be 17[McGuire, 2014]). \\\par
 
-Demoen shows that in the case of 9x9 Sudokus up to 6 out of the 27 'big' (\texttt{all\_different}) constraints can be redundant[X]. We experimented with the removal of such constraints. This decreased the performance, as expected (footnote to Demoen's study). We didn't experiment further with any of the 'small' constraints.
+Demoen shows that in the case of 9x9 Sudokus up to 6 out of the 27 `big' (\texttt{all\_different}) constraints can be redundant[X]. We experimented with the removal of such constraints. This decreased the performance, as expected (footnote to Demoen's study). We didn't experiment further with any of the `small' constraints.
 
 \subsection{Ideas ...}
 
