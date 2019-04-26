@@ -9,7 +9,7 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-variant(dual1) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
+variant(dual2) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
 
 % Set up the model for the given puzzle.
 %
@@ -75,7 +75,8 @@ block_constraints(Variables, N, K) :-
             row(K, Block, Cell, Row), % Given Block x Cell => give Row
             column(K, Block, Cell, Column), % Given Block x Cell => give Column
             #=(BlockArray[Block,Cell], Value, Bool),
-            #=(Variables[Row,Value], Column, Bool)
+            (variant(dual1) -> #=(Variables[Row,Value], Column, Bool) ; true),
+            (variant(dual2) -> #=(Variables[Column,Value], Row, Bool) ; true)
         )
     ).
 
