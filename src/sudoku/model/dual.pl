@@ -1,6 +1,7 @@
 %
 % Dual model for the Sudoku CLP solver.
-%   This includes several of the variants :
+%   It is referred to in slide 30 of 'Other.pdf'.
+%   We included several of the variants :
 %   - Row x Value implies Column (dual1)
 %   - Column x Value implies Row (dual2)
 %   - Block x Position implies Value (dual3)
@@ -108,6 +109,6 @@ generate_constraints_dual(Variables, Puzzle, N, K) :-
 read_solution(dual, Variables, _, N, _K, Solution) :-
     dim(SolutionArray, [N,N]),
     (multifor([R,C], 1, N), foreach(X, Variables), param(SolutionArray) do
-        (\+ var(X) -> convert(SolutionArray, R, C, X) ; true)
+        (nonvar(X) -> convert(SolutionArray, R, C, X) ; true)
     ),
     list_2d_to_array(Solution, SolutionArray).

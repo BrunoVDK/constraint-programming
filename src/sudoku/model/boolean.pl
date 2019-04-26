@@ -101,7 +101,7 @@ unequal_list(List1, List2) :-
 read_solution(boolean, Variables, _, N, _, Solution) :-
     dim(SolutionArray, [N,N]),
     (multifor([R,C,V], 1, N), foreach(X, Variables), param(SolutionArray) do
-        (\+ var(X), 1 is X -> V is SolutionArray[R,C] ; true)
+        (nonvar(X), 1 is X -> V is SolutionArray[R,C] ; true)
         % Note, ic_global:bool_channeling/3 can't be used as Variables is matrix
     ),
     list_2d_to_array(Solution, SolutionArray).

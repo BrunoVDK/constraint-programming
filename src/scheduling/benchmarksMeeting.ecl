@@ -11,7 +11,7 @@ test1(Start,EndTime,Viol) :-
 	     NbofPersons = 5,
              Durations = [](1,2,3,4,5),
 	     OnWeekend = [](0,0,0,0,0),
-	     Precs= []( [](1,3)), 
+	     Precs= []( [](1,3)),
 	     StartingDay = 5,
 	     Rank = [](1,2,3,4,5),  
 	     meeting(NbofPersons, Durations, OnWeekend, Rank, Precs,StartingDay,Start, EndTime , Viol).
@@ -22,7 +22,7 @@ Viol = 2
 
 test1b(Start,EndTime , Viol) :-
 	     NbofPersons = 5,
-             Durations = [](7,2,3,4,5),
+            Durations = [](7,2,3,4,5),
 	     OnWeekend = [](1,0,0,0,0),
 	     Precs= []( [](1,3)), 
 	     StartingDay = 5,
