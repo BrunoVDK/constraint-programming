@@ -5,6 +5,8 @@
 %   - Column x Value implies Row (dual2)
 %   - Block x Position implies Value (dual3)
 %   - Block x Value implies Position (dual4)
+%   Only the dual3 variant doesn't make use of channeling. In the other viewpoints
+%       it is hard to express certain constraints (on rows, columns or blocks).
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
@@ -69,6 +71,7 @@ column_constraints(Variables, N, _K) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 block_constraints(Variables, N, K) :-
+    % This is channeling
     dim(BlockArray, [N,N]),
     BlockArray :: 1..N,
     (for(Block, 1, N), param(BlockArray, Variables, N, K) do
@@ -117,6 +120,7 @@ dual3_constraints(Variables, N, K) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 dual4_constraints(Variables, N, K) :-
+    % This is channeling
     dim(MappedArray, [N,N]),
     MappedArray :: 1..N, % ... this is channelling, really
     (for(Row, 1, N), param(MappedArray, Variables, N, K) do
@@ -141,7 +145,7 @@ generate_constraints_dual(Variables, Puzzle, N, K) :-
     % Register pre-filled cells
     (foreach(Row, Puzzle), for(R, 1, N), param(Variables, N, K) do
         (foreach(X, Row), for(C, 1, N), param(N, K, R, Variables) do
-            (\+ var(X) -> convert(Variables, N, K, R, C, X) ; true)
+            (nonvar(X) -> convert(Variables, N, K, R, C, X) ; true)
         )
     ),
     % Constraints
@@ -163,7 +167,7 @@ generate_constraints_dual(Variables, Puzzle, N, K) :-
 % @param Solution   The puzzle's solution corresponding to the assignments
 %                       to the variables.
 read_solution(dual, Variables, _, N, K, Solution) :-
-    dim(SolutionArray, [N,N]),log,
+    dim(SolutionArray, [N,N]),
     (multifor([R,C], 1, N), foreach(X, Variables), param(N, K, SolutionArray) do
         (nonvar(X) ->
             row(K, R, C, R1), column(K, R, C, C1),

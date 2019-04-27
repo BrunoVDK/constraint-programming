@@ -10,8 +10,11 @@
 %       Value Ordering Heuristics for Multiple Permutation Problems" (2017)
 % Since it uses disequality between slices (arrays), we wrote one implementation of
 %   enforcing inequality in unequal_list/2. It wasn't a fruitful attempt.
-% Note that the Natural Combined Model was part of a study to demonstrate a new
+% N.B. : the Natural Combined Model was part of a study to demonstrate a new
 %   algorithm.
+% N.B. : the model we implement here can be seen as a linear programming model.
+% N.B. : as F. Rossi points out in her book, this is generally not a good idea, it's
+%           usually preferable to transform a boolean model in one with integers.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
@@ -80,9 +83,6 @@ generate_constraints_boolean(Variables, N, K) :-
 % @param List1  The first list.
 % @param List2  The second list.
 unequal_list(List1, List2) :-
-    %bool_channeling(X, List1, 1),
-    %bool_channeling(Y, List2, 1),
-    %X #\= Y.
     % See slides Active.pdf, 27 and onwards
     L1 is List1, L2 is List2,
     (foreach(X, L1), foreach(Y, L2), fromto(Sum, S1, S2, 0) do
