@@ -17,7 +17,7 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-use_model(boolean). % The model that is to be used
+use_model(channeling). % The model that is to be used
 
 :- lib(ic).
 :- import alldifferent/1 from ic_global.
@@ -26,9 +26,9 @@ use_model(boolean). % The model that is to be used
 :- compile('../utils.pl'). % Import utility functions
 :- compile('benchmarks/benchmarks').
 
-%:- compile('model/channeling').
+:- compile('model/channeling').
 %:- compile('model/dual').
-:- compile('model/boolean').
+%:- compile('model/boolean').
 %:- compile('model/member').
 %:- compile('model/classic').
 %:- compile('model/laburthe').

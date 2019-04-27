@@ -61,7 +61,7 @@
 \IfFileExists{fontawesome.sty}{%
     \RequirePackage{fontawesome}
 }{%
-    \ClassWarning{sareport}{You do not have fontawesome.sty available.
+    \ClassWarning{theme}{You do not have fontawesome.sty available.
     \MessageBreak You are recommended to upgrade your LaTeX distribution.
     }
     \newcommand{\faExclamationTriangle}{!}
@@ -478,7 +478,7 @@
                     \MakeUppercase{\the\department}}}
             \smallskip
         \hspace{\stretch{1}}
-        \vspace*{5cm}
+        \vspace*{3cm}
         %\vfill
         \begin{center}
             \begin{minipage}[t]{\textwidth}

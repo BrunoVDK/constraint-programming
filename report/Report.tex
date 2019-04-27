@@ -1,14 +1,17 @@
 \documentclass{misc/theme}
+\usepackage{wallpaper}
 \usepackage{tabu,longtable,booktabs,array}
 \def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
 \let\endchangemargin=\endlist 
-\newcommand{\block}[1]{\vspace{1.2cm}\begin{changemargin}{3cm}{3cm}\large\textit{#1}\end{changemargin}\vspace{0.6cm}}
+\newcommand{\block}[1]{\vspace{1.2cm}\begin{changemargin}{2.5cm}{2.5cm}\large\textit{#1}\end{changemargin}\vspace{0.6cm}}
 \newcommand{\fakesection}[1]{%
   \par\refstepcounter{section}% Increase section counter
   \sectionmark{#1}% Add section mark (header)
   \addcontentsline{toc}{section}{\protect\numberline{\thesection}#1}% Add section to ToC
   % Add more content here, if needed.
 }
+\ThisCenterWallPaper{0.7}{misc/cover.png}
+\usepackage{microtype} % Better word wrapping
 
 %%% Authors
 \addAuthor{Micha\"el}{Dooreman}{}
@@ -33,7 +36,7 @@
 %
 
 % \fakesection{Introduction}
-\block{Some preliminary notes below, things to start with. In this introduction we can give a short overview of the content of the report.}
+\block{In the past decades much research has been done on the characterization and resolution of constraint satisfaction - and constraint optimization problems. This report discusses three challenges ; Sudoku puzzles, Hashiwokakero and a scheduling problem.}
 
 %
 % Sudoku
@@ -60,5 +63,6 @@
 \newpage
 \appendix
 \input{Appendix}
+
 
 \end{document}
