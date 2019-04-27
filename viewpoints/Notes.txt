@@ -6,5 +6,11 @@
 
 (Demoen, 2012) shows that up to 6 all_different constraints can be disregarded and gives a list of Missing(6) models that are still Sudoku. Missing(7) models are never Sudoku. It is possible to remove more constraints by removing small constraints, but it may be a pain to do so.
 
-Misc. comments :
- - 'exactly' constraint isn't implemented in ECLiPSe as pointed out by H. Simonis, meaning that having just one '1' value in a list has to be done by emulation with other constraints (with gcc = global cardinality constraint, see http://www.hakank.org/eclipse/). We did this in the Natural Combined Model.
+---
+
+There are two studies on SAT models :
+
+2006 ; Sudoku as a SAT Problem (Lynce, Ouaknine) ; encodings were proposed, extended is better
+2006 ; Optimized CNF encoding for sudoku puzzles (Kwon, Jain) ; Same results (extended is better), then even better encoding
+
+We did the 'boolean' model which is pretty much the same. It combines 'at most' and 'at least' in 'occurrences'.

@@ -6,11 +6,14 @@
 %       constraints satisfies the 'primal' constraints.
 %   No alldifferent constraints are needed (this may even perform better, eg. Walsch, 2001).
 % N.B. : Sudoku is more complex than quasigroup completion so more dual models are needed.
+% N.B. : Theoretically alldifferent are more tight
+%           (Dual Modelling of Permutation and Injection Problems, Hnich et al., 2004)
+%           but channeling constraints are said to be 'competitive'.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-variant(extended) :- fail. % Set to true/fail if you want to use channeling between dual models
+variant(extended) :- true. % Set to true/fail if you want to use channeling between dual models (or not)
 
 % Set up the model for the given puzzle.
 %

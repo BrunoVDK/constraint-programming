@@ -7,6 +7,7 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
+combo :- fail. % Set true/fail if two viewpoints are to be combined.
 eliminate_redundancy :- fail.
 
 % Set up the classic model for the given puzzle.
