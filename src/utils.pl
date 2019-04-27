@@ -29,6 +29,14 @@ list_2d_to_array(List, Array) :-
 block(K, Row, Column, Block) :-
     Block is K * ((Row-1) // K) + ((Column-1) // K) + 1.
 
+% For a given Sudoku row and column, determine the block position where the cell is located.
+%
+% @param K          The block size.
+% @param Row        The row of the cell.
+% @param Column     The column of the cell.
+position(K, Row, Column, Position) :-
+    Position is ((Column-1) mod K) + K * ((Row-1) mod K) + 1.
+
 % For a given Sudoku block and cell index (relative to that block),
 %   determine the row where the respective cell is located.
 %

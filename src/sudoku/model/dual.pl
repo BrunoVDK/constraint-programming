@@ -1,6 +1,5 @@
 %
-% Dual model for the Sudoku CLP solver.
-%   It is referred to in slide 30 of 'Other.pdf'.
+% Dual model for the Sudoku CLP solver (referred to in slide 30 of 'Other.pdf').
 %   We included several of the variants :
 %   - Row x Value implies Column (dual1)
 %   - Column x Value implies Row (dual2)
@@ -10,7 +9,7 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-variant(dual2) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
+variant(dual3) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
 
 % Set up the model for the given puzzle.
 %
@@ -33,25 +32,28 @@ declare_domains_dual(Variables, N, _K) :-
 % Convert from the original puzzle to the variable array (and vice versa).
 %
 % @param Variables  The variable array.
-% @param I          The row of the element in the original puzzle.
-% @param J          The column of the element in the original puzzle.
-% @param V          The value of the call at given row/column.
-convert(Variables, Row, Column, Value) :-
+% @param N          The dimension of the puzzle.
+% @param K          The dimension of blocks.
+% @param Row        The row of the element in the original puzzle.
+% @param Column     The column of the element in the original puzzle.
+% @param Value      The value of the call at given row/column.
+convert(Variables, _N, K, Row, Column, Value) :-
     (variant(dual1) -> Column is Variables[Row,Value] ; true),
-    (variant(dual2) -> Row is Variables[Column,Value] ; true).
+    (variant(dual2) -> Row is Variables[Column,Value] ; true),
+    block(K, Row, Column, Block), % Convert Row x Column to Block
+    position(K, Row, Column, Position), % Convert Row x Column to Position
+    (variant(dual3) -> Value is Variables[Block,Position] ; true),
+    (variant(dual4) -> Position is Variables[Block,Value] ; true).
 
-% Set up all row constraints for the variable array.
+% Set up all constraints on rows for the variable array.
 %
 % @param Variables  The variable array.
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-% @param Rows       A list of rows for the given variable array.
 row_constraints(Variables, _N, _K) :-
-    (foreacharg(Row, Variables) do
-        alldifferent(Row)
-    ).
+    (foreacharg(Row, Variables) do alldifferent(Row)).
 
-% Set up all column constraints for the variable array.
+% Set up all constraints on columns for the variable array.
 %
 % @param Variables  The variable array.
 % @param N          The dimension of the puzzle.
@@ -68,7 +70,7 @@ column_constraints(Variables, N, _K) :-
 % @param K          The dimension of blocks.
 block_constraints(Variables, N, K) :-
     dim(BlockArray, [N,N]),
-    BlockArray :: 1..9,
+    BlockArray :: 1..N,
     (for(Block, 1, N), param(BlockArray, Variables, N, K) do
         alldifferent(BlockArray[Block,1..N]), % All blocks have different values
         (multifor([Cell,Value], 1, N), param(BlockArray, Variables, Block, K) do
@@ -81,6 +83,54 @@ block_constraints(Variables, N, K) :-
         )
     ).
 
+% Set up all remaining constraints for the dual3 variant
+%
+% @param Variables  The variable array.
+% @param N          The dimension of the puzzle.
+% @param K          The dimension of blocks.
+dual3_constraints(Variables, N, K) :-
+    (for(R, 1, N), param(N, K, Variables) do % X is row or column
+        SI is K * ((R-1) // K) + 1, EI is SI + K - 1,
+        SJ is K * ((R-1) mod K) + 1, EJ is SJ + K - 1,
+        length(RowValues, N),
+        (   multifor([I,J], [SI,SJ], [EI,EJ]),
+            foreach(RowValue, RowValues),
+            param(Variables) do
+            RowValue is Variables[I,J]
+        ),
+        alldifferent(RowValues)
+    ),
+    (for(C, 1, N), param(N, K, Variables) do % X is row or column
+        SI is ((C-1) // K) + 1, SJ is ((C-1) mod K) + 1,
+        length(ColumnValues, N),
+        (   multifor([I,J], [SI,SJ], N, K),
+            foreach(ColumnValue, ColumnValues),
+            param(Variables) do
+            ColumnValue is Variables[I,J]
+        ),
+        alldifferent(ColumnValues)
+    ).
+
+% Set up all remaining constraints for the dual4 variant
+%
+% @param Variables  The variable array.
+% @param N          The dimension of the puzzle.
+% @param K          The dimension of blocks.
+dual4_constraints(Variables, N, K) :-
+    dim(MappedArray, [N,N]),
+    MappedArray :: 1..N, % ... this is channelling, really
+    (for(Row, 1, N), param(MappedArray, Variables, N, K) do
+        alldifferent(MappedArray[Row,1..N]), % All rows have different values
+        alldifferent(MappedArray[1..N,Row]), % All columns have different values
+        (multifor([Column,Value], 1, N), param(MappedArray, Row, Variables, K) do
+            block(K, Row, Column, Block), % Get Block for Row x Column
+            position(K, Row, Column, Position), % Get Position for Row x Column
+            % The following is equivalent to an <=> constraint
+            #=(MappedArray[Row,Column], Value, Bool),
+            #=(Variables[Block,Value], Position, Bool)
+        )
+    ).
+
 % Generate the constraints for the given puzzle.
 %
 % @param Variables  The variables to generate constraints for.
@@ -89,15 +139,20 @@ block_constraints(Variables, N, K) :-
 % @param K          The dimension of blocks.
 generate_constraints_dual(Variables, Puzzle, N, K) :-
     % Register pre-filled cells
-    (foreach(Row, Puzzle), for(R, 1, N), param(Variables, N) do
-        (foreach(X, Row), for(C, 1, N), param(R, Variables) do
-            (\+ var(X) -> convert(Variables, R, C, X) ; true)
+    (foreach(Row, Puzzle), for(R, 1, N), param(Variables, N, K) do
+        (foreach(X, Row), for(C, 1, N), param(N, K, R, Variables) do
+            (\+ var(X) -> convert(Variables, N, K, R, C, X) ; true)
         )
     ),
     % Constraints
     row_constraints(Variables, N, K),
-    column_constraints(Variables, N, K),
-    block_constraints(Variables, N, K).
+    ((variant(dual1) ; variant(dual2)) ->
+        column_constraints(Variables, N, K),
+        block_constraints(Variables, N, K)
+    ;
+        (variant(dual3) -> dual3_constraints(Variables, N, K) ; true),
+        (variant(dual4) -> dual4_constraints(Variables, N, K) ; true)
+    ).
 
 % Transform the assignments to the decision variables to a solved puzzle.
 %
@@ -105,10 +160,20 @@ generate_constraints_dual(Variables, Puzzle, N, K) :-
 % @param Puzzle     The input puzzle (this is a list).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-% @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(dual, Variables, _, N, _K, Solution) :-
-    dim(SolutionArray, [N,N]),
-    (multifor([R,C], 1, N), foreach(X, Variables), param(SolutionArray) do
-        (nonvar(X) -> convert(SolutionArray, R, C, X) ; true)
+% @param Solution   The puzzle's solution corresponding to the assignments
+%                       to the variables.
+read_solution(dual, Variables, _, N, K, Solution) :-
+    dim(SolutionArray, [N,N]),log,
+    (multifor([R,C], 1, N), foreach(X, Variables), param(N, K, SolutionArray) do
+        (nonvar(X) ->
+            row(K, R, C, R1), column(K, R, C, C1),
+            row(K, R, X, R2), column(K, R, X, C2),
+            (variant(dual1) -> convert(SolutionArray, N, K, R, C, X) ; true),
+            (variant(dual2) -> convert(SolutionArray, N, K, C, X, R) ; true),
+            (variant(dual3) -> X is SolutionArray[R1,C1] ; true),
+            (variant(dual4) -> C is SolutionArray[R2,C2] ; true)
+        ;
+            true
+        )
     ),
     list_2d_to_array(Solution, SolutionArray).
