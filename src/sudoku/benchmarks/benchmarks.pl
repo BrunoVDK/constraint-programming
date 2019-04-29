@@ -9,6 +9,12 @@
 
 nb_minimum(100). % Number of minimum puzzles to use
 
+% Solve the puzzle with the given name and measure time and number of backtracks.
+%
+% @param Puzzle The puzzle to solve.
+solve(Puzzle) :-
+    sudoku_named(Puzzle, _, _, true).
+
 % Automatic benchmarking with the provided puzzles.
 %
 % @param Verbose    Flag denoting whether or not intermediate results should be printed.

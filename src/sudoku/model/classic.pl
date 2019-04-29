@@ -8,7 +8,7 @@
 % @version  1.0
 
 combo :- fail. % Set true/fail if two viewpoints are to be combined.
-eliminate_redundancy :- fail.
+eliminate_redundancy :- fail. % (Demoen)
 :- import alldifferent_matrix/1 from ic_global.
 
 % Set up the classic model for the given puzzle.

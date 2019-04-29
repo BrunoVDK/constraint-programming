@@ -50,7 +50,7 @@ setup_model(boolean, Puzzle, N, K, Vars) :-
 %
 % @param Variables The decision variables.
 declare_domains_boolean(Variables) :-
-    Variables :: 0..1. % All booleans
+    Variables #:: 0..1. % All booleans
 
 % Generate the constraints for the given decision variables.
 %
@@ -95,11 +95,15 @@ generate_constraints_boolean(Variables, N, K) :-
 %
 % @param List1  The first list.
 % @param List2  The second list.
+% @note There are a few ways to make this possible, one of which is the use of ~= which
+%       does not propagate (it doesn't know about domains), and our own code which is
+%       just as slow as it only propagates when only one variable is left.
 unequal_list(List1, List2) :-
     collection_to_list(flatten(List1), Iterator1),
     collection_to_list(flatten(List2), Iterator2),
-    (foreach(X, Iterator1), foreach(Y, Iterator2), foreach((X #\= Y), Constraints) do true),
-    1 #=< sum(Constraints).
+    Iterator1 ~= Iterator2.
+    %(foreach(X, Iterator1), foreach(Y, Iterator2), foreach((X #\= Y), Constraints) do true),
+    %1 #=< sum(Constraints).
     % See slides Active.pdf, 27 and onwards
     %L1 is List1, L2 is List2,
     %(foreach(X, L1), foreach(Y, L2), fromto(Sum, S1, S2, 0) do
