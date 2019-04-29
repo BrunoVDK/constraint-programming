@@ -1,5 +1,5 @@
 %
-% Sudoku CLP solver.
+% Sudoku CLP solver with the use of constraint handling rules.
 %   The solver reads in a puzzle, sets up a model and searches for a solution.
 %       It is assumed that for a puzzle of size N, blocks have a dimension of K x K
 %       with K * K = N. This deals with several of the variants including hexadoku.
@@ -7,29 +7,19 @@
 %   Several models can be made use of :
 %       - classic : the classic ('primal') model
 %       - member : model enforcing singular occurrence of each value in each row/column/block
-%       - laburthe : experiments with Laburthe's models (primal + dual + abstract)
-%       - boolean : two boolean models
 %       - dual : four variants of the dual model
-%       - channeling : the model with only the channeling constraints of the combined model
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-use_model(classic). % The model that is to be used
-
-:- lib(ic).
-:- import alldifferent/1 from ic_global.
-:- import bool_channeling/3 from ic_global.
+use_model(boolean). % The model that is to be used
 
 :- compile('../utils.pl'). % Import utility functions
 :- compile('benchmarks/benchmarks').
 
-%:- compile('model/channeling').
+%:- compile('model/classic').
 %:- compile('model/dual').
-%:- compile('model/boolean').
 %:- compile('model/member').
-:- compile('model/classic').
-%:- compile('model/laburthe').
 
 % Solve the Sudoku with the given name.
 %

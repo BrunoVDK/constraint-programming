@@ -1,5 +1,5 @@
 %
-% Classic model for the Sudoku CLP solver.
+% Classic model for the Sudoku CLP solver (CHR version).
 %
 % The following flags may be used :
 %       - eliminate_redundancy : if redundant constraints are to be removed (Demoen, 2012)
@@ -9,7 +9,6 @@
 
 combo :- fail. % Set true/fail if two viewpoints are to be combined.
 eliminate_redundancy :- fail.
-:- import alldifferent_matrix/1 from ic_global.
 
 % Set up the classic model for the given puzzle.
 %
@@ -36,29 +35,7 @@ declare_domains_classic(Puzzle, N, _K) :-
 % @note The part selection and use of concatenation was inspired by code
 %               provided by ECLiPSe. https://eclipseclp.org/examples/sudoku.ecl.txt
 generate_constraints_classic(Puzzle, N, K) :-
-    (for(I,1,N), param(Puzzle, N) do % Go through every row & column
-        % Note that only ECLiPSe 7.0 supports the '*' subscript which is equivalent to '1..N'
-        %   See changelog http://eclipseclp.org/relnotes/rel70.html
-        % alldifferent(Puzzle[I,*]), % Different integer in row cells
-        % alldifferent(Puzzle[*,I])) % Different integer in column cells
-        (\+ skip(I, N) ->
-            alldifferent(Puzzle[I,1..N]), % Different integer in row cells
-            alldifferent(Puzzle[1..N,I]) % Different integer in column cells
-        ;
-            true
-        )
-        % alldifferent_matrix(Puzzle) % Much slower, less backtracks
-    ),
-    % This code goes through I = 1->N, J = 1->N, step = K
-    %   It considers each block and enforces the constraint that each of the block's
-    %   elements should be different
-    %   multifor/3 is described here http://eclipseclp.org/doc/tutorial/tutorial025.html
-    (multifor([I,J], 1, N, K), param(Puzzle, K) do
-        % In ECLiPSe 7.0 subscript gives an array, in 6.1 it gives a list
-        % (-> use concat/flatten depending on version)
-        % alldifferent(concat(Puzzle[I..I+K-1,J..J+K-1])) % Different integers in block cells
-        alldifferent(flatten(Puzzle[I..I+K-1,J..J+K-1])) % Different integers in block cells
-    ).
+    fail.
 
 % Define rows and columns that are to be skipped if redundant 'big constraints' are disregarded.
 % This corresponds to the first Missing(6) model in appendix of (Demoen, 2012).

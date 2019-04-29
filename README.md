@@ -34,11 +34,12 @@ Repository for constraint programming assignments for the *Advanced Programming 
 ## Constraint Handling Rules
 
 Commited choice language ; unlike Prolog, once you make a choice, you're stuck with it.
+Created by Thom Frühwirth.
 
 **CHR rules**
 
  - Simplification (removes constraints, adds new ones to constraint store)
+ - Propagation (similar to simplification, doesn't remove constraints)
  - Simpagation (combines simplification and propagation)
- - Propagation (doesn't remove constraints)
  
  [Consult WikiPedia](https://en.wikipedia.org/wiki/Constraint_Handling_Rules)
