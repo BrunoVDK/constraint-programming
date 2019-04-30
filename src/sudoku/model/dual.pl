@@ -11,7 +11,7 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-variant(dual3) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
+variant(dual2) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
 
 % Set up the model for the given puzzle.
 %
@@ -74,13 +74,13 @@ block_constraints(Variables, N, K) :-
     % This is channeling
     dim(BlockArray, [N,N]),
     BlockArray :: 1..N,
-    (for(Block, 1, N), param(BlockArray, Variables, N, K) do
-        alldifferent(BlockArray[Block,1..N]), % All blocks have different values
-        (multifor([Cell,Value], 1, N), param(BlockArray, Variables, Block, K) do
+    (for(Value, 1, N), param(BlockArray, Variables, N, K) do
+        alldifferent(BlockArray[Value,1..N]), % All blocks have different values
+        (multifor([Row,Column], 1, N), param(BlockArray, Variables, Value, K) do
             % The following is equivalent to an <=> constraint
-            row(K, Block, Cell, Row), % Given Block x Cell => give Row
-            column(K, Block, Cell, Column), % Given Block x Cell => give Column
-            #=(BlockArray[Block,Cell], Value, Bool),
+            block(K, Row, Column, Block),
+            position(K, Row, Column, Position),
+            #=(BlockArray[Block,Value], Position, Bool),
             (variant(dual1) -> #=(Variables[Row,Value], Column, Bool) ; true),
             (variant(dual2) -> #=(Variables[Column,Value], Row, Bool) ; true)
         )

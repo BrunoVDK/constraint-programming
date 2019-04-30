@@ -45,19 +45,10 @@
 \RequirePackage{graphicx}
 \RequirePackage{geometry}
 \RequirePackage{todonotes}
-\RequirePackage{xcolor}
 \RequirePackage{xparse}
 \RequirePackage{expl3}
 \RequirePackage{enumitem}
 \RequirePackage{minitoc}
-\RequirePackage{hyperref}
-\hypersetup{
-    colorlinks,
-    citecolor=black,
-    filecolor=black,
-    linkcolor=black,
-    urlcolor=black
-}
 \IfFileExists{fontawesome.sty}{%
     \RequirePackage{fontawesome}
 }{%
@@ -528,17 +519,8 @@
         \end{minipage}
     \end{titlepage}
     \pagenumbering{arabic}
-}
-\AtBeginDocument{
-    \ifthenelse{\boolean{anonymize}}{%
-        \@ifpackageloaded{hyperref}{%
-            \hypersetup{pdfauthor={Anonymized},hidelinks}
-        }{}
-    }{%
-        \@ifpackageloaded{hyperref}{%
-            \hypersetup{pdfauthor={ },hidelinks}
-        }{}
-    }
+
+
 \sortAuthors
 \fakelistoffigures
 }
