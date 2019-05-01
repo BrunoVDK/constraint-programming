@@ -22,7 +22,7 @@ use_model(dual). % The model that is to be used
 :- import bool_channeling/3 from ic_global.
 
 :- compile('../utils.pl'). % Import utility functions
-:- compile('benchmarks/benchmarks').
+:- compile('../benchmarks/benchmarks').
 
 %:- compile('model/channeling').
 :- compile('model/dual').

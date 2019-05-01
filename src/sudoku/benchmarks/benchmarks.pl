@@ -19,20 +19,7 @@ solve(Puzzle) :-
 %
 % @param Verbose    Flag denoting whether or not intermediate results should be printed.
 benchmark(Verbose) :-
-    Puzzles = [ lambda,
-                hard17,
-                eastermonster,
-                tarek_052,
-                goldennugget,
-                coloin,
-                extra2,
-                extra3,
-                extra4,
-                inkara2012,
-                clue18,
-                clue17,
-                sudowiki_nb28,
-                sudowiki_nb49],
+    findall(Name, puzzles(_, Name), Puzzles),
     length(Puzzles, Nb),
     (   foreach(Puzzle, Puzzles), param(Verbose),
         fromto(0, InTime, OutTime, TotalTime),
@@ -51,7 +38,7 @@ benchmark(Verbose) :-
 %       Minimum sudokus were converted to a readable format with a Haskell script included
 %       in the repository.
 benchmark_minimum(Verbose) :-
-    nb_minimum(Nb),
+    nb_minimum(Nb), % Could use findall but this is more flexible
     (   for(I, 1, Nb),
         fromto(0, InTime, OutTime, TotalTime),
         fromto(0, InBacktracks, OutBacktracks, TotalBacktracks),

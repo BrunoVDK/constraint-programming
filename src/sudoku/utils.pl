@@ -1,5 +1,5 @@
 %
-% Utility functions.
+% Utility functions for the Sudoku solvers.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0

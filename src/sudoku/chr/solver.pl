@@ -12,10 +12,15 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
+:- use_module(library(chr)).
+:- use_module(library(lists)).
+
+:- chr_constraint foo/2.
+
 use_model(boolean). % The model that is to be used
 
-:- compile('../utils.pl'). % Import utility functions
-:- compile('benchmarks/benchmarks').
+:- compile('../../utils.pl'). % Import utility functions
+:- compile('../benchmarks/benchmarks').
 
 %:- compile('model/classic').
 %:- compile('model/dual').
@@ -48,7 +53,7 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     setup_model(Model, Puzzle, N, K, Variables),
     % Start search procedure
     (Verbose -> write('Search prodecure started.'), nl ; true),
-    search(Variables, 0, first_fail, indomain, complete, [backtrack(Backtracks)]), !,
+    solve(Model, Puzzle, N, K, Variables),
     statistics(hr_time, End),
     Time is End - Start,
     (Verbose -> write('Solution found ...'), nl ; true),
