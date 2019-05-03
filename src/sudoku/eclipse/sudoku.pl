@@ -15,7 +15,7 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-use_model(dual). % The model that is to be used
+use_model(channeling). % The model that is to be used
 
 :- lib(ic).
 :- import alldifferent/1 from ic_global.
@@ -24,8 +24,8 @@ use_model(dual). % The model that is to be used
 :- compile('../utils.pl'). % Import utility functions
 :- compile('../benchmarks/benchmarks').
 
-%:- compile('model/channeling').
-:- compile('model/dual').
+:- compile('model/channeling').
+%:- compile('model/dual').
 %:- compile('model/boolean').
 %:- compile('model/member').
 %:- compile('model/classic').
@@ -68,15 +68,14 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     (Verbose -> write('Backtracks : '), write(Backtracks), nl ; true),
     (Verbose -> write('Time : '), write(Time), nl ; true).
 
+% Convert the given 2-dimensional list to an array.
 %
-% Print the given Sudoku puzzle.
-%
-% @param Puzzle     An array representing a (solved) Sudoku puzzle.
-print_sudoku(Puzzle) :-
-    nl,
-    (foreach(Row, Puzzle) do
-        (foreach(Element, Row) do
-            write(Element), write(" ")
-        ),
-        nl
+% @param    The list to convert to an array.
+% @param    The array representing the same collection as the given list.
+list_2d_to_array(List, Array) :-
+    length(List, N),
+    dim(Array, [N,N]),
+    array_list(Array, Rows),
+    (foreach(ListRow, List), foreach(Row, Rows) do
+        array_list(Row, ListRow)
     ).

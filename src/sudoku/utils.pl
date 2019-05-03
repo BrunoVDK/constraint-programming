@@ -9,18 +9,6 @@ enable(debug) :- true.
 log :- (enable(debug) -> write('---'), nl ; true).
 log(Var) :- (enable(debug) -> write(Var), nl ; true).
 
-% Convert the given 2-dimensional list to an array.
-%
-% @param    The list to convert to an array.
-% @param    The array representing the same collection as the given list.
-list_2d_to_array(List, Array) :-
-    length(List, N),
-    dim(Array, [N,N]),
-    array_list(Array, Rows),
-    (foreach(ListRow, List), foreach(Row, Rows) do
-        array_list(Row, ListRow)
-    ).
-
 % For a given Sudoku row and column, determine the block where the cell is located.
 %
 % @param K          The block size.
@@ -57,15 +45,24 @@ column(K, Block, Cell, Column) :-
     BlockColumn is (Block-1) mod K,
     Column is (BlockColumn * K) + ((Cell-1) mod K) + 1.
 
-% Checks whether the given column and block intersect.
+% Generate domain for given N. This is simply the list of integers from 1 to N.
+create_domain(N, Domain) :-
+    findall(V, between(1,N,V), Domain).
+
 %
-% @param N      The puzzle size.
-% @param K      The block size.
-% @param Column The column number.
-% @param Block  The block number.
-block_column(N, K, Column, Block) :-
-    between(1, N, 1, Block),
-    Max is K * ((Block-1) mod K) + 3,
-    between(1, N, 1, Column),
-    Column =< Max,
-    Column > Max - K.
+% Print the given Sudoku puzzle.
+%
+% @param Puzzle     An array representing a (solved) Sudoku puzzle.
+print_sudoku(Puzzle) :-
+    findall(_, (member(Row,Puzzle), nl, member(El,Row), write(El), write(" ")), _).
+
+% Calculate the sum of the elements in the given list.
+%
+% @param List   The list (eg. of integers).
+% @note We implemented this ourselves to make this file compatible
+%           with both the CLP as well as the CHR implementation.
+sumlist(List, Sum) :- sumlist(List, 0, Sum).
+sumlist([], Sum, Sum).
+sumlist([X|Xs], Acc, Sum) :-
+    NewAcc is Acc + X,
+    sumlist(Xs, NewAcc, Sum).

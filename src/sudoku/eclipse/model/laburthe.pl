@@ -96,6 +96,19 @@ generate_constraints_laburthe(Puzzle, Dual, Abstract, N, K) :-
         )
     ).
 
+% Checks whether the given column and block intersect.
+%
+% @param N      The puzzle size.
+% @param K      The block size.
+% @param Column The column number.
+% @param Block  The block number.
+block_column(N, K, Column, Block) :-
+    between(1, N, 1, Block),
+    Max is K * ((Block-1) mod K) + 3,
+    between(1, N, 1, Column),
+    Column =< Max,
+    Column > Max - K.
+
 % Transform the assignments to the decision variables to a solved puzzle.
 %
 % @param Variables  The decision variables (should be assigned).
