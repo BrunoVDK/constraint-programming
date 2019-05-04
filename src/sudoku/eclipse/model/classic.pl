@@ -7,7 +7,6 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-combo :- fail. % Set true/fail if two viewpoints are to be combined.
 eliminate_redundancy :- fail. % (Demoen)
 :- import alldifferent_matrix/1 from ic_global.
 
@@ -16,7 +15,7 @@ eliminate_redundancy :- fail. % (Demoen)
 % @param Puzzle     The input puzzle (a list).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-setup_model(classic, Puzzle, N, K, flatten(Puzzle)) :-
+setup_model(Puzzle, N, K, flatten(Puzzle)) :-
     list_2d_to_array(Puzzle, PuzzleArray),
     declare_domains_classic(PuzzleArray, N, K),
     generate_constraints_classic(PuzzleArray, N, K).
@@ -71,4 +70,4 @@ skip(I, 9) :- eliminate_redundancy, (I = 2 ; I = 5 ; I = 8).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(classic, _, Puzzle, _, _, Puzzle).
+read_solution(_, Puzzle, _, _, Puzzle).

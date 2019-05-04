@@ -4,7 +4,7 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-:- module(classic, [solve/3,register_puzzle/3]).
+:- module(dual3, [solve/3,register_puzzle/3]).
 :- use_module(library(chr)).
 :- use_module(library(lists)).
 

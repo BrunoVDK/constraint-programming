@@ -11,11 +11,11 @@
 %       - boolean : two boolean models
 %       - dual : four variants of the dual model
 %       - channeling : the model with only the channeling constraints of the combined model
+%       - combined : primal (classic) + dual combination (channeling)
+%       - combined_member : primal (classic) + member combination (channeling)
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
-
-use_model(channeling). % The model that is to be used
 
 :- lib(ic).
 :- import alldifferent/1 from ic_global.
@@ -24,12 +24,7 @@ use_model(channeling). % The model that is to be used
 :- compile('../utils.pl'). % Import utility functions
 :- compile('../benchmarks/benchmarks').
 
-:- compile('model/channeling').
-%:- compile('model/dual').
-%:- compile('model/boolean').
-%:- compile('model/member').
-%:- compile('model/classic').
-%:- compile('model/laburthe').
+:- compile('model/combined'). % Choose the model here
 
 % Solve the Sudoku with the given name.
 %
@@ -53,9 +48,8 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     K is integer(sqrt(N)), % Get the dimension of blocks
     (Verbose -> write('Puzzle size : '), write(N), nl ; true),
     % Set up model
-    use_model(Model),
     statistics(hr_time, Start), % http://eclipseclp.org/doc/bips/kernel/env/statistics-2.html
-    setup_model(Model, Puzzle, N, K, Variables),
+    setup_model(Puzzle, N, K, Variables),
     % Start search procedure
     (Verbose -> write('Search prodecure started.'), nl ; true),
     search(Variables, 0, first_fail, indomain, complete, [backtrack(Backtracks)]), !,
@@ -63,7 +57,7 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     Time is End - Start,
     (Verbose -> write('Solution found ...'), nl ; true),
     % Display solution
-    read_solution(Model, Variables, Puzzle, N, K, Solution),
+    read_solution(Variables, Puzzle, N, K, Solution),
     (Verbose -> write('Solution : '), print_sudoku(Solution), nl ; true),
     (Verbose -> write('Backtracks : '), write(Backtracks), nl ; true),
     (Verbose -> write('Time : '), write(Time), nl ; true).

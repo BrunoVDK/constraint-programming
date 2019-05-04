@@ -20,7 +20,7 @@ variant(extended) :- true. % Set to true/fail if you want to use channeling betw
 % @param Puzzle     The input puzzle (a list).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-setup_model(channeling, Puzzle, N, K, flatten(Puzzle)) :-
+setup_model(Puzzle, N, K, flatten(Puzzle)) :-
     % This time the domain constraints are in the constraint generation
     %   function because it's easier to write it that way.
     list_2d_to_array(Puzzle, PuzzleArray),
@@ -65,4 +65,4 @@ generate_constraints_channeling(Puzzle, N, K) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(channeling, _Variables, Puzzle, _N, _K, Puzzle).
+read_solution(_Variables, Puzzle, _N, _K, Puzzle).

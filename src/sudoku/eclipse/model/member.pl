@@ -13,7 +13,7 @@
 % @param Puzzle     The input puzzle (a list).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-setup_model(member, Puzzle, N, K, flatten(Puzzle)) :-
+setup_model(Puzzle, N, K, flatten(Puzzle)) :-
     list_2d_to_array(Puzzle, PuzzleArray),
     declare_domains_member(PuzzleArray, N, K),
     generate_constraints_member(PuzzleArray, N, K).
@@ -48,4 +48,4 @@ generate_constraints_member(Puzzle, N, K) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(member, _, Puzzle, _N, _K, Puzzle).
+read_solution(_, Puzzle, _N, _K, Puzzle).

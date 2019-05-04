@@ -11,14 +11,14 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-variant(dual2) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
+variant(dual3) :- true. % Choose the variant here (dual1, dual2, dual3 or dual4)
 
 % Set up the model for the given puzzle.
 %
 % @param Puzzle     The input puzzle (a list).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-setup_model(dual, Puzzle, N, K, Vars) :-
+setup_model(Puzzle, N, K, Vars) :-
     dim(Variables, [N,N]),
     declare_domains_dual(Variables, N, K),
     generate_constraints_dual(Variables, Puzzle, N, K),
@@ -166,7 +166,7 @@ generate_constraints_dual(Variables, Puzzle, N, K) :-
 % @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments
 %                       to the variables.
-read_solution(dual, Variables, _, N, K, Solution) :-
+read_solution(Variables, _, N, K, Solution) :-
     dim(SolutionArray, [N,N]),
     (multifor([R,C], 1, N), foreach(X, Variables), param(N, K, SolutionArray) do
         (nonvar(X) ->
@@ -180,4 +180,4 @@ read_solution(dual, Variables, _, N, K, Solution) :-
             true
         )
     ),
-    list_2d_to_array(Solution, SolutionArray).
+    list_2d_to_array(Solution, SolutionArray), !.

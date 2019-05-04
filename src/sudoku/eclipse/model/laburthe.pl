@@ -12,7 +12,7 @@
 % @param Puzzle     The puzzle list to declare domains for.
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-setup_model(laburthe, Puzzle, N, K, flatten(Variables)) :-
+setup_model(Puzzle, N, K, flatten(Variables)) :-
     list_2d_to_array(Puzzle, PuzzleArray),
     % Declare domains and generate constraints
     declare_domains_laburthe(PuzzleArray, Dual, Abstract, N, K),
@@ -59,7 +59,13 @@ declare_domains_laburthe(Puzzle, Dual, Abstract, N, K) :-
 % @param K          The dimension of blocks.
 generate_constraints_laburthe(Puzzle, Dual, Abstract, N, K) :-
     % PRIMAL
-    generate_constraints_classic(Puzzle, N, K),
+    (for(I,1,N), param(Puzzle, N) do % Go through every row & column
+        alldifferent(Puzzle[I,1..N]), % Different integer in row cells
+        alldifferent(Puzzle[1..N,I]) % Different integer in column cells
+    ),
+    (multifor([I,J], 1, N, K), param(Puzzle, K) do
+        alldifferent(flatten(Puzzle[I..I+K-1,J..J+K-1])) % Different integers in block cells
+    ),
     % DUAL
     (multifor([I,V,X], 1, N), param(Puzzle, Dual, K) do
         #=(Dual[1,I,V], X, BoolRow),
@@ -86,7 +92,7 @@ generate_constraints_laburthe(Puzzle, Dual, Abstract, N, K) :-
         Dual[3,I,V] #= X => Abstract[4,I,V] #= Column
     ),
     (for(V, 1, N), param(Abstract, N, K) do % Multifor is less readable
-        (for(I, 1, N, K), param(Abstract, K, N, V) do
+        (for(I, 1, N, K), param(Abstract, K, _N, V) do
             J is I + K - 1,
             alldifferent(Abstract[1,I..J,V]),
             alldifferent(Abstract[2,I..J,V]),
@@ -116,4 +122,4 @@ block_column(N, K, Column, Block) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(laburthe, _, Puzzle, _, _, Puzzle).
+read_solution(_, Puzzle, _, _, Puzzle).

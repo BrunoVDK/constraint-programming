@@ -28,7 +28,7 @@ variant(original) :- true.
 % @param Puzzle     The input puzzle (a list).
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
-setup_model(boolean, Puzzle, N, K, Vars) :-
+setup_model(Puzzle, N, K, Vars) :-
     % Set up decision variables (record pre-filled cells)
     dim(Variables, [N,N,N]),
     %   ... (less readable)
@@ -119,10 +119,10 @@ unequal_list(List1, List2) :-
 % @param N          The dimension of the puzzle.
 % @param K          The dimension of blocks.
 % @param Solution   The puzzle's solution corresponding to the assignments to the variables.
-read_solution(boolean, Variables, _Puzzle, N, _K, Solution) :-
+read_solution(Variables, _Puzzle, N, _K, Solution) :-
     dim(SolutionArray, [N,N]),
     (multifor([R,C,V], 1, N), foreach(X, Variables), param(SolutionArray) do
         (nonvar(X), 1 is X -> V is SolutionArray[R,C] ; true)
         % Note, ic_global:bool_channeling/3 can't be used as Variables is 1D list
     ),
-    list_2d_to_array(Solution, SolutionArray).
+    list_2d_to_array(Solution, SolutionArray), !.
