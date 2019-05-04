@@ -1,7 +1,6 @@
 %
-% Dual model for the Sudoku CHR solver.
-%   Corresponds to the dual4 in the ECLiPSe version.
-%   -> Block x Value => Position
+% Combined (classic+dual4) model for the Sudoku CHR solver.
+%   dual4 means -> Block x Value => Position
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
