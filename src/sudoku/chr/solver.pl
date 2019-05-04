@@ -6,8 +6,8 @@
 %
 %   Several models can be made use of :
 %       - classic : the classic ('primal') model
-%       - member : model enforcing singular occurrence of each value in each row/column/block
-%       - dual : one variant of the dual model
+%       - dual3/dual4 : one variant of the dual model
+%       - combined : classic + dual4
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
