@@ -1,5 +1,5 @@
 %
-% Sudoku solve with CHR.
+% Sudoku solver with CHR.
 %   The solver reads in a puzzle, sets up a model and searches for a solution.
 %       It is assumed that for a puzzle of size N, blocks have a dimension of K x K
 %       with K * K = N. This deals with several of the variants including hexadoku.
