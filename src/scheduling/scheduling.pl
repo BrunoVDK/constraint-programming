@@ -60,6 +60,9 @@ timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay) :-
                 (Duration > 5 ->
                     fail % Cannot lead to a solution
                 ;
+                    % This just says the meeting cannot overlap with the
+                    %   first weekend that follows. mod/3 can't be used by the way,
+                    %   that's why there's an auxiliary variable.
                     X :: 0..6,
                     Q #>= 0,
                     Q * 7 + X #= Start + StartingDay,
@@ -115,7 +118,8 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
          param(Rank, Ranks, StartTimes, I) do
             OtherRank is Ranks[J],
             (Rank < OtherRank -> Out = [(StartTimes[I] #> StartTimes[J])|In] ;
-            (Rank > OtherRank -> Out = [(StartTimes[I] #< StartTimes[J])|In] ; Out = In))
+            (Rank > OtherRank -> Out = [(StartTimes[I] #< StartTimes[J])|In] ;
+            Out = In))
         ),
         append(InViolations, List, OutViolations)
     ),
@@ -139,7 +143,8 @@ benchmark(Verbose) :-
                 bench3c,
                 bench3d,
                 bench3e,
-                bench3f],
+                bench3f,
+                bench3g],
     (Verbose -> write('Running tests (schedule meetings) ...'), nl, log ; true),
     (   foreach(Test, Tests), param(Verbose),
         fromto(0, InTime, OutTime, TotalTime) do
