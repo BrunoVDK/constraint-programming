@@ -1,5 +1,5 @@
 %
-% Combined (classic+dual) model for the Sudoku CLP solver.
+% Combined (classic+dual4) model for the Sudoku CLP solver.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0

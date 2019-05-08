@@ -4,12 +4,14 @@
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-:- compile('../utils.pl'). % Import utility functions
 :- compile(benchmarksMeeting).
 
 :- lib(ic).
+%:- import sumlist/2 from ic_global.
 :- lib(branch_and_bound).
 :- lib(ic_edge_finder). % Provides the disjunctive/2 constraint
+
+enable(global) :- true. % To turn ic_edge_finder on/off
 
 % Schedule meetings for the given number of persons, each with their own preferences.
 %   The cost function first takes into account the end time which should be as low as possible,
@@ -19,43 +21,114 @@
 % @param Durations      The durations of the meeting for each person (an array).
 % @param OnWeekend      An array with value indicating
 %                           willingness of each person to meet on weekends.
-% @param Rank           An array holding the ranks of every person.
-% @param Precs          Precedense constraints.
+% @param Ranks          An array holding the ranks of every person.
+% @param Pcs            Precedence constraints.
 % @param StartingDay    Which day of the week is day 0 (0 Monday, 1 Tuesday, ..., 6 Sunday).
-meeting(N, Durations, OnWeekend, _Rank, Precs, _StartingDay, Start, EndTime , 0) :-
-    dim(Start, [N]),
-    sum(Durations[1..N], Sum),
-    Start :: 0..(2*N+Sum),
-    %Saturday is StartingDay - 5,
-    (for(I, 1, N), foreacharg(W, OnWeekend), param(OnWeekend, N, Start, Durations) do
-        (I \= N -> Start[I] + Durations[I] #=< Start[I+1] ; true),
-        (W \= 1 -> % Weekend constraints
-            (Durations[I] > 5 ->
-                fail % Cannot lead to a solution
-            ;
-                true
-                %S is Start[I],
-                %Duration = Durations[I],
-                %StartI mod 7 + Duration #< Saturday
+meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, Violations) :-
+    % --- Declare domains ---
+    dim(StartTimes, [N]),
+    sum(Durations[1..(N-1)], TotalDuration),
+    MaxStart is (2*N + TotalDuration),
+    StartTimes :: 0..MaxStart,
+    % --- Generate constraints ---
+    timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay),
+    non_overlapping(N, StartTimes, Durations),
+    precedences(Pcs, StartTimes),
+    % --- Define cost function ---
+    violations(N, Ranks, StartTimes, Violations, MaxViolations),
+    Cost #= MaxViolations * (StartTimes[N] + Durations[N]) + Violations,
+    % --- Branch and bound ---
+    minimize(labeling(StartTimes), Cost),
+    EndTime is StartTimes[N] + Durations[N].
+
+% Enforce timing constraints :
+%   - no meetings during weekends if person doesn't want it
+%   - minister comes last
+%
+% @param N              The number of persons.
+% @param StartTimes     The start times variable array.
+% @param Durations      Array of durations for each meeting with each person.
+% @param OnWeekend      Weekend preferences per person.
+% @param StartingDay    Which day of the week is day 0 (0 Monday, 1 Tuesday, ..., 6 Sunday).
+timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay) :-
+    (   for(I, 1, N),
+        foreacharg(Start, StartTimes),
+        foreacharg(Duration, Durations),
+        foreacharg(W, OnWeekend),
+        param(StartTimes, N, StartingDay) do
+            (W \= 1 -> % Weekend constraints
+                (Duration > 5 ->
+                    fail % Cannot lead to a solution
+                ;
+                    X :: 0..6,
+                    Q #>= 0,
+                    Q * 7 + X #= Start + StartingDay,
+                    X + Duration #< 6
+                    % ((Start + StartingDay) mod 7) + Duration #< 5
+                )
+            ; true ),
+            (I \= N -> Start #< StartTimes[N] ; true) % Minister comes last
+    ).
+
+% Make sure no meetings overlap.
+%
+% @param N              The number of persons
+% @param StartTimes     The start times variable array.
+% @param Durations      Array of durations for each meeting with each person.
+non_overlapping(N, StartTimes, Durations) :-
+    (enable(global) ->
+        disjunctive(StartTimes, Durations)
+    ;
+        (   for(I, 1, N),
+            foreacharg(Start, StartTimes),
+            foreacharg(Duration, Durations),
+            param(StartTimes, Durations, N) do
+            (for(J, I+1, N), param(Start, Duration, StartTimes, Durations) do
+                OtherStart is StartTimes[J],
+                OtherDuration is Durations[J],
+                (Start + Duration =< OtherStart) or (OtherStart + OtherDuration =< Start)
             )
-        ;true)
+        )
+    ).
+
+% Set up the precedence constraints.
+%
+% @param Precedences    The precedence constraints (an array).
+% @param StartTimes     The start times variable array.
+precedences(Precedences, StartTimes) :-
+    (foreacharg(Precedence, Precedences), param(StartTimes) do
+        StartTimes[Precedence[1]] #< StartTimes[Precedence[2]]
+    ).
+
+% Set up constraints to calculate violations for the given ranks & start times.
+%
+% @param N              The number of persons.
+% @param Ranks          The ranks of the persons (an array).
+% @param StartTimes     The start times of each meeting for each person (an array).
+violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
+    (for(I, 1, N-1),
+     fromto([], InViolations, OutViolations, ViolationList),
+     param(StartTimes, N, Ranks) do
+        Rank is Ranks[I],
+        (for(J, I+1, N-1),
+         fromto([], In, Out, List),
+         param(Rank, Ranks, StartTimes, I) do
+            OtherRank is Ranks[J],
+            (Rank < OtherRank -> Out = [(StartTimes[I] #> StartTimes[J])|In] ;
+            (Rank > OtherRank -> Out = [(StartTimes[I] #< StartTimes[J])|In] ; Out = In))
+        ),
+        append(InViolations, List, OutViolations)
     ),
-    % disjunctive(Start, Durations),
-    (foreacharg(Precedence, Precs), param(Start) do
-        Start[Precedence[1]] #< Start[Precedence[2]]
-    ),
-    maxlist(Start, EndTime),
-    minimize(labeling(Start), EndTime).
+    length(ViolationList, MaxViolations),
+    write('Max # violations : '), write(MaxViolations), nl,
+    %sumlist(ViolationList, Violations).
+    Violations #= sum(ViolationList).
 
 % Automate benchmarking for the schedule meetings function.
 %
 % @param Verbose    If intermediate results should be printed out.
 benchmark(Verbose) :-
-    Tests = [   test1,
-                test1b,
-                test1c,
-                test2,
-                bench1a,
+    Tests = [   bench1a,
                 bench1b,
                 bench1c,
                 bench2a,

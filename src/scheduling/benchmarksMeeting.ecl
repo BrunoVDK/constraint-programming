@@ -13,7 +13,7 @@ test1(Start,EndTime,Viol) :-
 	     OnWeekend = [](0,0,0,0,0),
 	     Precs= []( [](1,3)),
 	     StartingDay = 5,
-	     Rank = [](1,2,3,4,5),  
+	     Rank = [](1,2,3,4,5),
 	     meeting(NbofPersons, Durations, OnWeekend, Rank, Precs,StartingDay,Start, EndTime , Viol).
 /*Start = [](2, 9, 11, 3, 16)
 EndTime = 21
@@ -26,7 +26,7 @@ test1b(Start,EndTime , Viol) :-
 	     OnWeekend = [](1,0,0,0,0),
 	     Precs= []( [](1,3)), 
 	     StartingDay = 5,
-	     Rank = [](1,2,3,4,5), 
+	     Rank = [](1,2,3,4,5),
 	     meeting(NbofPersons, Durations, OnWeekend, Rank, Precs,StartingDay,Start, EndTime , Viol).
 /*Start = [](0, 9, 11, 16, 23)
 EndTime = 28
@@ -50,7 +50,7 @@ test2(Start,EndTime , Viol) :-
 	     OnWeekend = [](1,1,1,1,1),
 	     Precs= []( [](3,1)),
 	     StartingDay = 5,
-	     Rank = [](1,2,3,4,5),  
+	     Rank = [](1,2,3,4,5),
 	     meeting(NbofPersons, Durations, OnWeekend, Rank, Precs,StartingDay,Start, EndTime , Viol).
 /*
 Start = [](3, 4, 0, 6, 10)
