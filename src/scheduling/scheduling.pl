@@ -28,7 +28,7 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     % --- Declare domains ---
     dim(StartTimes, [N]),
     sum(Durations[1..(N-1)], TotalDuration),
-    MaxStart is (2*N + TotalDuration),
+    MaxStart is (TotalDuration + 2*(N-1) + StartingDay),
     StartTimes :: 0..MaxStart,
     % --- Generate constraints ---
     timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay),
@@ -36,9 +36,11 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     precedences(Pcs, StartTimes),
     % --- Define cost function ---
     violations(N, Ranks, StartTimes, Violations, MaxViolations),
+    implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs),
     Cost #= MaxViolations * (StartTimes[N] + Durations[N]) + Violations,
     % --- Branch and bound ---
     minimize(labeling(StartTimes), Cost),
+    %minimize(search(StartTimes, 0, first_fail, indomain, complete, []), Cost),
     EndTime is StartTimes[N] + Durations[N].
 
 % Enforce timing constraints :
@@ -64,8 +66,7 @@ timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay) :-
                     %   first weekend that follows. mod/3 can't be used by the way,
                     %   that's why there's an auxiliary variable.
                     X :: 0..6,
-                    Q #>= 0,
-                    Q * 7 + X #= Start + StartingDay,
+                    _Q * 7 + X #= Start + StartingDay,
                     X + Duration #< 6
                     % ((Start + StartingDay) mod 7) + Duration #< 5
                 )
@@ -119,7 +120,7 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
             OtherRank is Ranks[J],
             (Rank < OtherRank -> Out = [(StartTimes[I] #> StartTimes[J])|In] ;
             (Rank > OtherRank -> Out = [(StartTimes[I] #< StartTimes[J])|In] ;
-            Out = In))
+                Out = In))
         ),
         append(InViolations, List, OutViolations)
     ),
@@ -127,6 +128,31 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
     write('Max # violations : '), write(MaxViolations), nl,
     %sumlist(ViolationList, Violations).
     Violations #= sum(ViolationList).
+
+% Experiments with implied constraints.
+%
+% @param N      The number of persons.
+% @param Ranks  The rank of each person (an array).
+% @param StartTimes     The start times of each meeting for each person (an array).
+% @param Durations      The durations of meetings for each person (an array).
+% @param OnWeekend      An array with value indicating
+%                           willingness of each person to meet on weekends.
+% @param Pcs            Precedence constraints.
+implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs) :-
+    collection_to_list(Pcs, Precedences),
+    (   for(I, 1, N-1),
+        param(N, Ranks, StartTimes, Durations, OnWeekend, Precedences) do
+        (for(J, I+1, N-1), param(I, Ranks, StartTimes, Durations, OnWeekend, Precedences) do
+            Rank is Ranks[I], OtherRank is Ranks[J],
+            (   \+ member(I, Precedences),
+                \+ member(J, Precedences),
+                Durations[I] =:= Durations[J],
+                OnWeekend[I] =:= OnWeekend[J] ->
+                (Rank < OtherRank -> StartTimes[I] #< StartTimes[J] ;
+                (Rank > OtherRank -> StartTimes[I] #> StartTimes[J] ; true))
+            ; true)
+        )
+    ).
 
 % Automate benchmarking for the schedule meetings function.
 %
