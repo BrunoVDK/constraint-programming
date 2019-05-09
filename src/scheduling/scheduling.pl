@@ -1,5 +1,16 @@
 %
 % Scheduling meetings assignment.
+%   For clarification ; branch and bound is done by defining a cost
+%   function. If a solution is found with cost MAX, a constraint is put on the cost,
+%   Cost #< MAX. Then new solutions are sought. This will prune the search tree.
+%
+%   The cost function in our implementation prioritises the total duration and considers
+%       the number of violations next.
+%
+%   The weekend constraints just say that if a person doesn't want so, a meeting will never
+%       overlap with the weekend that follows.
+%   If a person does not want to meet on weekends but the duration of his meeting is longer
+%       than 5 days this will lead to an immediate failure.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
@@ -11,7 +22,7 @@
 :- lib(branch_and_bound).
 :- lib(ic_edge_finder). % Provides the disjunctive/2 constraint
 
-enable(global) :- true. % To turn ic_edge_finder on/off
+enable(global) :- fail. % To turn ic_edge_finder on/off
 
 % Schedule meetings for the given number of persons, each with their own preferences.
 %   The cost function first takes into account the end time which should be as low as possible,
@@ -40,7 +51,8 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     Cost #= MaxViolations * (StartTimes[N] + Durations[N]) + Violations,
     % --- Branch and bound ---
     minimize(labeling(StartTimes), Cost),
-    %minimize(search(StartTimes, 0, first_fail, indomain, complete, []), Cost),
+    %minimize(search(StartTimes, 0, first_fail, indomain, complete, [backtrack(Backtracks)]), Cost),
+    %write('Backtracks : '), write(Backtracks), nl,
     EndTime is StartTimes[N] + Durations[N].
 
 % Enforce timing constraints :
@@ -126,7 +138,7 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
     ),
     length(ViolationList, MaxViolations),
     write('Max # violations : '), write(MaxViolations), nl,
-    %sumlist(ViolationList, Violations).
+    %sumlist(ViolationList, Violations). % Will throw error unless you use reification
     Violations #= sum(ViolationList).
 
 % Experiments with implied constraints.
@@ -171,7 +183,7 @@ benchmark(Verbose) :-
                 bench3e,
                 bench3f,
                 bench3g],
-    (Verbose -> write('Running tests (schedule meetings) ...'), nl, log ; true),
+    (Verbose -> write('Running tests (schedule meetings) ...') ; true),
     (   foreach(Test, Tests), param(Verbose),
         fromto(0, InTime, OutTime, TotalTime) do
         (Verbose -> write('-> Search prodecure started : '), write(Test), nl ; true),
@@ -183,7 +195,7 @@ benchmark(Verbose) :-
         statistics(hr_time, End),
         Time is End - Start,
         % (Verbose -> write('Backtracks : '), write(Backtracks), nl ; true),
-        (Verbose -> write('Time : '), write(Time), nl, log ; true),
+        (Verbose -> write('Time : '), write(Time), nl ; true),
         OutTime is InTime + Time
     ),
     write('Total time : '), write(TotalTime), nl.
