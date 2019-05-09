@@ -12,6 +12,11 @@
 %   If a person does not want to meet on weekends but the duration of his meeting is longer
 %       than 5 days this will lead to an immediate failure.
 %
+%   We added implied constraints ; if two people have the same preferences and
+%       their meeting is of the same duration, but their rank is different,
+%       then an ordering is imposed based on their rank. Precedence
+%       constraints are prioritised of course.
+%
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
@@ -50,8 +55,8 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs),
     Cost #= MaxViolations * (StartTimes[N] + Durations[N]) + Violations,
     % --- Branch and bound ---
-    minimize(labeling(StartTimes), Cost),
-    %minimize(search(StartTimes, 0, first_fail, indomain, complete, [backtrack(Backtracks)]), Cost),
+    %minimize(labeling(StartTimes), Cost),
+    bb_min(search(StartTimes, 0, input_order, indomain_min, complete, [backtrack(Backtracks)]), Cost, bb_options{strategy:continue}),
     %write('Backtracks : '), write(Backtracks), nl,
     EndTime is StartTimes[N] + Durations[N].
 
@@ -130,6 +135,9 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
          fromto([], In, Out, List),
          param(Rank, Ranks, StartTimes, I) do
             OtherRank is Ranks[J],
+            %(Rank < OtherRank -> #>(StartTimes[I], StartTimes[J], Bool), Out = [Bool|In] ;
+            %(Rank > OtherRank -> #<(StartTimes[I], StartTimes[J], Bool), Out = [Bool|In] ;
+            %Out = In))
             (Rank < OtherRank -> Out = [(StartTimes[I] #> StartTimes[J])|In] ;
             (Rank > OtherRank -> Out = [(StartTimes[I] #< StartTimes[J])|In] ;
                 Out = In))
@@ -138,7 +146,7 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
     ),
     length(ViolationList, MaxViolations),
     write('Max # violations : '), write(MaxViolations), nl,
-    %sumlist(ViolationList, Violations). % Will throw error unless you use reification
+    %sumlist(ViolationList, Violations).
     Violations #= sum(ViolationList).
 
 % Experiments with implied constraints.
@@ -160,7 +168,7 @@ implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs) :-
                 \+ member(J, Precedences),
                 Durations[I] =:= Durations[J],
                 OnWeekend[I] =:= OnWeekend[J] ->
-                (Rank < OtherRank -> StartTimes[I] #< StartTimes[J] ;
+                (Rank =< OtherRank -> StartTimes[I] #< StartTimes[J] ;
                 (Rank > OtherRank -> StartTimes[I] #> StartTimes[J] ; true))
             ; true)
         )
@@ -183,19 +191,19 @@ benchmark(Verbose) :-
                 bench3e,
                 bench3f,
                 bench3g],
-    (Verbose -> write('Running tests (schedule meetings) ...') ; true),
+    (Verbose -> write('Running tests (schedule meetings) ...')),
     (   foreach(Test, Tests), param(Verbose),
         fromto(0, InTime, OutTime, TotalTime) do
-        (Verbose -> write('-> Search prodecure started : '), write(Test), nl ; true),
+        (Verbose -> write('-> Search prodecure started : '), write(Test), nl),
         statistics(hr_time, Start), % http://eclipseclp.org/doc/bips/kernel/env/statistics-2.html
         call(Test, StartTimes, EndTime, Violations),
-        (Verbose -> write('Start times : '), write(StartTimes), nl ; true),
-        (Verbose -> write('End time : '), write(EndTime), nl ; true),
-        (Verbose -> write('Violations : '), write(Violations), nl ; true),
+        (Verbose -> write('Start times : '), write(StartTimes), nl),
+        (Verbose -> write('End time : '), write(EndTime), nl),
+        (Verbose -> write('Violations : '), write(Violations), nl),
         statistics(hr_time, End),
         Time is End - Start,
-        % (Verbose -> write('Backtracks : '), write(Backtracks), nl ; true),
-        (Verbose -> write('Time : '), write(Time), nl ; true),
+        % (Verbose -> write('Backtracks : '), write(Backtracks), nl),
+        (Verbose -> write('Time : '), write(Time), nl),
         OutTime is InTime + Time
     ),
     write('Total time : '), write(TotalTime), nl.

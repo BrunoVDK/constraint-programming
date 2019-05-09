@@ -24,7 +24,7 @@
 :- compile('../utils.pl'). % Import utility functions
 :- compile('../benchmarks/benchmarks').
 
-:- compile('model/combined'). % Choose the model here
+:- compile('model/boolean'). % Choose the model here
 
 % Solve the Sudoku with the given name.
 %
@@ -33,7 +33,7 @@
 % @param Backtracks The recorded number of backtracks.
 % @param Verbose    Flag denoting whether or not intermediate results should be printed.
 sudoku_named(Name, Time, Backtracks, Verbose) :-
-    (Verbose -> write('Puzzle name : '), write(Name), nl ; true),
+    (Verbose -> write('Puzzle name : '), write(Name), nl),
     puzzles(Puzzle, Name), % Find the puzzle with the given name
     sudoku(Puzzle, Time, Backtracks, Verbose).
 
@@ -46,21 +46,21 @@ sudoku_named(Name, Time, Backtracks, Verbose) :-
 sudoku(Puzzle, Time, Backtracks, Verbose) :-
     length(Puzzle, N), % Get the puzzle dimension
     K is integer(sqrt(N)), % Get the dimension of blocks
-    (Verbose -> write('Puzzle size : '), write(N), nl ; true),
+    (Verbose -> write('Puzzle size : '), write(N), nl),
     % Set up model
     statistics(hr_time, Start), % http://eclipseclp.org/doc/bips/kernel/env/statistics-2.html
     setup_model(Puzzle, N, K, Variables),
     % Start search procedure
-    (Verbose -> write('Search prodecure started.'), nl ; true),
+    (Verbose -> write('Search prodecure started.'), nl),
     search(Variables, 0, first_fail, indomain, complete, [backtrack(Backtracks)]), !,
     statistics(hr_time, End),
     Time is End - Start,
-    (Verbose -> write('Solution found ...'), nl ; true),
+    (Verbose -> write('Solution found ...'), nl),
     % Display solution
     read_solution(Variables, Puzzle, N, K, Solution),
-    (Verbose -> write('Solution : '), print_sudoku(Solution), nl ; true),
-    (Verbose -> write('Backtracks : '), write(Backtracks), nl ; true),
-    (Verbose -> write('Time : '), write(Time), nl ; true).
+    (Verbose -> write('Solution : '), print_sudoku(Solution), nl),
+    (Verbose -> write('Backtracks : '), write(Backtracks), nl),
+    (Verbose -> write('Time : '), write(Time), nl).
 
 % Convert the given 2-dimensional list to an array.
 %
