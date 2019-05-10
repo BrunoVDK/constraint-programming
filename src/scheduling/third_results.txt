@@ -1,0 +1,462 @@
+File scheduling.pl, line 60: Singleton variable Backtracks
+scheduling.pl compiled 12272 bytes in 0.11 seconds
+Running tests (schedule meetings) ...-> Search prodecure started : bench1a
+lists.eco  loaded in 0.00 seconds
+Max # violations : 30
+Found a solution with cost 913
+Found a solution with cost 912
+Found a solution with cost 910
+Found a solution with cost 822
+Found a solution with cost 820
+Found a solution with cost 819
+Found a solution with cost 818
+Found a solution with cost 817
+Found a solution with cost 816
+Found a solution with cost 815
+Found no solution with cost 601.0 .. 814.0
+Start times : [](8, 15, 10, 22, 1, 9, 17, 19, 18, 26)
+End time : 27
+Violations : 5
+Time : 0.392301082611084
+-> Search prodecure started : bench1b
+Max # violations : 30
+Found a solution with cost 610
+Found a solution with cost 609
+Found a solution with cost 608
+Found a solution with cost 607
+Found no solution with cost 601.0 .. 606.0
+Start times : [](0, 1, 9, 15, 3, 8, 13, 12, 14, 19)
+End time : 20
+Violations : 7
+Time : 0.207483053207397
+-> Search prodecure started : bench1c
+Max # violations : 30
+Found a solution with cost 612
+Found a solution with cost 611
+Found a solution with cost 610
+Found a solution with cost 609
+Found a solution with cost 608
+Found a solution with cost 607
+Found a solution with cost 606
+Found a solution with cost 605
+Found a solution with cost 604
+Found no solution with cost 601.0 .. 603.0
+Start times : [](0, 6, 9, 14, 1, 8, 12, 18, 13, 19)
+End time : 20
+Violations : 4
+Time : 0.432515859603882
+-> Search prodecure started : bench2a
+Max # violations : 73
+Found a solution with cost 4042
+Found a solution with cost 4041
+Found a solution with cost 3530
+Found a solution with cost 3529
+Found a solution with cost 3528
+Found a solution with cost 3527
+Found a solution with cost 3526
+Found a solution with cost 3525
+Found a solution with cost 3524
+Found a solution with cost 3523
+Found a solution with cost 3522
+Found a solution with cost 3521
+Found a solution with cost 3520
+Found a solution with cost 3519
+Found a solution with cost 3518
+Found a solution with cost 3517
+Found a solution with cost 3516
+Found no solution with cost 2993.0 .. 3515.0
+Start times : [](8, 9, 15, 36, 1, 11, 18, 33, 19, 40, 12, 22, 24, 29, 43)
+End time : 48
+Violations : 12
+Time : 7.57508206367493
+-> Search prodecure started : bench2b
+Max # violations : 73
+Found a solution with cost 2584
+Found a solution with cost 2583
+Found a solution with cost 2582
+Found a solution with cost 2581
+Found a solution with cost 2580
+Found a solution with cost 2579
+Found a solution with cost 2578
+Found a solution with cost 2577
+Found a solution with cost 2576
+Found a solution with cost 2575
+Found a solution with cost 2574
+Found a solution with cost 2573
+Found a solution with cost 2572
+Found a solution with cost 2571
+Found a solution with cost 2570
+Found a solution with cost 2569
+Found a solution with cost 2568
+Found a solution with cost 2567
+Found no solution with cost 2556.0 .. 2566.0
+Start times : [](0, 6, 10, 24, 1, 8, 13, 28, 14, 29, 9, 15, 17, 20, 30)
+End time : 35
+Violations : 12
+Time : 22.045156955719
+-> Search prodecure started : bench2c
+Max # violations : 73
+Found a solution with cost 2662
+Found a solution with cost 2661
+Found a solution with cost 2660
+Found a solution with cost 2659
+Found a solution with cost 2658
+Found a solution with cost 2657
+Found a solution with cost 2656
+Found a solution with cost 2580
+Found a solution with cost 2579
+Found a solution with cost 2578
+Found a solution with cost 2577
+Found no solution with cost 2556.0 .. 2576.0
+Start times : [](1, 15, 3, 22, 8, 0, 6, 17, 7, 18, 2, 13, 19, 26, 30)
+End time : 35
+Violations : 22
+Time : 0.360567092895508
+-> Search prodecure started : bench3a
+Max # violations : 26
+Found a solution with cost 364
+Found no solution with cost 261.0 .. 363.0
+Start times : [](0, 1, 2, 5, 6, 7, 8, 9, 12, 13)
+End time : 14
+Violations : 0
+Time : 0.150177955627441
+-> Search prodecure started : bench3b
+Max # violations : 26
+Found a solution with cost 376
+Found a solution with cost 375
+Found a solution with cost 374
+Found a solution with cost 373
+Found a solution with cost 372
+Found a solution with cost 371
+Found a solution with cost 370
+Found a solution with cost 369
+Found a solution with cost 368
+Found a solution with cost 367
+Found no solution with cost 261.0 .. 366.0
+Start times : [](2, 8, 6, 9, 12, 0, 1, 7, 5, 13)
+End time : 14
+Violations : 3
+Time : 0.389178037643433
+-> Search prodecure started : bench3c
+Max # violations : 36
+Found a solution with cost 526
+Found a solution with cost 525
+Found a solution with cost 524
+Found a solution with cost 523
+Found a solution with cost 522
+Found a solution with cost 521
+Found a solution with cost 520
+Found a solution with cost 519
+Found a solution with cost 518
+Found a solution with cost 517
+Found no solution with cost 361.0 .. 516.0
+Start times : [](0, 12, 2, 9, 8, 7, 6, 5, 1, 13)
+End time : 14
+Violations : 13
+Time : 0.352527856826782
+-> Search prodecure started : bench3d
+Max # violations : 42
+Found a solution with cost 686
+Found a solution with cost 685
+Found a solution with cost 684
+Found a solution with cost 683
+Found a solution with cost 682
+Found a solution with cost 680
+Found a solution with cost 679
+Found a solution with cost 678
+Found a solution with cost 677
+Found a solution with cost 676
+Found a solution with cost 675
+Found no solution with cost 546.0 .. 674.0
+Start times : [](2, 8, 6, 12, 13, 0, 1, 7, 5, 14, 9, 15)
+End time : 16
+Violations : 3
+Time : 0.3628249168396
+-> Search prodecure started : bench3e
+Max # violations : 59
+Found a solution with cost 1196
+Found a solution with cost 1195
+Found a solution with cost 1194
+Found a solution with cost 1192
+Found a solution with cost 1191
+Found a solution with cost 1188
+Found a solution with cost 1187
+Found a solution with cost 1186
+Found a solution with cost 1185
+Found a solution with cost 1184
+Found a solution with cost 1183
+Found no solution with cost 827.0 .. 1182.0
+Start times : [](2, 8, 6, 13, 14, 0, 1, 7, 5, 16, 9, 12, 15, 19)
+End time : 20
+Violations : 3
+Time : 0.376137018203735
+-> Search prodecure started : bench3f
+Max # violations : 79
+Found a solution with cost 1755
+Found a solution with cost 1754
+Found a solution with cost 1753
+Found a solution with cost 1751
+Found a solution with cost 1750
+Found a solution with cost 1747
+Found a solution with cost 1746
+Found a solution with cost 1745
+Found a solution with cost 1744
+Found a solution with cost 1743
+Found a solution with cost 1742
+Found a solution with cost 1741
+Found no solution with cost 1265.0 .. 1740.0
+Start times : [](5, 9, 7, 14, 15, 0, 1, 8, 6, 20, 12, 13, 16, 19, 2, 21)
+End time : 22
+Violations : 3
+Time : 0.412286043167114
+-> Search prodecure started : bench3g
+Max # violations : 79
+Found a solution with cost 1281
+Found a solution with cost 1280
+Found a solution with cost 1279
+Found a solution with cost 1277
+Found a solution with cost 1276
+Found a solution with cost 1273
+Found a solution with cost 1272
+Found a solution with cost 1271
+Found a solution with cost 1270
+Found a solution with cost 1269
+Found a solution with cost 1268
+Found a solution with cost 1267
+Found no solution with cost 1265.0 .. 1266.0
+Start times : [](3, 7, 5, 10, 11, 0, 1, 6, 4, 14, 8, 9, 12, 13, 2, 15)
+End time : 16
+Violations : 3
+Time : 0.366437911987305
+Total time : 33.4226758480072
+benchmarksMeeting.ecl compiled 23472 bytes in 0.01 seconds
+File scheduling.pl, line 60: Singleton variable Backtracks
+scheduling.pl compiled 12184 bytes in 0.04 seconds
+Running tests (schedule meetings) ...-> Search prodecure started : bench1a
+Max # violations : 30
+Found a solution with cost 913
+Found a solution with cost 912
+Found a solution with cost 910
+Found a solution with cost 822
+Found a solution with cost 820
+Found a solution with cost 819
+Found a solution with cost 818
+Found a solution with cost 817
+Found a solution with cost 816
+Found a solution with cost 815
+Found no solution with cost 601.0 .. 814.0
+Start times : [](8, 15, 10, 22, 1, 9, 17, 19, 18, 26)
+End time : 27
+Violations : 5
+Time : 0.288311004638672
+-> Search prodecure started : bench1b
+Max # violations : 30
+Found a solution with cost 610
+Found a solution with cost 609
+Found a solution with cost 608
+Found a solution with cost 607
+Found no solution with cost 601.0 .. 606.0
+Start times : [](0, 1, 9, 15, 3, 8, 13, 12, 14, 19)
+End time : 20
+Violations : 7
+Time : 0.205825805664062
+-> Search prodecure started : bench1c
+Max # violations : 30
+Found a solution with cost 612
+Found a solution with cost 611
+Found a solution with cost 610
+Found a solution with cost 609
+Found a solution with cost 608
+Found a solution with cost 607
+Found a solution with cost 606
+Found a solution with cost 605
+Found a solution with cost 604
+Found no solution with cost 601.0 .. 603.0
+Start times : [](0, 6, 9, 14, 1, 8, 12, 18, 13, 19)
+End time : 20
+Violations : 4
+Time : 0.367862939834595
+-> Search prodecure started : bench2a
+Max # violations : 73
+Found a solution with cost 4042
+Found a solution with cost 4041
+Found a solution with cost 3530
+Found a solution with cost 3529
+Found a solution with cost 3528
+Found a solution with cost 3527
+Found a solution with cost 3526
+Found a solution with cost 3525
+Found a solution with cost 3524
+Found a solution with cost 3523
+Found a solution with cost 3522
+Found a solution with cost 3521
+Found a solution with cost 3520
+Found a solution with cost 3519
+Found a solution with cost 3518
+Found a solution with cost 3517
+Found a solution with cost 3516
+Found no solution with cost 2993.0 .. 3515.0
+Start times : [](8, 9, 15, 36, 1, 11, 18, 33, 19, 40, 12, 22, 24, 29, 43)
+End time : 48
+Violations : 12
+Time : 1.97358918190002
+-> Search prodecure started : bench2b
+Max # violations : 73
+Found a solution with cost 2584
+Found a solution with cost 2583
+Found a solution with cost 2582
+Found a solution with cost 2581
+Found a solution with cost 2580
+Found a solution with cost 2579
+Found a solution with cost 2578
+Found a solution with cost 2577
+Found a solution with cost 2576
+Found a solution with cost 2575
+Found a solution with cost 2574
+Found a solution with cost 2573
+Found a solution with cost 2572
+Found a solution with cost 2571
+Found a solution with cost 2570
+Found a solution with cost 2569
+Found a solution with cost 2568
+Found a solution with cost 2567
+Found no solution with cost 2556.0 .. 2566.0
+Start times : [](0, 6, 10, 24, 1, 8, 13, 28, 14, 29, 9, 15, 17, 20, 30)
+End time : 35
+Violations : 12
+Time : 2.03583598136902
+-> Search prodecure started : bench2c
+Max # violations : 73
+Found a solution with cost 2662
+Found a solution with cost 2661
+Found a solution with cost 2660
+Found a solution with cost 2659
+Found a solution with cost 2658
+Found a solution with cost 2657
+Found a solution with cost 2656
+Found a solution with cost 2580
+Found a solution with cost 2579
+Found a solution with cost 2578
+Found a solution with cost 2577
+Found no solution with cost 2556.0 .. 2576.0
+Start times : [](1, 15, 3, 22, 8, 0, 6, 17, 7, 18, 2, 13, 19, 26, 30)
+End time : 35
+Violations : 22
+Time : 0.374300003051758
+-> Search prodecure started : bench3a
+Max # violations : 26
+Found a solution with cost 364
+Found no solution with cost 261.0 .. 363.0
+Start times : [](0, 1, 2, 5, 6, 7, 8, 9, 12, 13)
+End time : 14
+Violations : 0
+Time : 0.141350984573364
+-> Search prodecure started : bench3b
+Max # violations : 26
+Found a solution with cost 376
+Found a solution with cost 375
+Found a solution with cost 374
+Found a solution with cost 373
+Found a solution with cost 372
+Found a solution with cost 371
+Found a solution with cost 370
+Found a solution with cost 369
+Found a solution with cost 368
+Found a solution with cost 367
+Found no solution with cost 261.0 .. 366.0
+Start times : [](2, 8, 6, 9, 12, 0, 1, 7, 5, 13)
+End time : 14
+Violations : 3
+Time : 0.53344202041626
+-> Search prodecure started : bench3c
+Max # violations : 36
+Found a solution with cost 526
+Found a solution with cost 525
+Found a solution with cost 524
+Found a solution with cost 523
+Found a solution with cost 522
+Found a solution with cost 521
+Found a solution with cost 520
+Found a solution with cost 519
+Found a solution with cost 518
+Found a solution with cost 517
+Found no solution with cost 361.0 .. 516.0
+Start times : [](0, 12, 2, 9, 8, 7, 6, 5, 1, 13)
+End time : 14
+Violations : 13
+Time : 0.409887075424194
+-> Search prodecure started : bench3d
+Max # violations : 42
+Found a solution with cost 686
+Found a solution with cost 685
+Found a solution with cost 684
+Found a solution with cost 683
+Found a solution with cost 682
+Found a solution with cost 680
+Found a solution with cost 679
+Found a solution with cost 678
+Found a solution with cost 677
+Found a solution with cost 676
+Found a solution with cost 675
+Found no solution with cost 546.0 .. 674.0
+Start times : [](2, 8, 6, 12, 13, 0, 1, 7, 5, 14, 9, 15)
+End time : 16
+Violations : 3
+Time : 0.43717098236084
+-> Search prodecure started : bench3e
+Max # violations : 59
+Found a solution with cost 1196
+Found a solution with cost 1195
+Found a solution with cost 1194
+Found a solution with cost 1192
+Found a solution with cost 1191
+Found a solution with cost 1188
+Found a solution with cost 1187
+Found a solution with cost 1186
+Found a solution with cost 1185
+Found a solution with cost 1184
+Found a solution with cost 1183
+Found no solution with cost 827.0 .. 1182.0
+Start times : [](2, 8, 6, 13, 14, 0, 1, 7, 5, 16, 9, 12, 15, 19)
+End time : 20
+Violations : 3
+Time : 0.438433170318604
+-> Search prodecure started : bench3f
+Max # violations : 79
+Found a solution with cost 1755
+Found a solution with cost 1754
+Found a solution with cost 1753
+Found a solution with cost 1751
+Found a solution with cost 1750
+Found a solution with cost 1747
+Found a solution with cost 1746
+Found a solution with cost 1745
+Found a solution with cost 1744
+Found a solution with cost 1743
+Found a solution with cost 1742
+Found a solution with cost 1741
+Found no solution with cost 1265.0 .. 1740.0
+Start times : [](5, 9, 7, 14, 15, 0, 1, 8, 6, 20, 12, 13, 16, 19, 2, 21)
+End time : 22
+Violations : 3
+Time : 0.402920961380005
+-> Search prodecure started : bench3g
+Max # violations : 79
+Found a solution with cost 1281
+Found a solution with cost 1280
+Found a solution with cost 1279
+Found a solution with cost 1277
+Found a solution with cost 1276
+Found a solution with cost 1273
+Found a solution with cost 1272
+Found a solution with cost 1271
+Found a solution with cost 1270
+Found a solution with cost 1269
+Found a solution with cost 1268
+Found a solution with cost 1267
+Found no solution with cost 1265.0 .. 1266.0
+Start times : [](3, 7, 5, 10, 11, 0, 1, 6, 4, 14, 8, 9, 12, 13, 2, 15)
+End time : 16
+Violations : 3
+Time : 0.505265951156616
+Total time : 8.11419606208801

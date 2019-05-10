@@ -27,7 +27,7 @@
 :- lib(branch_and_bound).
 :- lib(ic_edge_finder). % Provides the disjunctive/2 constraint
 
-enable(global) :- fail. % To turn ic_edge_finder on/off
+enable(global) :- true. % To turn ic_edge_finder on/off
 
 % Schedule meetings for the given number of persons, each with their own preferences.
 %   The cost function first takes into account the end time which should be as low as possible,
@@ -54,6 +54,7 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     violations(N, Ranks, StartTimes, Violations, MaxViolations),
     implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs),
     Cost #= MaxViolations * (StartTimes[N] + Durations[N]) + Violations,
+    Cost #> MaxViolations * (TotalDuration + Durations[N]),
     % --- Branch and bound ---
     %minimize(labeling(StartTimes), Cost),
     bb_min(search(StartTimes, 0, input_order, indomain_min, complete, [backtrack(Backtracks)]), Cost, bb_options{strategy:continue}),
