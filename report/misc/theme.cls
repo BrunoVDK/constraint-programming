@@ -456,19 +456,19 @@
         \vspace*{-4em}%
         \noindent%
         \IfFileExists{KULeuven.pdf}{%
-            \includegraphics[width=0.33\textwidth]{KULeuven}
+            %\includegraphics[width=0.33\textwidth]{KULeuven}
         }{%
             \ClassWarning{sareport}{The file KULeuven.pdf is missing.}
         }
 
-        \smallskip\noindent
-            \fcolorbox{white}{kuleng}{
-                \parbox{0.313\textwidth}{\color{white}
-                    \centering
-                    \sffamily \bfseries
-                    \MakeUppercase{\the\department}}}
-            \smallskip
-        \hspace{\stretch{1}}
+%        \smallskip\noindent
+%            \fcolorbox{white}{kuleng}{
+%                \parbox{0.313\textwidth}{\color{white}
+%                    \centering
+%                    \sffamily \bfseries
+%                    \MakeUppercase{\the\department}}}
+%            \smallskip
+%        \hspace{\stretch{1}}
         \vspace*{3cm}
         %\vfill
         \begin{center}
@@ -514,7 +514,7 @@
                         \the\authors
                     \end{tabular} %
                     }
-                    %{\bfseries \the\authors}
+                    {\bfseries \the\authors}
                 }
         \end{minipage}
     \end{titlepage}

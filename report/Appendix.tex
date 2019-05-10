@@ -5,11 +5,14 @@
 \subsection*{Reflection}\label{sec:reflection}
 \addcontentsline{toc}{subsection}{\nameref{sec:reflection}}
 
-When implementing the Sudoku solver in CHR we took a glimpse at Thom's implementation. It's given in his book as a solution to some exercise. Once we understood his approach we had the tendency to implement the viewpoints by making use of the same strategy ; constraints representing variables, constraints representing values. A simple implementation of the \texttt{first\_fail} heuristic. This worked well, but it wasn't the most creative thing to do. Implementing some other approaches and trying to decrease total runtime was our way to compensate for this.\\\par
+When implementing the Sudoku solver in CHR we took a glimpse at Thom's implementation. It's given in his book as a solution to some exercise. Once we understood his approach we had the tendency to implement the viewpoints by making use of the same strategy ; constraints representing variables, constraints representing values and a simple implementation of the \texttt{first\_fail} heuristic. This worked well, but it wasn't the most creative thing to do. Implementing some other approaches (and heuristics) and trying to decrease total runtime was our way to compensate for this.
 
 \subsection*{Workload}\label{sec:workload}
 \addcontentsline{toc}{subsection}{\nameref{sec:workload}}
 
-Some questions were asked online after all the code had been written. There were four of them, all about Sudoku. One on how to enforce equality of lists. One on looping through a list which is a subscript of an array. One on the inner workings of \texttt{ic\_global:occurrences/3}. And a final one on memory usage. Aside from a quick experiment with \texttt{$\sim$=/2} no code was rewritten as a result. None of the questions mentioned Sudoku. All the viewpoints were either thought of by ourselves or come from the literature that was cited in this report.\\\par
+Some questions were asked online after all the code had been written. There were four of them, all about Sudoku. One on how to enforce equality of lists (we already had the solution but wanted to be sure there was no better alternative). One on looping through a list which is a subscript of an array (we found the appropriate solution ourselves). One on the inner workings of \texttt{ic\_global:occurrences/3}. And a final one on memory usage. Aside from a quick experiment with \texttt{$\sim$=/2} no code was rewritten as a result. None of the questions mentioned Sudoku. All the viewpoints were either thought of by ourselves or come from the literature that was cited in this report.\\\par
 
-We started working in mid-April and finished a few days before the deadline, each having worked about ??? hours in total. This includes reading (parts of) the educational material, tinkering, programming, debugging and writing the report.
+We started working in mid-April and finished a few days before the deadline, each having worked about ??? hours in total. This includes reading (parts of) the educational material, researching, tinkering, programming, debugging and writing the report.
+
+\subsection*{Overview of the Code}\label{sec:code}
+\addcontentsline{toc}{subsection}{\nameref{sec:code}}
