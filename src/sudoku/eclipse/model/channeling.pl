@@ -9,6 +9,7 @@
 % N.B. : Theoretically alldifferent are more tight
 %           (Dual Modelling of Permutation and Injection Problems, Hnich et al., 2004)
 %           but channeling constraints are said to be 'competitive'.
+% N.B. : It is possible to use all
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0

@@ -16,7 +16,27 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \definecolor{blue}{rgb}{0.01, 0.28, 1.0}
+\definecolor{lightgray}{rgb}{0.95, 0.95, 0.95}
 \hypersetup{colorlinks=true, urlcolor=blue, citecolor=blue, filecolor=blue, linkcolor=blue}
+\usepackage{afterpage}
+\pagecolor{lightgray}\afterpage{\nopagecolor}
+\usepackage[firstpage=true]{background}
+\def\Step{0.1cm}
+\tikzset{dotted lines/.style={black, loosely dotted,  thick}}
+\backgroundsetup{
+scale=1,
+angle=0,
+position={0,0},
+contents={
+\begin{tikzpicture}[remember picture,overlay]
+\draw[dotted lines,step=\Step,help lines]
+  (-10,-30) grid  (20,10);
+  \end{tikzpicture}
+  }
+}
+\usepackage{algorithm}
+\usepackage{array}
+\usepackage{tabu}
 
 %%% Authors
 \addAuthor{Micha\"el}{Dooreman}{}

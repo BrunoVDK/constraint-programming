@@ -1,8 +1,8 @@
 %
 % Classic model for the Sudoku CHR solver.
 %   This was just an early (naive) version for experimentation's sake.
-%   It's extremely inefficient as it doesn't propagate constraints.
-%   To see it work you can test it out with the tarek_052 puzzle which takes a minute ...
+%   It's extremely inefficient as it uses passive constraints.
+%   To see it work you can test it out with the tarek_052 puzzle which takes about a minute ...
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0

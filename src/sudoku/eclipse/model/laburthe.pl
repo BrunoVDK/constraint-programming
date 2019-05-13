@@ -92,13 +92,13 @@ generate_constraints_laburthe(Puzzle, Dual, Abstract, N, K) :-
         Dual[3,I,V] #= X => Abstract[4,I,V] #= Column
     ),
     (for(V, 1, N), param(Abstract, N, K) do % Multifor is less readable
-        (for(I, 1, N, K), param(Abstract, K, _N, V) do
+        (for(I, 1, N, K), param(Abstract, K, N, V) do
             J is I + K - 1,
             alldifferent(Abstract[1,I..J,V]),
             alldifferent(Abstract[2,I..J,V]),
-            alldifferent(Abstract[3,I..J,V])
-            %findall(X, (block_column(N,K,I,B), X is Abstract[4,B,V]), Xs),
-            %alldifferent(Xs)
+            alldifferent(Abstract[3,I..J,V]),
+            findall(X, (block_column(N,K,I,B), X is Abstract[4,B,V]), Xs),
+            alldifferent(Xs)
         )
     ).
 

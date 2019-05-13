@@ -24,7 +24,7 @@
 :- compile('../utils.pl'). % Import utility functions
 :- compile('../benchmarks/benchmarks').
 
-:- compile('model/boolean'). % Choose the model here
+:- compile('model/channeling'). % Choose the model here
 
 % Solve the Sudoku with the given name.
 %
@@ -52,7 +52,7 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     setup_model(Puzzle, N, K, Variables),
     % Start search procedure
     (Verbose -> write('Search prodecure started.'), nl),
-    search(Variables, 0, first_fail, indomain, complete, [backtrack(Backtracks)]), !,
+    search(Variables, 0, first_fail, indomain_split, complete, [backtrack(Backtracks)]), !,
     statistics(hr_time, End),
     Time is End - Start,
     (Verbose -> write('Solution found ...'), nl),

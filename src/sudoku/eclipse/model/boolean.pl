@@ -11,17 +11,18 @@
 % Since it uses disequality between slices (arrays), we wrote one implementation of
 %   enforcing inequality in unequal_list/2. It wasn't a fruitful attempt.
 % N.B. : the Natural Combined Model was part of a study to demonstrate a new
-%   algorithm.
+%   algorithm. Implementing it was more of an experiment than anything else.
+%   The channeling model was a more appropriate (and fruitful) experiment.
 % N.B. : the model we implement here can be seen as a linear programming model.
 % N.B. : as F. Rossi points out in her book, this is generally not a good idea, it's
-%           usually preferable to transform a boolean model in one with integers.
+%           usually preferable to transform a boolean model into one with integers.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
 :- import occurrences/3 from ic_global.
 
-variant(original) :- fail.
+variant(original) :- true.
 
 % Set up the model for the given puzzle.
 %
@@ -50,7 +51,7 @@ setup_model(Puzzle, N, K, Vars) :-
 %
 % @param Variables The decision variables.
 declare_domains_boolean(Variables) :-
-    Variables #:: 0..1. % All booleans
+    Variables::0..1. % All booleans
 
 % Generate the constraints for the given decision variables.
 %
@@ -60,21 +61,24 @@ declare_domains_boolean(Variables) :-
 generate_constraints_boolean(Variables, N, K) :-
     (variant(original) -> % The original model
         (for(I, 1, N), param(Variables, N, K) do
-            Start is I + 1,
-            (for(J, Start, N), param(Variables, N, K, I) do
-                row(K, I, 1, RI), column(K, I, 1, CI),
-                row(K, J, 1, RJ), column(K, J, 1, CJ),
-                (for(V, 1, N), param(Variables, I, J, RI, RJ, CI, CJ, N, K) do
-                    unequal_list(Variables[I,1..N,V], Variables[J,1..N,V]),
-                    unequal_list(Variables[1..N,I,V], Variables[1..N,J,V]),
+            (for(J, I+1, N), param(Variables, N, K, I) do
+                (for(V, 1, N), param(Variables, I, J, N, K) do
+                    % Two columns, different value
                     unequal_list(Variables[V,I,1..N], Variables[V,J,1..N]),
+                    % Two rows, different value
                     unequal_list(Variables[I,V,1..N], Variables[J,V,1..N]),
-                    unequal_list(flatten(Variables[RI..RI+K-1,CI..CI+K-1,V]),
-                                 flatten(Variables[RJ..RJ+K-1,CJ..CJ+K-1,V])),
-                    row(K, V, I, RIV), column(K, V, I, CIV),
-                    row(K, V, J, RJV), column(K, V, J, CJV),
-                    unequal_list(flatten(Variables[RIV,CIV,1..N]),
-                                 flatten(Variables[RJV,CJV,1..N]))
+                    % Two positions in block, different value
+                    row(K, V, I, RI), column(K, V, I, CI),
+                    row(K, V, J, RJ), column(K, V, J, CJ),
+                    unequal_list(Variables[RI,CI,1..N], Variables[RJ,CJ,1..N]),
+                    % Value not twice in the same column
+                    unequal_list(Variables[I,1..N,V], Variables[J,1..N,V]),
+                    % Value not twice in the same row
+                    unequal_list(Variables[1..N,I,V], Variables[1..N,J,V]),
+                    % Value not twice in same block
+                    row(K, V, 1, RV), column(K, V, 1, CV),
+                    unequal_list(   Variables[RV..RV+K-1,CV..CV+K-1,I],
+                                    Variables[RV..RV+K-1,CV..CV+K-1,J])
                 )
             )
         )
@@ -98,12 +102,19 @@ generate_constraints_boolean(Variables, N, K) :-
 % @note There are a few ways to make this possible, one of which is the use of ~= which
 %       does not propagate (it doesn't know about domains), and our own code which is
 %       just as slow as it only propagates when only one variable is left.
+% @note The code here is a bunch of experiments, mostly done out of curiosity.
 unequal_list(List1, List2) :-
     collection_to_list(flatten(List1), Iterator1),
     collection_to_list(flatten(List2), Iterator2),
-    Iterator1 ~= Iterator2.
-    %(foreach(X, Iterator1), foreach(Y, Iterator2), foreach((X #\= Y), Constraints) do true),
-    %1 #=< sum(Constraints).
+    % Experiment 1
+    %Iterator1 ~= Iterator2.
+    % Experiment 2 (didn't make much sense)
+    %bool_channeling(X, Iterator1, 1), bool_channeling(Y, Iterator2, 1), X #\= Y.
+    % Experiment 3 (very slow unless you explicitely say there's one 1 in each list)
+    (foreach(X, Iterator1), foreach(Y, Iterator2), foreach((X #\= Y), Constraints) do true),
+    1 #< sum(Constraints),
+    1 #= sum(Iterator1),
+    1 #= sum(Iterator2).
     % See slides Active.pdf, 27 and onwards
     %L1 is List1, L2 is List2,
     %(foreach(X, L1), foreach(Y, L2), fromto(Sum, S1, S2, 0) do
