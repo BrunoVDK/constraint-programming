@@ -17,7 +17,14 @@ The last two models were found to be the most performant. The first makes use of
 
 \subsection{Experiments}
 
-Number of backtracks and running time for most of the models are displayed in table 1. Removal of \textit{`big'} (\texttt{all\_different}) constraints in the classic model\footnote{In his study Demoen gives several \textit{Missing(6)} examples, models in which 6 of the \texttt{all\_different} constraints are removed. \textit{Missing(7)} models aren't Sudoku, and because of the stark rise in number of backtracks no further experimentation with the removal of `\textit{small}' constraints was done. The \texttt{eliminate\_redundancy} flag can be used to toggle redundancy elimination on and off.} led to an increase in runtime which corroborates Demoen's experiments \cite{article:demoen}. \\\par
+Number of backtracks and running time for most of the models are displayed in table 1. Removal of \textit{`big'} (\texttt{all\_different}) constraints in the classic model\footnote{In his study Demoen gives several \textit{Missing(6)} examples, models in which 6 of the \texttt{all\_different} constraints are removed. \textit{Missing(7)} models aren't Sudoku, and because of the stark rise in number of backtracks no further experimentation with the removal of `\textit{small}' constraints was done. The \texttt{eliminate\_redundancy} flag can be used to toggle redundancy elimination on and off.} led to an increase in runtime which corroborates Demoen's experiences \cite{article:demoen}. \\\par
+
+\begin{figure}[H]
+\centering
+\includegraphics{misc/missing6}
+\caption{\textit{Missing(6)} model}
+\label{fig:missing6}
+\end{figure}
 
 One interesting observation is that the two most performant models also have the same number of backtracks. One of them is the model with nothing but channeling constraints, the other uses the \href{http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html}{\texttt{occurrences/3}} constraint. This constraint enforces arc consistency.\\\par
 
@@ -56,8 +63,8 @@ Even more code here
 \textit{clue17}          &              &             &                           &                          \\
 \textit{sudowiki\_nb28}  &              &             &                           &                          \\
 \textit{sudowiki\_nb49}  &              &             &                           &                          \\\hline
-Total           &              &             &                           &                          \\
-Total (minimum) &              &             &                           &                         
+Total/Average           &              &             &                           &                          \\
+Total/Average (minimum) &              &             &                           &                         
 \end{tabular}
 \egroup
 \caption{Results (ECLiPSe)}
