@@ -34,9 +34,15 @@ contents={
   \end{tikzpicture}
   }
 }
-\usepackage{algorithm}
+\usepackage{caption}
+\usepackage[ruled,vlined]{algorithm2e}
+\newenvironment{snippet}[1][htb]
+  {\renewcommand{\algorithmcfname}{Code Snippet}% Update algorithm name
+   \vspace{0.3cm}\begin{algorithm}[#1]%
+  }{\end{algorithm}\vspace{0.3cm}}
 \usepackage{array}
 \usepackage{tabu}
+\usepackage{float}
 \usepackage[all]{hypcap}
 
 %%% Authors

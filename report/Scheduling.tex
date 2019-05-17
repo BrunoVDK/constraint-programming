@@ -7,38 +7,39 @@ $$((S + \textit{StartingDay})\ \texttt{mod}\ 7) + D <  5$$
 In the above constraint $S$ and $D$ represent the start and duration of the person's meeting. Making direct use of \href{https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html}{\texttt{mod/3}} leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.\\\par
 Precedence constraints and constraints assuring that no meetings overlap are generated last. The corresponding code is fairly trivial\footnote{Note that all code for this third challenge can be found in \texttt{/src/scheduling/scheduling.pl}.}. The fact that the meeting with the minister should come last is equivalent to adding $N-1$ precedence constraints with $N$ the total number of persons.
 
-\begin{algorithm}[H]
+\begin{snippet}[H]
 \caption{Weekend constraints (equivalent to $((S + SD)\ mod\ 7) + D < 5$ with $S$ the start time, $SD$ the starting day and $D$ the duration)}\label{weekend}
 \small
 X :: 0..6,\\
 \_Q * 7 + X \#= Start + StartingDay,\\
 X + Duration \#< 6
-\end{algorithm}
+\end{snippet}
 
-The cost function is defined as $(V_{max}\times E)+V$ where $V_{max}$ is the maximum number of rank violations, $E$ is the end time of the meeting with the minister and $V$ is the actual number of rank violations for a given solution. This ensures that whenever two solutions have a different $E$, the solution with the smallest $E$ will have the lowest cost (whatever the number of violations $V$). Yet if two solutions have the same end time $E$, then it's the number of violations $V$ that will determine what solution is best. \par
-An additional constraint was used for the cost function, stating that it cannot be smaller than $V_{max}\times D_{tot}$ with $D_{tot}$ the sum of all meeting durations. This makes a difference\footnote{In our tests the total runtime was reduced by a factor of 4 (not when making use of the \texttt{ic\_edge\_finder} version).}.
+The cost function is defined as $(V_{max}\times E)+V$ where $V_{max}$ is the maximum number of rank violations, $E$ is the end time of the meeting with the minister and $V$ is the actual number of rank violations for a given solution. This ensures that whenever two solutions have a different $E$, the solution with the smallest $E$ will have the lowest cost (whatever the number of violations $V$). Yet if two solutions have the same end time $E$, then it's the number of violations $V$ that will determine what solution is best.
 
-\begin{algorithm}[H]
+\begin{snippet}[H]
 \caption{Calculating the number of violations. The cost function is defined as $MaxViolations * (StartTime_{minister} + Duration_{minister}) + Violations$}\label{cost}
 \small
 violations(N, Ranks, StartTimes, Violations, MaxViolations) :-\\
-(for(I, 1, N-1),\\
-     fromto([], InViolations, OutViolations, ViolationList),\\
-     param(StartTimes, N, Ranks) do \\
-        Rank is Ranks[I], \\
-        (for(J, I+1, N-1), \\
-         fromto([], In, Out, List), \\
-         param(Rank, Ranks, StartTimes, I) do \\
-            OtherRank is Ranks[J], \\
-            (Rank < OtherRank -> Out = [(StartTimes[I] \#> StartTimes[J])|In] ; \\
-            (Rank > OtherRank -> Out = [(StartTimes[I] \#< StartTimes[J])|In] ; \\
-                Out = In)) \\
-        ), \\
-        append(InViolations, List, OutViolations) \\
-    ), \\
-    length(ViolationList, MaxViolations), \\
-    Violations \#= sum(ViolationList).
-\end{algorithm}
+    \qquad(for(I, 1, N-1),\\
+     \qquad fromto([], InViolations, OutViolations, ViolationList),\\
+     \qquad param(StartTimes, N, Ranks) do \\
+        \qquad\qquad Rank is Ranks[I], \\
+        \qquad\qquad (for(J, I+1, N-1), \\
+         \qquad\qquad fromto([], In, Out, List), \\
+         \qquad\qquad param(Rank, Ranks, StartTimes, I) do \\
+            \qquad\qquad\qquad OtherRank is Ranks[J], \\
+            \qquad\qquad\qquad (Rank < OtherRank -> Out = [(StartTimes[I] \#> StartTimes[J])|In] ; \\
+            \qquad\qquad\qquad (Rank > OtherRank -> Out = [(StartTimes[I] \#< StartTimes[J])|In] ; \\
+            \qquad\qquad\qquad Out = In)) \\
+        \qquad\qquad ), \\
+       \qquad\qquad append(InViolations, List, OutViolations) \\
+    \qquad), \\
+    \qquad length(ViolationList, MaxViolations), \\
+    \qquad Violations \#= sum(ViolationList).
+\end{snippet}
+
+An additional constraint was used for the cost function, stating that it cannot be smaller than $V_{max}\times D_{tot}$ with $D_{tot}$ the sum of all meeting durations. This makes a difference\footnote{In our tests the total runtime was reduced by a factor of 4 (not when making use of the \texttt{ic\_edge\_finder} version).}.\\\par
 
 Some implied constraints were added to increase performance. In case two persons have a different rank but the same meeting duration and weekend preferences, a corresponding order on their start times can safely be imposed. This mustn't override the precedence constraints.\\\par
 
