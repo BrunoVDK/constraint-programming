@@ -9,7 +9,11 @@
 % N.B. : Theoretically alldifferent are more tight
 %           (Dual Modelling of Permutation and Injection Problems, Hnich et al., 2004)
 %           but channeling constraints are said to be 'competitive'.
-% N.B. : It is possible to use all
+% "Using these identities, we can immediately deduce, for instance, that it does not increase
+%   pruning to have both channelling constraints and primal (or dual) not-equals constraints.
+%   Not-equals constraints do not increase the amount of constraint propagation over that
+%   achieved with channelling constraints alone. As our experiments show later on, they
+%   only add overhead to the constraint solver."
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0

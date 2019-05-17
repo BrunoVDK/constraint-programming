@@ -1,18 +1,48 @@
 \section{Scheduling Meetings}
 
-The last challenge is the scheduling of some meetings, taking into account the preferences of the various persons involved. A constraint optimization problem where the cost is a function of the end time of the last meeting and the number of `\textit{violations}` (people of lower rank having their meeting after that of people of higher rank). This number of violations is of secondary importance.\\\par
+The last challenge is the scheduling of some meetings, taking into account the preferences of the various persons involved. A constraint optimization problem where the cost is a function of the end time of the last meeting and the number of `\textit{violations}' (people of lower rank having their meeting after that of people of higher rank). This number of violations is of secondary importance.\\\par
 
 Weekend constraints are generated first. If a person doesn't want to meet on weekends then his or her meeting is not allowed to overlap with the first weekend that follows :
 $$((S + \textit{StartingDay})\ \texttt{mod}\ 7) + D <  5$$
-In the above constraint $S$ and $D$ represent the start and duration of the person's meeting. Making direct use of \href{https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html}{\texttt{mod/3}} leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation [CODE].\par
-Precedence constraints and constraints assuring that no meetings overlap are generated last. The corresponding code is fairly trivial\footnote{Note that all code for this third challenge can be found in \texttt{/src/scheduling/scheduling.pl}.}. The fact that the meeting with the minister should come last is equivalent to adding $N-1$ precedence constraints with $N$ the total number of persons. \\\par
+In the above constraint $S$ and $D$ represent the start and duration of the person's meeting. Making direct use of \href{https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html}{\texttt{mod/3}} leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.\\\par
+Precedence constraints and constraints assuring that no meetings overlap are generated last. The corresponding code is fairly trivial\footnote{Note that all code for this third challenge can be found in \texttt{/src/scheduling/scheduling.pl}.}. The fact that the meeting with the minister should come last is equivalent to adding $N-1$ precedence constraints with $N$ the total number of persons.
 
-The cost function is defined as $(V_{max}\times E)+V$ where $V_{max}$ is the maximum number of rank violations, $E$ is the end time of the meeting with the minister and $V$ is the actual number of rank violations for a given solution. This ensures that whenever two solutions have a different $E$, the solution with the smallest $E$ will have the lowest cost (whatever the number of violations $V$). Yet if two solutions have the same end time $E$, then it's the number of violations $V$ that will determine what solution is best. Code is displayed in [CODE]. \par
-An additional constraint was used for the cost function, stating that it cannot be smaller than $V_{max}\times D_{tot}$ with $D_{tot}$ the sum of all meeting durations. This makes a difference\footnote{In our tests the total runtime for all benchmarks was reduced by a factor of 4.}.\\\par
+\begin{algorithm}[H]
+\caption{Weekend constraints (equivalent to $((S + SD)\ mod\ 7) + D < 5$ with $S$ the start time, $SD$ the starting day and $D$ the duration)}\label{weekend}
+\small
+X :: 0..6,\\
+\_Q * 7 + X \#= Start + StartingDay,\\
+X + Duration \#< 6
+\end{algorithm}
 
-Some implied constraints were added to increase performance. In case two persons have a different rank but the same meeting duration and weekend preferences, a corresponding order on their start times can safely be imposed. This mustn't override the precedence constraints. The respective implementation is displayed in [CODE].\\\par
+The cost function is defined as $(V_{max}\times E)+V$ where $V_{max}$ is the maximum number of rank violations, $E$ is the end time of the meeting with the minister and $V$ is the actual number of rank violations for a given solution. This ensures that whenever two solutions have a different $E$, the solution with the smallest $E$ will have the lowest cost (whatever the number of violations $V$). Yet if two solutions have the same end time $E$, then it's the number of violations $V$ that will determine what solution is best. \par
+An additional constraint was used for the cost function, stating that it cannot be smaller than $V_{max}\times D_{tot}$ with $D_{tot}$ the sum of all meeting durations. This makes a difference\footnote{In our tests the total runtime was reduced by a factor of 4 (not when making use of the \texttt{ic\_edge\_finder} version).}.
 
-Table \ref{tab:sche1} shows the runtime for each benchmark. Two versions are considered ; one ensures that no two meetings overlap by imposing a \texttt{(}$S_1$+$D_1$ $\leq$ $S_2$\ \texttt{or}\ $S_2$+$D_2$ $\leq$ $S_1$\texttt{)} constraint for every such pair, the other version uses a global version of these same constraints provided by the \href{http://eclipseclp.org/doc/bips/lib/ic_edge_finder/index.html}{\texttt{ic\_edge\_finder}} library. It's clear that the global version outperforms the other one.\\\par
+\begin{algorithm}[H]
+\caption{Calculating the number of violations. The cost function is defined as $MaxViolations * (StartTime_{minister} + Duration_{minister}) + Violations$}\label{cost}
+\small
+violations(N, Ranks, StartTimes, Violations, MaxViolations) :-\\
+(for(I, 1, N-1),\\
+     fromto([], InViolations, OutViolations, ViolationList),\\
+     param(StartTimes, N, Ranks) do \\
+        Rank is Ranks[I], \\
+        (for(J, I+1, N-1), \\
+         fromto([], In, Out, List), \\
+         param(Rank, Ranks, StartTimes, I) do \\
+            OtherRank is Ranks[J], \\
+            (Rank < OtherRank -> Out = [(StartTimes[I] \#> StartTimes[J])|In] ; \\
+            (Rank > OtherRank -> Out = [(StartTimes[I] \#< StartTimes[J])|In] ; \\
+                Out = In)) \\
+        ), \\
+        append(InViolations, List, OutViolations) \\
+    ), \\
+    length(ViolationList, MaxViolations), \\
+    Violations \#= sum(ViolationList).
+\end{algorithm}
+
+Some implied constraints were added to increase performance. In case two persons have a different rank but the same meeting duration and weekend preferences, a corresponding order on their start times can safely be imposed. This mustn't override the precedence constraints.\\\par
+
+Table \ref{tab:sche1} shows the runtime for each benchmark. Two versions are considered ; one ensures that no two meetings overlap by imposing a \texttt{(}$S_1$+$D_1$ $\leq$ $S_2$\ \texttt{or}\ $S_2$+$D_2$ $\leq$ $S_1$\texttt{)} constraint for every such pair, the other version uses a global version of these same constraints provided by the \href{http://eclipseclp.org/doc/bips/lib/ic_edge_finder/index.html}{\texttt{ic\_edge\_finder}} library. It's clear that the global version outperforms the other one. The time it takes to propagate the constraints is usually compensated for by the reduction in nodes having to be considered due to the pruning of the search tree.\\\par
 
 Instead of making use of implied constraints one can also tinker with the various heuristics provided by the \href{http://eclipseclp.org/doc/bips/lib/ic/search-6.html}{\texttt{search/5}} procedure. Some of those lend themselves to some benchmarks but not to others.\par
 The \texttt{indomain\_min} heuristic performed better than \texttt{indomain\_max} as it is an optimisation problem after all, meaning that selecting the minimum starting time selects solutions with a smaller cost first. A solution with a lower cost will prune the search tree more.
@@ -21,24 +51,24 @@ The \texttt{indomain\_min} heuristic performed better than \texttt{indomain\_max
 \centering
 \bgroup
 \def\arraystretch{1.3}
-\begin{tabular}{cll}
+\begin{tabular}{ccc}
 \multicolumn{1}{l}{} & \texttt{input\_order} & \texttt{input\_order} + \texttt{ic\_edge\_finder} \\ \hline
-\textit{bench1a}      &              &                                 \\
-\textit{bench1b}      &              &                                 \\
-\textit{bench1c}      &              &                                 \\
-\textit{bench2a}      &              &                                 \\
-\textit{bench2b}      &              &                                 \\
-\textit{bench2c}      &              &                                 \\
-\textit{bench3a}      &              &                                 \\
-\textit{bench3b}      &              &                                 \\
-\textit{bench3c}      &              &                                 \\
-\textit{bench3d}      &              &                                 \\
-\textit{bench3e}      &              &                                 \\
-\textit{bench3f}      &              &                                 \\
-\textit{bench3g}      &              &                                 \\\hline
-Total/Average        &              &                                
+\textit{bench1a}  & 207 & 326 \\
+\textit{bench1b}  & 135 & 180                                 \\
+\textit{bench1c}  & 314   & 269                                 \\
+\textit{bench2a}  & 3636   & 2110                                 \\
+\textit{bench2b}  & 19269   & 2043                                 \\
+\textit{bench2c}  & 371   & 366                                 \\
+\textit{bench3a}  & 143   & 138                                 \\
+\textit{bench3b}  & 386   & 389                                 \\
+\textit{bench3c}  & 286   & 309                                 \\
+\textit{bench3d}  & 201   & 333                                 \\
+\textit{bench3e}  & 405   & 371                                 \\
+\textit{bench3f}   & 506   & 413                                 \\
+\textit{bench3g}  & 568   & 479                                 \\\hline
+Total/Average     & 26422/2033   & 7721/594                       
 \end{tabular}
 \egroup
-\caption{Benchmark results for the Scheduling Meetings challenge.}
+\caption{Benchmark results for the Scheduling Meetings challenge, shown in milliseconds.}
 \label{tab:sche1}
 \end{table}

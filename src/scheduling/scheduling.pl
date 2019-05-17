@@ -27,7 +27,7 @@
 :- lib(branch_and_bound).
 :- lib(ic_edge_finder). % Provides the disjunctive/2 constraint
 
-enable(global) :- true. % To turn ic_edge_finder on/off
+enable(global) :- fail. % To turn ic_edge_finder on/off
 
 % Schedule meetings for the given number of persons, each with their own preferences.
 %   The cost function first takes into account the end time which should be as low as possible,
@@ -40,19 +40,20 @@ enable(global) :- true. % To turn ic_edge_finder on/off
 % @param Ranks          An array holding the ranks of every person.
 % @param Pcs            Precedence constraints.
 % @param StartingDay    Which day of the week is day 0 (0 Monday, 1 Tuesday, ..., 6 Sunday).
+% @note The starting time domains needn't be tight because the main source of pruning is the cost
+%           function, so start times that are too high are filtered out.
 meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, Violations) :-
     % --- Declare domains ---
     dim(StartTimes, [N]),
     sum(Durations[1..(N-1)], TotalDuration),
-    MaxStart is (TotalDuration + 2*(N-1) + StartingDay),
-    StartTimes :: 0..MaxStart,
+    StartTimes :: 0..7*(N-1), % Needn't be tighter, doesn't speed up
     % --- Generate constraints ---
     timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay),
     non_overlapping(N, StartTimes, Durations),
     precedences(Pcs, StartTimes),
+    implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs),
     % --- Define cost function ---
     violations(N, Ranks, StartTimes, Violations, MaxViolations),
-    implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs),
     Cost #= MaxViolations * (StartTimes[N] + Durations[N]) + Violations,
     Cost #> MaxViolations * (TotalDuration + Durations[N]),
     % --- Branch and bound ---

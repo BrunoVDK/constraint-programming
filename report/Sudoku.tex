@@ -8,16 +8,16 @@ The dual models hold a $N\times N$ array with all the decision variables. Wherea
 
 In one of his works Laburthe discusses various rules that can be used to resolve Sudoku puzzles, after which he details three models that he associates with the rules \cite{article:laburthe}. He ends up proposing a model for every level of difficulty of the input puzzle. An attempt was made at implementing his recommendation for `difficult' puzzles. It decreased the average number of backtracks but increased the runtime. \\\par
 
-The boolean models include the natural combined model \cite{article:natural} and a more intuitive characterisation resembling an integer programming - or a SAT model \cite{article:sat} (using \href{http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html}{\texttt{occurrences/3}} instead of sums, disjunctions and conjunctions). Both of them have $N\times N\times N$ boolean variables $b_{rcv}$ which are true if the cell at row $r$ and column $c$ holds the value $v$. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by ECLiPSe\footnote{A custom-made implementation as well as the \href{https://eclipseclp.org/doc/bips/kernel/termcomp/TE-2.html}{\texttt{$\sim$=/2}} constraint which checks if two terms can be unified were tried. Channeling back to integers with \href{http://eclipseclp.org/doc/bips/lib/ic_global/bool_channeling-3.html}{\texttt{ic\_global:bool\_channeling/3}} worked better.}.\par
+The boolean models include the natural combined model \cite{article:natural} and a more intuitive characterisation resembling an integer programming - or a SAT model \cite{article:sat} (using \href{http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html}{\texttt{occurrences/3}} instead of sums, disjunctions and conjunctions). Both of them have $N\times N\times N$ boolean variables $b_{rcv}$ which are true if the cell at row $r$ and column $c$ holds the value $v$. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by ECLiPSe\footnote{A custom-made implementation as well as the \href{https://eclipseclp.org/doc/bips/kernel/termcomp/TE-2.html}{\texttt{$\sim$=/2}} constraint which checks if two terms can be unified were tried. Channeling back to integers with \href{http://eclipseclp.org/doc/bips/lib/ic_global/bool_channeling-3.html}{\texttt{ic\_global:bool\_channeling/3}} worked better (ironically).}.\par
 Note that it is usually not recommended to use a boolean model when integers can be used instead (as pointed out by Rossi \cite{book:rossi}).\\\par
 % Rossi is p. 393
 
 The last two models were found to be the most performant. The first makes use of the previously mentioned \href{http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html}{\texttt{occurrences/3}} constraint to make every value occur just once in every row, column and block. 
-\par The second one generates nothing but channeling constraints. It has been demonstrated that this can provide good results despite such constraints being less `tight' than \texttt{all\_different} constraints\footnote{\textit{``The reason for this difference is that the primal not-equals constraints detect singleton variables (i.e. those variables with a single value), the channelling constraints detect singleton variables and singleton values (i.e. those values which occur in the domain of a single variable), whilst the primal all-different constraint detects global consistency (which includes singleton variables, singleton values and many other situations)"}\cite{article:channeling}}. When Dot\'u discussed it he was considering QuasiGroups \cite{article:quasi}. This was extended\footnote{The code lies in \texttt{sudoku/model/channeling.pl} in which a flag called \texttt{extended} can be used to opt for one of two variants.} to Sudoku puzzles by making use of three instead of two dual models (since blocks need to be considered as well). The variant in which channeling constraints between all models (one primal, three dual) are generated performed better than the one in which only channeling constraints between the primal and every dual model are applied. These variants are analogous to what Dot\'u referred to as \textit{`trichanneling'} and \textit{`bichanneling'}.\\\par
+\par The second one generates nothing but channeling constraints. It has been demonstrated that this can provide good results despite such constraints being less `tight' than \texttt{all\_different} constraints\footnote{\textit{``The reason for this difference is that the primal not-equals constraints detect singleton variables (i.e. those variables with a single value), the channelling constraints detect singleton variables and singleton values (i.e. those values which occur in the domain of a single variable), whilst the primal all-different constraint detects global consistency (which includes singleton variables, singleton values and many other situations)"}\cite{article:channeling}}. When Dot\'u discussed it he was considering QuasiGroups \cite{article:quasi}. This was extended\footnote{The code lies in \texttt{sudoku/model/channeling.pl} in which a flag called \texttt{extended} can be used to opt for one of two variants.} to Sudoku puzzles by making use of three instead of two dual models (since blocks need to be considered as well). The variant in which channeling constraints between all models (one primal, three dual) are generated performed better than the one in which only channeling constraints between the primal and every dual model are applied. These variants are analogous to what Dot\'u referred to as \textit{`trichanneling'} and \textit{`bichanneling'}.
 
 \subsection{Experiments}
 
-Number of backtracks and running time for most of the models are displayed in table 1. Removal of \textit{`big'} (\texttt{all\_different}) constraints in the classic model\footnote{In his study Demoen gives several \textit{Missing(6)} examples, models in which 6 of the \texttt{all\_different} constraints are removed. \textit{Missing(7)} models aren't Sudoku, and because of the stark rise in number of backtracks no further experimentation with the removal of `\textit{small}' constraints was done. The \texttt{eliminate\_redundancy} flag can be used to toggle redundancy elimination on and off.} led to an increase in runtime which corroborates Demoen's experiences \cite{article:demoen}. \\\par
+Number of backtracks and running time for most of the models are displayed in table \ref{tab:res1}. Removal of \textit{`big'} (\texttt{all\_different}) constraints in the classic model\footnote{In his study Demoen gives several \textit{Missing(6)} examples, models in which 6 of the \texttt{all\_different} constraints are removed. \textit{Missing(7)} models aren't Sudoku, and because of the stark rise in number of backtracks no further experimentation with the removal of `\textit{small}' constraints was done. The \texttt{eliminate\_redundancy} flag can be used to toggle redundancy elimination on and off.} led to an increase in runtime which corroborates Demoen's experiences \cite{article:demoen}.  \\\par
 
 \begin{figure}[H]
 \centering
@@ -26,30 +26,47 @@ Number of backtracks and running time for most of the models are displayed in ta
 \label{fig:missing6}
 \end{figure}
 
-One interesting observation is that the two most performant models also have the same number of backtracks. One of them is the model with nothing but channeling constraints, the other uses the \href{http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html}{\texttt{occurrences/3}} constraint. This constraint enforces arc consistency.\\\par
+An interesting observation is that the two most performant models also have the same number of backtracks. One of them is the model with nothing but channeling constraints, the other uses the \href{http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html}{\texttt{occurrences/3}} constraint which enforces arc-consistency. The first will detect when for a given \textit{row-column}, \textit{row-value}, \textit{column-value} or \textit{block-value} combination only one possible \textit{value}, \textit{column}, \textit{row} or \textit{position} remains. It will remove this value, column, ... from the other primal or dual variables\footnote{The difference between unequality constraints and channeling is best explained in \cite{article:channeling}.}. The second propagates in the same way (e.g. removing from a given list of variables corresponding to a block, all positions that cannot take part in a solution anymore). It is probably slower because the constraint itself is more generic than reification constraints.\\\par
 
-A model combining the classic viewpoint with the fourth dual model was set up. Number of backtracks and runtimes are displayed in table \ref{tab:res1}.
+A model combining the classic viewpoint with the fourth dual model was set up. Number of backtracks and runtimes are displayed in table \ref{tab:res2}.
 
 \begin{algorithm}[H]
-\caption{Dual viewpoint constraints}\label{channeling}
+\caption{Channeling constraints for the combined viewpoint model}\label{channeling}
 \small
-Code here\\
-More code here\\
-Even more code here
+(multifor([Row,Column,Value], 1, N), param(Primal, Dual, K) do \\
+    \#=(Primal[Row,Column], Value, Bool), \% reification \\
+    block(K, Row, Column, Block), \% calls utility function to convert $R\times C\rightarrow B$ \\
+    position(K, Row, Column, Position), \% calls utility function to convert $R\times C\rightarrow P$ \\
+    \#=(Dual[Block,Value], Position, Bool) \% reification \\
+)
 \end{algorithm}
 
->> Two tables: one with all results with ic:alldifferent and just fixed heuristics (input\_order). Then a table for ic\_global + heuristics for the chosen 2 models (channeling and dual3 or dual4), this time each puzzle separately. Then a small discussion of the results. Should be 3 pages in total including TOC. Note that small discussion of CHR needs to be done too.
+The \texttt{first\_fail} heuristic generally outperforms \texttt{input\_order}. It considers variables with the smallest domain first, rather than considering variables in the order they were given. This increases pruning power as removing a value from the domain will remove a bigger part of the search tree as the branching count increases as you go down the tree (which is not necessarily the case when using \texttt{input\_order}). As a result the number of backtracks tends to decrease. Unless the solution lies at the left side of the search tree generated by the \texttt{input\_order} heuristic performance will increase in comparison. \\\par
 
->> Maybe for those puzzles that do better with input\_order show that mirroring the puzzle leads to slower runtimes (you could do this for all puzzles, write procedure swap(Puzzle) for it). Note that value heuristics shouldn't matter much as the 'max' or 'min' isn't  really meaningful in Sudoku (you can use '9,8,7, ...' instead of '1,2,3,...' for all we know
+As for the \texttt{all\_different} constraints, more constraint propagation can be done when making use of \texttt{ic\_global} as it enforces bounds consistency rather than separately enforcing arc-consistency on the corresponding inequalities. This decreases the number of backtracks, sometimes at the cost of performance as the propagation is less efficient.
 
-%\setlength\arrayrulewidth{0.5pt}
-%\taburulecolor{gray}
 \begin{table}[]
 \bgroup
 \def\arraystretch{1.3}
+\begin{tabular}{ccccccccc}
+\multicolumn{1}{l}{}    & classic & dual1 & dual2 & dual3 & boolean & laburthe & member & channeling \\ \hline
+Total/Average & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+Total/Average (minimum) & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0                    
+\end{tabular}
+\egroup
+\caption{Runtimes for the various viewpoints (ECLiPSe) - shown in milliseconds.}
+\label{tab:res1}
+\end{table}
+
+
+%\setlength\arrayrulewidth{0.5pt}
+%\taburulecolor{gray}
+\begin{table}[H]
+\bgroup
+\def\arraystretch{1.3}
 \begin{tabular}{ccccc}
-\multicolumn{1}{l}{}    & \texttt{input\_order} & \texttt{first\_fail} & \texttt{input\_order} + \texttt{ic\_global} & \texttt{first\_fail} + \texttt{ic\_global} \\ \hline
-\textit{lambda}          &              &             &                           &                          \\
+\multicolumn{1}{l}{}    & \texttt{input\_order} & \texttt{first\_fail} & \texttt{input\_order} (global) & \texttt{first\_fail} (global) \\ \hline
+\textit{lambda} & 0 &             &                           &                          \\
 \textit{hard17}          &              &             &                           &                          \\
 \textit{eastermonster}   &              &             &                           &                          \\
 \textit{tarek\_052}      &              &             &                           &                          \\
@@ -67,6 +84,65 @@ Total/Average           &              &             &                          
 Total/Average (minimum) &              &             &                           &                         
 \end{tabular}
 \egroup
-\caption{Results (ECLiPSe)}
-\label{tab:res1}
+\caption{Results for the classic and alternative (dual) viewpoint (ECLiPSe) - shown as backtracks/milliseconds.}
+\label{tab:res2}
+\end{table}
+
+\begin{table}[H]
+\bgroup
+\def\arraystretch{1.3}
+\begin{tabular}{ccccc}
+\multicolumn{1}{l}{}    & \texttt{input\_order} & \texttt{first\_fail} & \texttt{input\_order} (global) & \texttt{first\_fail} (global) \\ \hline
+\textit{lambda} & 0 &             &                           &                          \\
+\textit{hard17}          &              &             &                           &                          \\
+\textit{eastermonster}   &              &             &                           &                          \\
+\textit{tarek\_052}      &              &             &                           &                          \\
+\textit{goldennugget}    &              &             &                           &                          \\
+\textit{coloin}          &              &             &                           &                          \\
+\textit{extra2}          &              &             &                           &                          \\
+\textit{extra3}          &              &             &                           &                          \\
+\textit{extra4}          &              &             &                           &                          \\
+\textit{inkara2012}      &              &             &                           &                          \\
+\textit{clue18}          &              &             &                           &                          \\
+\textit{clue17}          &              &             &                           &                          \\
+\textit{sudowiki\_nb28}  &              &             &                           &                          \\
+\textit{sudowiki\_nb49}  &              &             &                           &                          \\\hline
+Total/Average           &              &             &                           &                          \\
+Total/Average (minimum) &              &             &                           &                         
+\end{tabular}
+\egroup
+\caption{Results for the combined (classic + dual) viewpoint (ECLiPSe) - shown as backtracks/milliseconds.}
+\label{tab:res3}
+\end{table}
+
+\subsection{CHR}
+
+Some of the viewpoints considered previously were implemented in \texttt{CHR}, too. The runtimes are shown in table \ref{tab:res4}. DISCUSS HEURISTICS AND CODE.
+
+\begin{table}[H]
+\centering
+\bgroup
+\def\arraystretch{1.3}
+\begin{tabular}{cccc}
+\multicolumn{1}{l}{} & classic & dual & combined \\ \hline
+\textit{lambda} & 0 & 0 & 0  \\
+\textit{hard17} & 0 & 0 & 0  \\
+\textit{eastermonster} & 0 & 0 & 0  \\
+\textit{tarek\_052} & 0 & 0 & 0  \\
+\textit{goldennugget} & 0 & 0 & 0  \\
+\textit{coloin} & 0 & 0 & 0  \\
+\textit{extra2} & 0 & 0 & 0  \\
+\textit{extra3} & 0 & 0 & 0  \\
+\textit{extra4} & 0 & 0 & 0  \\
+\textit{inkara2012} & 0 & 0 & 0  \\
+\textit{clue18} & 0 & 0 & 0  \\
+\textit{clue17} & 0 & 0 & 0  \\
+\textit{sudowiki\_nb28} & 0 & 0 & 0  \\
+\textit{sudowiki\_nb49} & 0 & 0 & 0  \\\hline
+Total/Average & 0 & 0 & 0  \\
+Total/Average (minimum) & 0 & 0 & 0                      
+\end{tabular}
+\egroup
+\caption{Results for the CHR Sudoku solver - shown as backtracks/milliseconds.}
+\label{tab:res4}
 \end{table}

@@ -52,7 +52,7 @@ sudoku(Puzzle, Time, Backtracks, Verbose) :-
     setup_model(Puzzle, N, K, Variables),
     % Start search procedure
     (Verbose -> write('Search prodecure started.'), nl),
-    search(Variables, 0, first_fail, indomain_split, complete, [backtrack(Backtracks)]), !,
+    search(Variables, 0, most_constrained, indomain_split, complete, [backtrack(Backtracks)]), !,
     statistics(hr_time, End),
     Time is End - Start,
     (Verbose -> write('Solution found ...'), nl),
