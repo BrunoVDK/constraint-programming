@@ -24,12 +24,16 @@ hashi(Name, Time, Backtracks) :-
         getIslands(Board, Imax, Jmax, Islands),
         Islands = [[A,B]|_],  % pick a sink, always picks the first from the list, this is the island in the lowest row, in the furthest column
         Total is length(Islands),
-        ( foreachindex([I,J],Board), param(Board,NESW,Imax,Jmax) do
+        ( foreachindex([I,J],Board), param(Board,NESW,FlowNESW,Imax,Jmax,A,B,Total) do
             Sum is Board[I,J],
             N is NESW[I,J,1],
             E is NESW[I,J,2],
             S is NESW[I,J,3],
             W is NESW[I,J,4],
+			FN is FlowNESW[I,J,1],
+            FE is FlowNESW[I,J,2],
+            FS is FlowNESW[I,J,3],
+            FW is FlowNESW[I,J,4],
 
             % Constraints 1 and 2:
             % The combination of N=S etc on tiles without island
@@ -50,39 +54,20 @@ hashi(Name, Time, Backtracks) :-
               % Constraint 5
               N+E+S+W #= Sum
             ;
-            N = S, E = W,
+			  N = S, E = W,
             
-            % Constraint 3
-            (N #= 0) or (E #= 0)
-            )
-		),
-
-        % find a solution
-		statistics(hr_time, Start1),
-        %labeling(NESW),
-		search(NESW, 0, input_order, indomain, complete, [backtrack(Backtracks1)]),
-		statistics(hr_time, End1),
-		Time1 is End1 - Start1,
-		
-		( foreachindex([I,J],Board), param(Board,NESW,FlowNESW,Imax,Jmax,A,B,Total) do
-            Sum is Board[I,J],
-            N is NESW[I,J,1],
-            E is NESW[I,J,2],
-            S is NESW[I,J,3],
-            W is NESW[I,J,4],
-            FN is FlowNESW[I,J,1],
-            FE is FlowNESW[I,J,2],
-            FS is FlowNESW[I,J,3],
-            FW is FlowNESW[I,J,4],
+			  % Constraint 3
+              (N #= 0) or (E #= 0)
+            ),
 			
-		% Connectedness constraint:
-        % Consists of 5 flow constraints.
+			% Connectedness constraint:
+			% Consists of 5 flow constraints.
             
 			% Define the domain of the variables 
 			% Implied constraint: if there's no bridge in a direction, there is no flow in that direction. 
 			% Remark: the domain definition is not an implied constraint, it is necessary.
-			(N = 0 -> FN #= 0 ; FN #:: -(Total-1)..(Total-1)),
-			(E = 0 -> FE #= 0 ; FE #:: -(Total-1)..(Total-1)),
+            (N = 0 -> FN #= 0 ; FN #:: -(Total-1)..(Total-1)),
+            (E = 0 -> FE #= 0 ; FE #:: -(Total-1)..(Total-1)),
 			(S = 0 -> FS #= 0 ; FS #:: -(Total-1)..(Total-1)),
 			(W = 0 -> FW #= 0 ; FW #:: -(Total-1)..(Total-1)),
 			% Flow constraint 3:
@@ -132,14 +117,15 @@ hashi(Name, Time, Backtracks) :-
 					FN+FE+FS+FW #= 0
 				)
 			)
-        ),
-		statistics(hr_time, Start2),
-		%labeling(FlowNESW),
-		search(FlowNESW, 0, input_order, indomain, complete, [backtrack(Backtracks2)]),
-		statistics(hr_time, End2),
-		Time2 is End2 - Start2,
-		Time is Time1 + Time2,
-		Backtracks is Backtracks1 + Backtracks2,
+		),
+
+        % find a solution
+		statistics(hr_time, Start1),
+        %labeling(NESW),
+		search([NESW,FlowNESW], 0, input_order, indomain, complete, [backtrack(Backtracks1)]),
+		statistics(hr_time, End1),
+		Time is End1 - Start1,
+		Backtracks is Backtracks1,
         print_board(Board, NESW).
 
 
