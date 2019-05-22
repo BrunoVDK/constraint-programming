@@ -22,7 +22,7 @@
 
 :- import occurrences/3 from ic_global.
 
-variant(original) :- true.
+variant(original) :- fail.
 
 % Set up the model for the given puzzle.
 %

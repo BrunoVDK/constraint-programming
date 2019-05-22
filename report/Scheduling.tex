@@ -4,16 +4,17 @@ The last challenge is the scheduling of some meetings, taking into account the p
 
 Weekend constraints are generated first. If a person doesn't want to meet on weekends then his or her meeting is not allowed to overlap with the first weekend that follows :
 $$((S + \textit{StartingDay})\ \texttt{mod}\ 7) + D <  5$$
-In the above constraint $S$ and $D$ represent the start and duration of the person's meeting. Making direct use of \href{https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html}{\texttt{mod/3}} leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.\\\par
-Precedence constraints and constraints assuring that no meetings overlap are generated last. The corresponding code is fairly trivial\footnote{Note that all code for this third challenge can be found in \texttt{/src/scheduling/scheduling.pl}.}. The fact that the meeting with the minister should come last is equivalent to adding $N-1$ precedence constraints with $N$ the total number of persons.
+In the above constraint $S$ and $D$ represent the start and duration of the person's meeting. Making direct use of \href{https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html}{\texttt{mod/3}} leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.
 
 \begin{snippet}[H]
-\caption{Weekend constraints (equivalent to $((S + SD)\ mod\ 7) + D < 5$ with $S$ the start time, $SD$ the starting day and $D$ the duration)}\label{weekend}
+\caption{Weekend constraints}\label{weekend}
 \small
-X :: 0..6,\\
+X :: 0..6, \% Weekend constraints\\
 \_Q * 7 + X \#= Start + StartingDay,\\
 X + Duration \#< 6
 \end{snippet}
+
+Precedence constraints and constraints assuring that no meetings overlap are generated last. The corresponding code is fairly trivial\footnote{Note that all code for this third challenge can be found in \texttt{/src/scheduling/scheduling.pl}.}. The fact that the meeting with the minister should come last is equivalent to adding $N-1$ precedence constraints with $N$ the total number of persons.\\\par
 
 The cost function is defined as $(V_{max}\times E)+V$ where $V_{max}$ is the maximum number of rank violations, $E$ is the end time of the meeting with the minister and $V$ is the actual number of rank violations for a given solution. This ensures that whenever two solutions have a different $E$, the solution with the smallest $E$ will have the lowest cost (whatever the number of violations $V$). Yet if two solutions have the same end time $E$, then it's the number of violations $V$ that will determine what solution is best.
 

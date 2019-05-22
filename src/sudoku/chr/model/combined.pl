@@ -12,7 +12,7 @@
 % cell/3 : Block x Position x Corresponding puzzle variable = to read solution
 % val/3 : Block x Value x Position = assigned cell
 % var/4 : Block x Value x Domain length x Domain = decision variable
-:- chr_constraint cell/3, val/3, var/4, first_fail/2, rowpos/4, colpos/4, val_classic/3, var_classic/4, blocksize/1.
+:- chr_constraint cell/3, val/3, var/4, first_fail/2, rowpos/4, colpos/4, val_classic/3, var_classic/4, blocksize/1, pos/4.
 
 % ---------------------------
 %        CHR rule base
@@ -27,6 +27,7 @@ val_classic(_,C,Val) \ var_classic(R,C,L,Domain) # passive <=>
 val_classic(R1,C1,Val), blocksize(K) # passive \ var_classic(R2,C2,L,Domain) # passive <=>
     block(K,R1,C1,B), block(K,R2,C2,B), select(Val,Domain,NewDomain)
     | NewL is L-1, NewL > 0, var_classic(R2,C2,NewL,NewDomain).
+pos(R,C,B,P) # passive \ var(B,V,_,_) # passive, val_classic(R,C,V) <=> val(B,V,P).
 val_classic(_,_,_) <=> true.
 
 % Constraint propagation (forward checking)
@@ -40,6 +41,7 @@ val(B1,V,Pos) \ colpos(B1,Pos,B2,Delete) # passive, var(B2,V,_,Domain) # passive
     <=> subtract(Domain,Delete,NewDomain) |
     length(NewDomain,NewL), NewL > 0, var(B2,V,NewL,NewDomain).
 val(B,Value,P), cell(B,P,Variable) # passive <=> Variable = Value.
+pos(R,C,B,P) # passive \ var_classic(R,C,_,_) # passive, val(B,V,P) <=> val_classic(R,C,V).
 val(_,_,_) <=> true.
 
 % First Fail heuristic
@@ -108,7 +110,10 @@ register_puzzle_dual(Puzzle, N, K) :-
             (between(1,N,R),between(1,N,C),block(K,R,C,B), position(K,R,C,P)),
             Cells),
     maplist(associate_variable, Cells, FlatPuzzle),
-    maplist(assign_value, Cells, FlatPuzzle).
+    maplist(assign_value, Cells, FlatPuzzle),
+    % Positional constraints
+    findall(R-C-B-P, (between(1,N,B),between(1,N,P),row(K,B,P,R),column(K,B,P,C)), Pos),
+    maplist(pos_constraint, Pos).
 
 row_overlap(N, K, R, B, Delete) :- findall(P, (between(1,N,P),row(K,B,P,R)), Delete).
 col_overlap(N, K, C, B, Delete) :- findall(P, (between(1,N,P),column(K,B,P,C)), Delete).
@@ -119,3 +124,5 @@ overlap(B1-P-B2-DelRow-DelCol) :-
     (DelCol \= [] -> colpos(B1,P,B2,DelCol) ; true).
 assign_value(B-P, V) :- (nonvar(V) -> val(B,V,P) ; true).
 associate_variable(B-P, V) :- (var(V) -> cell(B,P,V) ; true).
+
+pos_constraint(R-C-B-P) :- pos(R,C,B,P).
