@@ -66,10 +66,10 @@ hashi(Name, Time, Backtracks) :-
 			% Define the domain of the variables 
 			% Implied constraint: if there's no bridge in a direction, there is no flow in that direction. 
 			% Remark: the domain definition is not an implied constraint, it is necessary.
-            (N = 0 -> FN #= 0 ; FN #:: -(Total-1)..(Total-1)),
-            (E = 0 -> FE #= 0 ; FE #:: -(Total-1)..(Total-1)),
-			(S = 0 -> FS #= 0 ; FS #:: -(Total-1)..(Total-1)),
-			(W = 0 -> FW #= 0 ; FW #:: -(Total-1)..(Total-1)),
+            (N == 0 -> FN = 0 ; FN #:: -(Total-1)..(Total-1)),
+            (E == 0 -> FE = 0 ; FE #:: -(Total-1)..(Total-1)),
+			(S == 0 -> FS = 0 ; FS #:: -(Total-1)..(Total-1)),
+			(W == 0 -> FW = 0 ; FW #:: -(Total-1)..(Total-1)),
 			% Flow constraint 3:
 			% If a cell has a flow n in the direction of neighbor, that neighbor has a flow -n in the opposite
 			% direction.
@@ -105,7 +105,7 @@ hashi(Name, Time, Backtracks) :-
 					FN+FE+FS+FW #= 1
 				)
 				;
-				( N+E+S+W #= 0 ->
+				( N+E+S+W == 0 ->
 					% Flow constraint 1:
 					% A cell that isn't an island, neither a bridge, has no flow.
 					[FN,FE,FS,FW] #:: 0
@@ -263,6 +263,11 @@ board(simple12,
      []([](2,0,2),
         [](0,0,0),
         [](1,0,1))
+    ).
+
+board(simple13,
+     []([](1,2),
+        [](0,1))
     ).
 
 board(stackoverflow,
