@@ -13,7 +13,7 @@
 % @version  1.0
 
 :- use_module(library(chr)).
-:- use_module(model/classic_alt).
+:- use_module(model/channeling_full).
 :- use_module(library(lists)).
 
 %:- chr_option(check_guard_bindings, on).

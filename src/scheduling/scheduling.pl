@@ -27,7 +27,7 @@
 :- lib(branch_and_bound).
 :- lib(ic_edge_finder). % Provides the disjunctive/2 constraint
 
-enable(global) :- fail. % To turn ic_edge_finder on/off
+enable(edge_finder) :- true. % To turn ic_edge_finder on/off
 
 % Schedule meetings for the given number of persons, each with their own preferences.
 %   The cost function first takes into account the end time which should be as low as possible,
@@ -52,10 +52,12 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     non_overlapping(N, StartTimes, Durations),
     precedences(Pcs, StartTimes),
     implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs),
+    % trivial_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs),
     % --- Define cost function ---
     violations(N, Ranks, StartTimes, Violations, MaxViolations),
+    min_violations(Pcs, Ranks, MinViolations),
     Cost #= MaxViolations * (StartTimes[N] + Durations[N]) + Violations,
-    Cost #> MaxViolations * (TotalDuration + Durations[N]),
+    Cost #> MaxViolations * (TotalDuration + Durations[N]) + MinViolations,
     % --- Branch and bound ---
     %minimize(labeling(StartTimes), Cost),
     bb_min(search(StartTimes, 0, input_order, indomain_min, complete, [backtrack(Backtracks)]), Cost, bb_options{strategy:continue}),
@@ -99,7 +101,7 @@ timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay) :-
 % @param StartTimes     The start times variable array.
 % @param Durations      Array of durations for each meeting with each person.
 non_overlapping(N, StartTimes, Durations) :-
-    (enable(global) ->
+    (enable(edge_finder) ->
         disjunctive(StartTimes, Durations)
     ;
         (   for(I, 1, N),
@@ -119,8 +121,8 @@ non_overlapping(N, StartTimes, Durations) :-
 % @param Precedences    The precedence constraints (an array).
 % @param StartTimes     The start times variable array.
 precedences(Precedences, StartTimes) :-
-    (foreacharg(Precedence, Precedences), param(StartTimes) do
-        StartTimes[Precedence[1]] #< StartTimes[Precedence[2]]
+    (foreacharg([](I,J), Precedences), param(StartTimes) do
+        StartTimes[I] #< StartTimes[J]
     ).
 
 % Set up constraints to calculate violations for the given ranks & start times.
@@ -153,28 +155,103 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-
 
 % Experiments with implied constraints.
 %
-% @param N      The number of persons.
-% @param Ranks  The rank of each person (an array).
+% @param N              The number of persons.
+% @param Ranks          The rank of each person (an array).
 % @param StartTimes     The start times of each meeting for each person (an array).
 % @param Durations      The durations of meetings for each person (an array).
 % @param OnWeekend      An array with value indicating
 %                           willingness of each person to meet on weekends.
-% @param Pcs            Precedence constraints.
+% @param Precedences    Precedence constraints.
+% @note These constraints could be generalized.
 implied_constraints(N, Ranks, StartTimes, Durations, OnWeekend, Pcs) :-
     collection_to_list(Pcs, Precedences),
-    (   for(I, 1, N-1),
-        param(N, Ranks, StartTimes, Durations, OnWeekend, Precedences) do
-        (for(J, I+1, N-1), param(I, Ranks, StartTimes, Durations, OnWeekend, Precedences) do
+    (for(I, 1, N-1),
+     param(N, Ranks, StartTimes, Durations, OnWeekend, Precedences) do
+        (for(J, I+1, N-1),
+         param(I, Ranks, StartTimes, Durations, OnWeekend, Precedences) do
             Rank is Ranks[I], OtherRank is Ranks[J],
-            (   \+ member(I, Precedences),
-                \+ member(J, Precedences),
-                Durations[I] =:= Durations[J],
-                OnWeekend[I] =:= OnWeekend[J] ->
-                (Rank =< OtherRank -> StartTimes[I] #< StartTimes[J] ;
-                (Rank > OtherRank -> StartTimes[I] #> StartTimes[J] ; true))
+            (\+ member(I, Precedences),
+             \+ member(J, Precedences),
+             OnWeekend[I] =:= OnWeekend[J],
+             Durations[I] =:= Durations[J] ->
+                (Rank =< OtherRank ->
+                    StartTimes[I] #< StartTimes[J]
+                ;
+                    StartTimes[I] #> StartTimes[J]
+                )
             ; true)
         )
     ).
+
+% Trivial constraints : if all meetings can be done on weekends, the order is
+%  nearly entirely dependent on rank (with the exception of precedence constraints).
+%
+% @param N              The number of persons.
+% @param Ranks          The rank of each person (an array).
+% @param StartTimes     The start times of each meeting for each person (an array).
+% @param Durations      The durations of meetings for each person (an array).
+% @param OnWeekend      An array with value indicating
+%                           willingness of each person to meet on weekends.
+% @param Precedences    Precedence constraints.
+% @note These are unrealistic, they're 'overfitting' the benchmarks and deal with
+%        bench2b in particular. They're not used in the experiments in the report.
+trivial_constraints(N, Ranks, StartTimes, _Durations, OnWeekend, Pcs) :-
+    collection_to_list(OnWeekend, List),
+    (\+ member(0, List) ->
+        collection_to_list(Pcs, Precedences),
+        (for(I, 1, N-1),
+         param(N, Ranks, StartTimes, Precedences) do
+            (for(J, I+1, N-1),
+             param(I, Ranks, StartTimes, Precedences) do
+                Rank is Ranks[I], OtherRank is Ranks[J],
+                (\+ member(I, Precedences),
+                 \+ member(J, Precedences) ->
+                    (Rank =< OtherRank ->
+                        StartTimes[I] #< StartTimes[J]
+                    ;
+                        StartTimes[I] #> StartTimes[J]
+                    )
+                ; true)
+            )
+        )
+    ; true).
+
+% Calculate the minimum number of violations when considering the given
+%   precedence constraints and the given ranks.
+%
+% @param Precedences    The precedences
+% @note Putting a minimum on the cost only benefits few puzzles, e.g. the one
+%        where the minimum end time equals the total duration (bench2b).
+min_violations(Precedences, Ranks, MinViolations) :-
+    extend_precedences(Precedences, AllPreferences),
+    (foreach([](I,J), AllPreferences), fromto(0, In, Out, MinViolations), param(Ranks) do
+        (Ranks[I] > Ranks[J] -> Out is In + 1 ; Out is In)
+    ),
+    write('Min # violations : '), write(MinViolations), nl.
+
+% For a given array of precedence constraints, extend it so that all transitive relations are
+%   exposed.
+%
+% @param Precedences            An array of precedence constraints.
+% @param ExtendedPreferences    A list with the same precedence constraints as well as
+%                                any transitive constraints.
+% @note Assumes absence of circular (erroneous) references.
+% @note Not written in the best way, there's redundancy.
+extend_precedences(Precedences, ExtendedPreferences) :-
+    array_list(Precedences, PrecedenceList),
+    (foreach([](I,J), PrecedenceList),
+     fromto(PrecedenceList, In, Out, OutPreferences),
+     param(PrecedenceList) do
+        findall([](I,X), (path(J,X,PrecedenceList), X \= I), P1),
+        findall([](J,X), (path(J,X,PrecedenceList), X \= J), P2),
+        append(In, P1, P3),
+        append(P3, P2, Out)
+    ),
+    sort(OutPreferences, ExtendedPreferences).
+path(J, X, PrecedenceList) :-
+    member([](J,Y), PrecedenceList),
+    path(Y, X, PrecedenceList).
+path(X, X, _).
 
 % Automate benchmarking for the schedule meetings function.
 %
@@ -193,19 +270,19 @@ benchmark(Verbose) :-
                 bench3e,
                 bench3f,
                 bench3g],
-    (Verbose -> write('Running tests (schedule meetings) ...')),
+    (Verbose -> write('Running tests (schedule meetings) ...') ; true),
     (   foreach(Test, Tests), param(Verbose),
         fromto(0, InTime, OutTime, TotalTime) do
-        (Verbose -> write('-> Search prodecure started : '), write(Test), nl),
+        (Verbose -> write('-> Search prodecure started : '), write(Test), nl ; true),
         statistics(hr_time, Start), % http://eclipseclp.org/doc/bips/kernel/env/statistics-2.html
         call(Test, StartTimes, EndTime, Violations),
-        (Verbose -> write('Start times : '), write(StartTimes), nl),
-        (Verbose -> write('End time : '), write(EndTime), nl),
-        (Verbose -> write('Violations : '), write(Violations), nl),
+        (Verbose -> write('Start times : '), write(StartTimes), nl ; true),
+        (Verbose -> write('End time : '), write(EndTime), nl ; true),
+        (Verbose -> write('Violations : '), write(Violations), nl ; true),
         statistics(hr_time, End),
         Time is End - Start,
-        % (Verbose -> write('Backtracks : '), write(Backtracks), nl),
-        (Verbose -> write('Time : '), write(Time), nl),
+        % (Verbose -> write('Backtracks : '), write(Backtracks), nl ; true),
+        (Verbose -> write('Time : '), write(Time), nl ; true),
         OutTime is InTime + Time
     ),
     write('Total time : '), write(TotalTime), nl.
