@@ -67,6 +67,9 @@ hashi(Name, Time, Backtracks) :-
 			% Implied constraint: if there's no bridge in a direction, there is no flow in that direction. 
 			% Remark: the domain definition is not an implied constraint, it is necessary.
             [FN,FE,FS,FW] #:: -(Total-1)..(Total-1),
+			% Flow constraint 1:
+			% A cell that isn't an island, neither a bridge, has no flow.
+			% Remark: this can be extended to all cells. If a cell does not have a bridge in a certain direction, it does not have flow in that direction.
             N #= 0 => FN #= 0,
             E #= 0 => FE #= 0,
             S #= 0 => FS #= 0,
@@ -107,6 +110,9 @@ hashi(Name, Time, Backtracks) :-
 				)
 				;
                     %N + E + S + W #= 0 => FN #= 0 and FE #= 0 and FS #= 0 and FW #= 0,
+					% Flow constraint 2:
+					% The net flow in a bridge is 0.
+					% remark: this constraint is also valid for empty cells
                     N + E + S + W #\= 0 => FN #= -(FS) and FE #= -(FW) and FN + FE +FS + FW #= 0
 			)
 		),
