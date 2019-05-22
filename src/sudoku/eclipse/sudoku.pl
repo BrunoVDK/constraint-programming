@@ -24,7 +24,7 @@
 :- compile('../utils.pl'). % Import utility functions
 :- compile('../benchmarks/benchmarks').
 
-:- compile('model/dual'). % Choose the model here
+:- compile('model/combined'). % Choose the model here
 
 % Solve the Sudoku with the given name.
 %
