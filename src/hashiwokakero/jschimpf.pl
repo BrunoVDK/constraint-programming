@@ -66,10 +66,11 @@ hashi(Name, Time, Backtracks) :-
 			% Define the domain of the variables 
 			% Implied constraint: if there's no bridge in a direction, there is no flow in that direction. 
 			% Remark: the domain definition is not an implied constraint, it is necessary.
-            (N == 0 -> FN = 0 ; FN #:: -(Total-1)..(Total-1)),
-            (E == 0 -> FE = 0 ; FE #:: -(Total-1)..(Total-1)),
-			(S == 0 -> FS = 0 ; FS #:: -(Total-1)..(Total-1)),
-			(W == 0 -> FW = 0 ; FW #:: -(Total-1)..(Total-1)),
+            [FN,FE,FS,FW] #:: -(Total-1)..(Total-1),
+            N #= 0 => FN #= 0,
+            E #= 0 => FE #= 0,
+            S #= 0 => FS #= 0,
+            W #= 0 => FW #= 0,
 			% Flow constraint 3:
 			% If a cell has a flow n in the direction of neighbor, that neighbor has a flow -n in the opposite
 			% direction.
@@ -105,24 +106,18 @@ hashi(Name, Time, Backtracks) :-
 					FN+FE+FS+FW #= 1
 				)
 				;
-				( N+E+S+W == 0 ->
-					% Flow constraint 1:
-					% A cell that isn't an island, neither a bridge, has no flow.
-					[FN,FE,FS,FW] #:: 0
-					;
-					% Flow constraint 2:
-					% The net flow in a bridge cell is 0.
-					FN #= -(FS),
-					FE #= -(FW),
-					FN+FE+FS+FW #= 0
-				)
+                    %N + E + S + W #= 0 => FN #= 0 and FE #= 0 and FS #= 0 and FW #= 0,
+                    N + E + S + W #\= 0 => FN #= -(FS) and FE #= -(FW) and FN + FE +FS + FW #= 0
 			)
 		),
 
         % find a solution
 		statistics(hr_time, Start1),
         %labeling(NESW),
-		search([NESW,FlowNESW], 0, input_order, indomain, complete, [backtrack(Backtracks1)]),
+        collection_to_list(NESW, Vars1),
+        collection_to_list(FlowNESW, Vars2),
+        append(Vars1, Vars2, Vars),
+		search(Vars, 0, input_order, indomain, complete, [backtrack(Backtracks1)]),
 		statistics(hr_time, End1),
 		Time is End1 - Start1,
 		Backtracks is Backtracks1,
@@ -191,12 +186,11 @@ makeFromPuzzle(Id, Board) :-
 	dim(Board, [Imax,Imax]),
 	( foreachindex([I,J],Board), param(Board,P) do
 		( member((I,J,A), P) ->
-			Board[I,J] #= A
+			Board[I,J] is A
 		;
-			Board[I,J] #= 0 
+			Board[I,J] is 0 
 		)
-	),
-	labeling(Board).
+	).
 
 % Examples
 
