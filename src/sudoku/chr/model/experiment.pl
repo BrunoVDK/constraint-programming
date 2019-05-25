@@ -1,10 +1,13 @@
 %
-% Channeling-constraints-only model for the Sudoku CHR solver.
+% Interpretation of the channeling-only viewpoint.
+%   This does the extra2 puzzle in 0 backtracks.
+% It applies all single-candidate & single-position rules.
+% Not really purely in CHR.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-:- module(channeling_full, [solve/3]).
+:- module(experiment, [solve/3]).
 :- use_module(library(chr)).
 :- use_module(library(lists)).
 

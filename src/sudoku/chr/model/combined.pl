@@ -1,6 +1,6 @@
 %
-% Combined (classic+dual4) model for the Sudoku CHR solver.
-%   dual4 means -> Block x Value => Position
+% Combined model for the Sudoku CHR solver.
+%   This corresponds to classic + dual4 in the ECLiPSe versions.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
@@ -9,120 +9,126 @@
 :- use_module(library(chr)).
 :- use_module(library(lists)).
 
-% cell/3 : Block x Position x Corresponding puzzle variable = to read solution
-% val/3 : Block x Value x Position = assigned cell
-% var/4 : Block x Value x Domain length x Domain = decision variable
-:- chr_constraint cell/3, val/3, var/4, first_fail/2, rowpos/4, colpos/4, val_classic/3, var_classic/4, blocksize/1, pos/4.
+:- chr_constraint init_domain_primal/2, init_domain_primal/4, setup/4, setup_row/5.
+:- chr_constraint init_domain_dual/2, init_domain_dual/4, generate_domains/5, assign_values/6.
+:- chr_constraint value/5, variable/7.
+:- chr_constraint dual4/5, vardual4/5. % cell/5
+:- chr_constraint first_fail/2.
 
-% ---------------------------
-%        CHR rule base
-% ---------------------------
+%
+%   PRIMAL propagation
+%
 
-% Constraint propagation (forward checking)
-val_classic(R,C,_) \ var_classic(R,C,_,_) # passive <=> true.
-val_classic(R,_,Val) \ var_classic(R,C,L,Domain) # passive <=>
-    select(Val,Domain,NewDomain) | NewL is L-1, NewL > 0, var_classic(R,C,NewL,NewDomain).
-val_classic(_,C,Val) \ var_classic(R,C,L,Domain) # passive <=>
-    select(Val,Domain,NewDomain) | NewL is L-1, NewL > 0, var_classic(R,C,NewL,NewDomain).
-val_classic(R1,C1,Val), blocksize(K) # passive \ var_classic(R2,C2,L,Domain) # passive <=>
-    block(K,R1,C1,B), block(K,R2,C2,B), select(Val,Domain,NewDomain)
-    | NewL is L-1, NewL > 0, var_classic(R2,C2,NewL,NewDomain).
-pos(R,C,B,P) # passive \ var(B,V,_,_) # passive, val_classic(R,C,V) <=> val(B,V,P).
-val_classic(_,_,_) <=> true.
+value(A,B,C,D,Val) \ variable(A,B,C,D,Var,_,_) # passive <=> Var is Val.
+dual4(A,B,_,_,Val) \ vardual4(A,B,Val,_,_) # passive <=> true.
 
 % Constraint propagation (forward checking)
-val(B,V,_) \ var(B,V,_,_) # passive <=> true.
-val(B,_,Pos) \ var(B,V,L,Domain) # passive <=>
-    select(Pos,Domain,NewDomain) | NewL is L-1, NewL > 0, var(B,V,NewL,NewDomain).
-val(B1,V,Pos) \ rowpos(B1,Pos,B2,Delete) # passive, var(B2,V,_,Domain) # passive
-    <=> subtract(Domain,Delete,NewDomain) |
-    length(NewDomain,NewL), NewL > 0, var(B2,V,NewL,NewDomain).
-val(B1,V,Pos) \ colpos(B1,Pos,B2,Delete) # passive, var(B2,V,_,Domain) # passive
-    <=> subtract(Domain,Delete,NewDomain) |
-    length(NewDomain,NewL), NewL > 0, var(B2,V,NewL,NewDomain).
-val(B,Value,P), cell(B,P,Variable) # passive <=> Variable = Value.
-pos(R,C,B,P) # passive \ var_classic(R,C,_,_) # passive, val(B,V,P) <=> val_classic(R,C,V).
-val(_,_,_) <=> true.
+value(_,B,_,D,V) \ variable(A,B,C,D,Var,_,[V,LastV]) # passive
+    <=> value(A,B,C,D,LastV), Var = LastV.
+value(_,B,_,D,V) \ variable(A,B,C,D,Var,_,[LastV,V]) # passive
+    <=> value(A,B,C,D,LastV), Var = LastV.
+value(A,_,C,_,Val) \ variable(A,B,C,D,V,L,Domain) # passive <=>
+    select(Val,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, variable(A,B,C,D,V,NewL,NewDomain).
+value(_,B,_,D,Val) \ variable(A,B,C,D,V,L,Domain) # passive <=>
+    select(Val,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, variable(A,B,C,D,V,NewL,NewDomain).
+value(A,B,_,_,Val) \ variable(A,B,C,D,V,L,Domain) # passive <=>
+    select(Val,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, variable(A,B,C,D,V,NewL,NewDomain).
+value(_,_,_,_,_) <=> true.
+
+dual4(A,B,_,_,Val) \ vardual4(A,B,Val,_,_) # passive <=> true.
+
+%
+%   DUAL propagation
+%
+
+% Constraint propagation (forward checking)
+dual4(A,B,C,D,_) \ vardual4(A,B,Val,L,Domain) # passive <=> % alldiff blocks
+    select(C-D,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, vardual4(A,B,Val,NewL,NewDomain).
+dual4(A,_,C,_,Val) \ vardual4(A,B,Val,_,Domain) # passive <=>
+    include(\=(C-_),Domain,NewDomain)
+    | length(NewDomain,NewL), NewL > 0, vardual4(A,B,Val,NewL,NewDomain).
+dual4(_,B,_,D,Val) \ vardual4(A,B,Val,_,Domain) # passive <=>
+    include(\=(_-D),Domain,NewDomain)
+    | length(NewDomain,NewL), NewL > 0, vardual4(A,B,Val,NewL,NewDomain).
+dual4(_,_,_,_,_) <=> true.
 
 % First Fail heuristic
-blocksize(K) # passive \ first_fail(Counter,Max), var(B,V,Counter,Domain) # passive
-    <=> choose_val(Val,Domain), row(K,B,Val,R), column(K,B,Val,C),
-        val_classic(R,C,V), val(B,V,Val), first_fail(1,Max).
-blocksize(K) # passive \ first_fail(Counter,Max), var_classic(R,C,Counter,Domain) # passive
-    <=> choose_val(Val,Domain), block(K,R,C,B), position(K,R,C,P),
-        val_classic(R,C,Val), val(B,Val,P), first_fail(1,Max).
-first_fail(Counter,Max)
-    <=> Counter < Max | NewCounter is Counter + 1, first_fail(NewCounter,Max).
-first_fail(_,_) \ rowpos(_,_,_,_) # passive <=> true. % Constraints that weren't propagated
-first_fail(_,_) \ colpos(_,_,_,_) # passive <=> true. % Constraints that weren't propagated
-first_fail(_,_), blocksize(_) <=> true. % Only remove once as there is max one of each
+first_fail(Counter,Max), variable(A,B,C,D,Var,Counter,Dom) # passive
+    <=> member(Val,Dom), value(A,B,C,D,Val), dual4(A,B,C,D,Val), Var is Val, first_fail(1,Max).
+first_fail(Counter,Max), vardual4(A,B,Val,Counter,Dom) # passive
+    <=> member(C-D,Dom), dual4(A,B,C,D,Val), value(A,B,C,D,Val), first_fail(1,Max).
+first_fail(Counter,Max) <=> Counter < Max | NewCounter is Counter + 1, first_fail(NewCounter,Max).
+first_fail(_,_), init_domain_primal(_,_), init_domain_dual(_,_) <=> true.
 
-% The value heuristic
-choose_val(Val, Domain) :- member(Val, Domain).
-
-% -----------------------------------------------
-%  Entry point + utility functions for the model
-% -----------------------------------------------
-
-% Solve the given Sudoku puzzle with the dual model.
-%
-% @param Puzzle     The input puzzle as a list of lists.
-% @param N          The dimension of the puzzle.
-% @param K          The dimension of blocks.
-solve(Puzzle, N, K) :-
-    blocksize(K),
-    register_puzzle_classic(Puzzle, N, K),
-    register_puzzle_dual(Puzzle, N, K),
+% Solve the given puzzle (has to be a procedure, not a rule)
+solve(P,N,K) :-
+    flatten(P, Puzzle),
+    % PRIMAL
+    init_domain_primal(max,[],N,N), % Generate initial domain
+    setup(dom,1,P,K), % Generate domains
+    setup(val,1,P,K), % Register pre-filled cells
+    % DUAL
+    init_domain_dual(min,[],N,N), % Generate initial domain
+    generate_domains(1,1,1,1,K), % Generate domains
+    assign_values(1,1,1,1,K,Puzzle), % Register pre-filled cells
     first_fail(1,N).
 
-% Register the pre-filled cells in the given puzzle (classic model).
-%
-% @param Puzzle     The input puzzle as a list of lists.
-% @param N          The dimension of the puzzle.
-% @param K          The dimension of blocks.
-% @note No safety checks are done.
-% @note Findall won't work here as it backtracks which undoes the insertion of constraints.
-% @note Probably should have been written with recursion.
-register_puzzle_classic(Puzzle, N, _K) :-
-    flatten(Puzzle, FlatPuzzle),
-    findall(R-C-N-D, (create_domain(N,D),between(1,N,R),between(1,N,C)), Cells),
-    maplist(generate_domain_classic, Cells, FlatPuzzle),
-    maplist(assign_value_classic, Cells, FlatPuzzle).
-generate_domain_classic(R-C-N-Domain, V) :- var(V) -> var_classic(R,C,N,Domain) ; true.
-assign_value_classic(R-C-_-_, V) :- nonvar(V) -> val_classic(R,C,V) ; true.
+% -----------
+%   PRIMAL
+% -----------
 
-% Register the pre-filled cells in the given puzzle (dual model).
-%
-% @param Puzzle     The input puzzle as a list of lists.
-% @param N          The dimension of the puzzle.
-% @param K          The dimension of blocks.
-% @note No safety checks are done.
-register_puzzle_dual(Puzzle, N, K) :-
-    findall(B-V-N-D, (create_domain(N,D),between(1,N,B),between(1,N,V)), Vars),
-    maplist(generate_domain, Vars),
-    findall(B-P-B2-DelRow-DelCol,
-            (between(1,N,B),between(1,N,P),row(K,B,P,R),column(K,B,P,C),between(1,N,B2),B\=B2,
-            row_overlap(N,K,R,B2,DelRow), col_overlap(N,K,C,B2,DelCol)),
-            Combs),
-    maplist(overlap, Combs),
-    flatten(Puzzle, FlatPuzzle),
-    findall(B-P,
-            (between(1,N,R),between(1,N,C),block(K,R,C,B), position(K,R,C,P)),
-            Cells),
-    maplist(associate_variable, Cells, FlatPuzzle),
-    maplist(assign_value, Cells, FlatPuzzle),
-    % Positional constraints
-    findall(R-C-B-P, (between(1,N,B),between(1,N,P),row(K,B,P,R),column(K,B,P,C)), Pos),
-    maplist(pos_constraint, Pos).
+% Make a list from 1 to N
+init_domain_primal(min,L,1,N) <=> init_domain_primal(N,[1|L]).
+init_domain_primal(max,L,1,N) <=> reverse([1|L],D), init_domain_primal(N,D).
+init_domain_primal(Heur,L,X,N) <=> NewX is X - 1, init_domain_primal(Heur,[X|L],NewX,N).
 
-row_overlap(N, K, R, B, Delete) :- findall(P, (between(1,N,P),row(K,B,P,R)), Delete).
-col_overlap(N, K, C, B, Delete) :- findall(P, (between(1,N,P),column(K,B,P,C)), Delete).
+% Generate the domains for the input puzzle
+% Reversal of domain is for indomain_max
+setup(Mode,R,[Row|Rows],K) <=> setup_row(Mode,R,1,Row,K), NewR is R + 1, setup(Mode,NewR,Rows,K).
+setup_row(val,R,C,[X|Xs],K)
+    <=> nonvar(X) | V is (R+2)//3, W is (C+2)//3, Y is ((R-1) mod 3)+1, Z is ((C-1) mod 3)+1, value(V,W,Y,Z,X), NewC is C + 1, setup_row(val,R,NewC,Xs,K).
+setup_row(val,R,C,[X|Xs],K)
+    <=> var(X) | NewC is C + 1, setup_row(val,R,NewC,Xs,K).
+init_domain_primal(L,D) # passive \ setup_row(dom,R,C,[X|Xs],K)
+    <=> var(X) | V is (R+2)//3, W is (C+2)//3, Y is ((R-1) mod 3)+1, Z is ((C-1) mod 3)+1, variable(V,W,Y,Z,X,L,D), NewC is C + 1, setup_row(dom,R,NewC,Xs,K).
+setup_row(dom,R,C,[X|Xs],K)
+    <=> nonvar(X) | NewC is C + 1, setup_row(dom,R,NewC,Xs,K).
+setup_row(_,_,_,_,_) <=> true.
+setup(_,_,_,_) <=> true.
 
-generate_domain(B-V-N-D) :- var(B,V,N,D).
-overlap(B1-P-B2-DelRow-DelCol) :-
-    (DelRow \= [] -> rowpos(B1,P,B2,DelRow) ; true),
-    (DelCol \= [] -> colpos(B1,P,B2,DelCol) ; true).
-assign_value(B-P, V) :- (nonvar(V) -> val(B,V,P) ; true).
-associate_variable(B-P, V) :- (var(V) -> cell(B,P,V) ; true).
+% --------
+%   DUAL
+% --------
 
-pos_constraint(R-C-B-P) :- pos(R,C,B,P).
+% Make a list with positions
+init_domain_dual(min,L,1,N) <=> init_domain_dual(N,[1-1|L]).
+init_domain_dual(max,L,1,N) <=> reverse([1-1|L],D), init_domain_dual(N,D).
+init_domain_dual(Heur,L,X,N)
+    <=> NewX is X - 1,
+    A is (X+2)//3, B is ((X-1) mod 3)+1,
+    init_domain_dual(Heur,[A-B|L],NewX,N).
+
+% Generate domains for all cells
+generate_domains(0,_,_,_,_) <=> true.
+init_domain_dual(L,Dom) # passive \ generate_domains(A,B,C,D,K) <=>
+    Val is K*(C-1)+D,
+    vardual4(A,B,Val,L,Dom),
+    (D < K -> NewD is D + 1, NewC is C, NewB is B, NewA is A ; NewD is 1,
+    (C < K -> NewC is C + 1, NewB is B, NewA is A ; NewC is 1,
+    (B < K -> NewB is B + 1, NewA is A ; NewB is 1,
+    (A < K -> NewA is A + 1 ; NewA is 0)))),
+    generate_domains(NewA,NewB,NewC,NewD,K).
+
+% Assign values (= register pre-filled cells)
+assign_values(_,_,_,_,_,[]) <=> true.
+assign_values(A,B,C,D,K,[P|Puzzle]) <=>
+    (nonvar(P) -> dual4(A,C,B,D,P) ; true), % cell(A,C,B,D,P)
+    (D < K -> NewD is D + 1, NewC is C, NewB is B, NewA is A ; NewD is 1,
+    (C < K -> NewC is C + 1, NewB is B, NewA is A ; NewC is 1,
+    (B < K -> NewB is B + 1, NewA is A ; NewB is 1,
+    (A < K -> NewA is A + 1 ; NewA is 1)))),
+    assign_values(NewA,NewB,NewC,NewD,K,Puzzle).

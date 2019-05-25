@@ -51,12 +51,13 @@ Combining two viewpoints adds redundancy, leading to more propagation. The numbe
 
 Some of the viewpoints considered previously were implemented in \texttt{CHR}. The runtimes are shown in table \ref{tab:res4}. Initially the \texttt{first\_fail} variable heuristic and the \texttt{indomain\_min} value heuristic were used. These are easy to implement and generally perform quite nicely. Based on previous experiments with ECLiPSe it was concluded that (at least for the given benchmarks) \texttt{indomain\_max} would be a better choice for the classic model. It cut runtime by about half, yet increased the runtime of the \texttt{dual4} model which shows that indeed, models and heuristics interact.\\\par 
 
-Because the channeling-only viewpoint performed best in the ECLiPSe experiments an attempt was made at implementing it in \texttt{CHR}. The approach that was used led to complicated code and - ironically - the slowest runtimes seen yet. After a related failed experiment\footnote{At some point a constraint \texttt{pos/4} was used to convert from \textit{row-column} combinations to the corresponding blocks and positions (e.g. \texttt{pos(2,3,1,6)}). This slowed down the algorithm a lot because it increased the size of the constraint store. Encoding positions with 4 coordinates worked better.} the focus was laid on keeping the code more simple and adding redundant constraints. A few of the rules discussed by Laburthe \cite{article:laburthe} were tested out (\textit{x-wing} and \textit{single-position}) but the runtime increased because the likelihood that these constraints are applicable is generally too low to compensate for having to process the rules every time a variable gets assigned.\par
-In example code Gonzalez \& Christiansen use a 4-coordinate approach ($a\times b\times c\times d$ with $a\times b$ designating a block, $c$ a row - and $d$ a column within that block). This looked like an elegant trick to try out as it makes it unnecessary to convert from \textit{row-column} combinations to block numbers. A form of pre-processing which did reduce total runtime (for the classic model) by about 4 seconds. \\\par
+Because the channeling-only viewpoint performed best in the ECLiPSe experiments an attempt was made at implementing it in \texttt{CHR}. The approach that was used led to complicated code and - ironically - the slowest runtimes seen yet. After a related failed experiment\footnote{At some point a constraint \texttt{pos/4} was used to convert from \textit{row-column} combinations to the corresponding blocks and positions (e.g. \texttt{pos(2,3,1,6)}). This slowed down the algorithm a lot because it increased the size of the constraint store. Encoding positions with 4 coordinates worked better.} the focus was laid on keeping the code more simple and adding redundant constraints. A few of the rules discussed by Laburthe \cite{article:laburthe} were tested out. The \textit{x-wing} rule was of no use, but adding a \textit{single-position} rule decreased the runtime. \\\par
 
-Eventually based on all the experiments a second attempt at implementing the channeling-only model was made.\\\par 
+After this experiment a second attempt was made at implementing some sort of channeling-only model, or at least a model which would detect when values can only be put in one cell in a given row, column or block. By applying all the \textit{single-position} rules, basically. While technically speaking no channeling is done in the implementation of this experimental model, the number of backtracks decreased starkly\footnote{It's a little harder to count the number of backtracks in \texttt{CHR}. Because the channeling-only model solves the \textit{extra2} puzzle with zero backtracks the \texttt{CHR} model was tested on that one, and it also did zero backtracking.} and the total runtime decreased in comparison with the classic model.\\\par
 
-As in the previous section, two of the \texttt{CHR} viewpoints were combined in one single model. It generally performed at least as well as the worst of the two other models except when runtime was already low. [EXPLANATION]
+In example code Gonzalez \& Christiansen use a 4-coordinate approach ($a\times b\times c\times d$ with $a\times b$ designating a block, $c$ a row - and $d$ a column within that block). This looked like an elegant trick to try out as it makes it unnecessary to convert from \textit{row-column} combinations to block numbers. A form of pre-processing which did reduce runtime (for the classic model) by a few seconds. Applying it in the experimental model decreased total runtime to about 4 seconds.\\\par
+
+As in the previous section, two of the \texttt{CHR} viewpoints were combined in one single model. For every puzzle it generally performed at least as well as the worst of the two other models - with a few exceptions. Sometimes it performed better than both, because the propagation achieved by the separate models and reduction in backtracks quickened the search enough to compensate for the increased complexity of the model. Total runtime clearly is highest in the dual model, lower in the classic model, even lower in the combined model and lowest in the experimental model discussed previously.
 
 \newpage
 \begin{table}[h]
@@ -139,25 +140,24 @@ Total/Average (backtracks) & 8592/613 & 2702/193 & 847/61 & 268/19
 \bgroup
 \def\arraystretch{1.3}
 \begin{tabular}{cccc|ccc|c}
-\multicolumn{1}{l}{} & classic & dual & combined & classic (alt) & dual (alt) & combined (alt) & channeling-only \\ \hline
-\textit{lambda} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{hard17} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{eastermonster} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{tarek\_052} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{goldennugget} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{coloin} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{extra2} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{extra3} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{extra4} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{inkara2012} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{clue18} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{clue17} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{sudowiki\_nb28} & 0 & 0 & 0 & 0 & 0 & 0  \\
-\textit{sudowiki\_nb49} & 0 & 0 & 0 & 0 & 0 & 0  \\\hline
-Total/Average & 0 & 0 & 0 & 0 & 0 & 0  \\
-Total/Average (minimum) & 0 & 0 & 0 & 0 & 0  & 0                     
+\multicolumn{1}{l}{} & classic & dual & combined & experiment \\ \hline
+\textit{lambda} & 64 & 23 & 13 & 67  \\
+\textit{hard17} & 283 & 115 & 35 & 63  \\
+\textit{eastermonster} & 258 & 657 & 228 & 223  \\
+\textit{tarek\_052} & 273 & 2596 & 604 & 72  \\
+\textit{goldennugget} & 100 & 3438 & 624 & 467  \\
+\textit{coloin} & 433 & 5764 & 633 & 648  \\
+\textit{extra2} & 2426 & 18 & 40 & 56  \\
+\textit{extra3} & 46 & 25 & 137 & 54  \\
+\textit{extra4} & 20 & 22 & 43 & 52  \\
+\textit{inkara2012} & 404 & 1875 & 248 & 306  \\
+\textit{clue18} & 35 & 139 & 619 & 762  \\
+\textit{clue17} & 913 & 58 & 44 & 47  \\
+\textit{sudowiki\_nb28} & 141 & 1378 & 66 & 68  \\
+\textit{sudowiki\_nb49} & 55 & 1289 & 553 & 169  \\\hline
+Total/Average & 5452/389 & 17397/1242 & 4004/286 & 3702/264  \\
 \end{tabular}
 \egroup
-\caption{Runtimes for the CHR Sudoku solver - shown in milliseconds. Dual corresponds to \texttt{dual4} in the ECLiPSe version, dual (bis) with \texttt{dual3}.}
+\caption{Runtimes for the CHR Sudoku solver - shown in milliseconds. Dual corresponds to \texttt{dual4} in the ECLiPSe version. The experimental viewpoint combines the classic viewpoint with all \textit{single-position} rules. The fact that the classic viewpoint outperforms the dual model by a large margin can partly be explained by the use of two little redundant rules that were added to quicken matching.}
 \label{tab:res4}
 \end{table}
