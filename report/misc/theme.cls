@@ -190,7 +190,7 @@
     \Huge \bfseries #1\par\nobreak
     \vskip 40\p@
   }}
-\geometry{tmargin=3cm, bmargin=2.2cm, lmargin=2.2cm, rmargin=2cm}
+\geometry{tmargin=2.2cm, bmargin=2.2cm, lmargin=2cm, rmargin=2cm}
 \rand
 \newtotcounter{InstructionCounter}
 \def\IfEmpty#1#2#3{%

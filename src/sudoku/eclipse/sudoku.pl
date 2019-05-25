@@ -18,13 +18,13 @@
 % @version  1.0
 
 :- lib(ic).
-%:- import alldifferent/1 from ic_global.
+:- import alldifferent/1 from ic_global.
 :- import bool_channeling/3 from ic_global.
 
 :- compile('../utils.pl'). % Import utility functions
 :- compile('../benchmarks/benchmarks').
 
-:- compile('model/combined'). % Choose the model here
+:- compile('model/channeling'). % Choose the model here
 
 % Solve the Sudoku with the given name.
 %

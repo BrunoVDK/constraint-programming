@@ -67,7 +67,9 @@ solve(Puzzle, N, K) :-
 % @param K          The dimension of blocks.
 % @note No safety checks are done.
 register_puzzle(Puzzle, N, K) :-
-    findall(B-V-N-D, (create_domain(N,D),between(1,N,B),between(1,N,V)), Vars),
+    create_domain(N, Domain),
+    reverse(Domain, D),
+    findall(B-V-N-D, (between(1,N,B),between(1,N,V)), Vars),
     maplist(generate_domain, Vars),
     findall(B-P-B2-DelRow-DelCol,
             (between(1,N,B),between(1,N,P),row(K,B,P,R),column(K,B,P,C),between(1,N,B2),B\=B2,

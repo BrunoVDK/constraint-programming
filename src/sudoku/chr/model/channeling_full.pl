@@ -1,86 +1,128 @@
 %
-% Channeling constraints only model for the Sudoku CHR solver.
+% Channeling-constraints-only model for the Sudoku CHR solver.
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
 
-:- module(channeling, [solve/3,register_puzzle/3]).
+:- module(channeling_full, [solve/3]).
 :- use_module(library(chr)).
 :- use_module(library(lists)).
 
-:- chr_constraint primal/3, varprimal/5, vardual1/4, vardual2/4, vardual3/4, first_fail/2, variable/3, blocksize/1, cleanup/0.
+:- chr_constraint first_fail/2. % Variable heuristics
+:- chr_constraint primal/5, varprimal/7. % Primal constraints
+:- chr_constraint vardual1/5, vardual2/5, vardual3/5. % Dual constraints
+
+% --------------------------
+%       CHR rule base
+% --------------------------
+
+primal(A,C,_,_,Val) \ vardual1(A,C,Val,_,_) # passive <=> true.
+primal(_,_,B,D,Val) \ vardual2(B,D,Val,_,_) # passive <=> true.
+primal(A,_,B,_,Val) \ vardual3(A,B,Val,_,_) # passive <=> true.
+
+% Channeling constraints
+
+primal(A,C,_,_,Val) \ varprimal(A,C,B,D,V,L,Domain) # passive
+    <=> select(Val,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, varprimal(A,C,B,D,V,NewL,NewDomain).
+primal(_,_,B,D,Val) \ varprimal(A,C,B,D,V,L,Domain) # passive
+    <=> select(Val,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, varprimal(A,C,B,D,V,NewL,NewDomain).
+primal(A,_,B,_,Val) \ varprimal(A,C,B,D,V,L,Domain) # passive
+    <=> select(Val,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, varprimal(A,C,B,D,V,NewL,NewDomain).
+
+primal(A,C,B,D,Val) \ vardual1(X,Y,Val,L,Domain) # passive
+    <=> filter(dual1_guard,A,C,B,D,X,Y,Domain,NewDomain,L,NewL)
+    | NewL > 0, vardual1(X,Y,Val,NewL,NewDomain).
+primal(A,C,B,D,_) \ vardual1(A,C,Val,L,Domain) # passive
+    <=> select(B-D,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, vardual1(A,C,Val,NewL,NewDomain).
+
+primal(A,C,B,D,Val) \ vardual2(X,Y,Val,L,Domain) # passive
+    <=> filter(dual2_guard,A,C,B,D,X,Y,Domain,NewDomain,L,NewL)
+    | NewL > 0, vardual2(X,Y,Val,NewL,NewDomain).
+primal(A,C,B,D,_) \ vardual2(B,D,Val,L,Domain) # passive
+    <=> select(A-C,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, vardual2(B,D,Val,NewL,NewDomain).
+
+primal(A,C,B,D,Val) \ vardual3(X,Y,Val,L,Domain) # passive
+    <=> filter(dual3_guard,A,C,B,D,X,Y,Domain,NewDomain,L,NewL)
+    | NewL > 0, vardual3(X,Y,Val,NewL,NewDomain).
+primal(A,C,B,D,_) \ vardual3(A,B,Val,L,Domain) # passive
+    <=> select(C-D,Domain,NewDomain)
+    | NewL is L-1, NewL > 0, vardual3(A,B,Val,NewL,NewDomain).
+
+primal(A,C,B,D,Val) \ varprimal(A,C,B,D,Var,_,_) # passive
+    <=> Var is Val.
+
+filter(Guard, A, C, B, D, X, Y, Domain, NewDomain, OldLength, NewLength) :-
+    filter(Guard, A, C, B, D, X, Y, Domain, [], NewDomain, 0, NewLength),
+    NewLength \= OldLength.
+filter(_,_, _, _, _, _, _, [], FilteredList, FilteredList, NewLength, NewLength).
+filter(Guard, A, C, B, D, X, Y, [Z-W|Rest], Acc, FilteredList, AccLength, Length) :-
+    (call(Guard, A-C-B-D, X-Y-Z-W) ->
+        filter(Guard, A, C, B, D, X, Y, Rest, Acc, FilteredList, AccLength, Length)
+    ;
+        NewLength is AccLength + 1,
+        filter(Guard, A, C, B, D, X, Y, Rest, [Z-W|Acc], FilteredList, NewLength, Length)
+    ).
+
+dual1_guard(A-C-B-D,X-Y-Z-W) :- (A == X, C == Y) ; (B == Z, D == W) ; (A == X, B == Z).
+dual2_guard(A-C-B-D,X-Y-Z-W) :- (A == Z, C == W) ; (B == X, D == Y) ; (A == Z, B == X).
+dual3_guard(A-C-B-D,X-Y-Z-W) :- (A == X, C == Z) ; (B == Y, D == W) ; (A == X, B == Y).
+
+primal(_,_,_,_,_) <=> true.
+
+% Only one value left in one of the viewpoints, assign the corresponding cell
+first_fail(1,N), varprimal(A,C,B,D,Var,1,[Val]) # passive
+    <=> primal(A,C,B,D,Val), Var = Val, first_fail(1,N).
+first_fail(1,N), vardual1(A,C,V,1,[B-D]) # passive
+    <=> primal(A,C,B,D,V), first_fail(1,N).
+first_fail(1,N), vardual2(B,D,V,1,[A-C]) # passive
+    <=> primal(A,C,B,D,V), first_fail(1,N).
+first_fail(1,N), vardual3(A,B,V,1,[C-D]) # passive
+    <=> primal(A,C,B,D,V), first_fail(1,N).
+
+% First Fail heuristic
+first_fail(Counter,Max), varprimal(A,C,B,D,Var,Counter,Dom) # passive
+    <=> member(Val,Dom), primal(A,C,B,D,Val), Var = Val, first_fail(1,Max).
+first_fail(Counter,Max)
+    <=> Counter < Max | NewCounter is Counter + 1, first_fail(NewCounter,Max).
+first_fail(_,_) \ vardual1(_,_,_,_,_) <=> true.
+first_fail(_,_) \ vardual2(_,_,_,_,_) <=> true.
+first_fail(_,_) \ vardual3(_,_,_,_,_) <=> true.
+first_fail(_,_) <=> true.
 
 % ---------------------------
-%        CHR rule base
+% Register input puzzle
+%   Not done in CHR because it would be more cluttered. In the other viewpoints it's done
+%   in CHR.
 % ---------------------------
 
-% Primal is assigned, assign duals
-primal(R,_,V) \ vardual1(R,V,_,_) # passive <=> true.
-primal(_,C,V) \ vardual2(C,V,_,_) # passive <=> true.
-primal(R,C,V), blocksize(K) # passive \ vardual3(B,V,_,_) # passive <=> block(K,R,C,B) | true.
+% Solve the given puzzle (has to be a procedure, not a rule)
+solve(P, N, K) :-
+    register_puzzle(P, N, K),
+    first_fail(1,N), !.
 
-% Dual is assigned, assign primal
-vardual1(R,V,1,[C]), varprimal(R,C,Var,_,_) # passive <=> primal(R,C,V), Var is V.
-vardual2(C,V,1,[R]), varprimal(R,C,Var,_,_) # passive <=> primal(R,C,V), Var is V.
-blocksize(K) # passive \ vardual3(B,V,1,[P]), varprimal(R,C,Var,_,_) # passive <=> row(K,B,P,R), column(K,B,P,C) | primal(R,C,V), Var is V.
-
-% Reification logic
-primal(R,_,V) \ varprimal(R,C,Var,L,D) # passive <=> select(V,D,NewD) | NewL is L-1, NewL > 0, varprimal(R,C,Var,NewL,NewD).
-primal(_,C,V) \ varprimal(R,C,Var,L,D) # passive <=> select(V,D,NewD) | NewL is L-1, NewL > 0, varprimal(R,C,Var,NewL,NewD).
-primal(R,C,V), blocksize(K) # passive \ varprimal(R2,C2,Var,L,D) # passive <=> block(K,R,C,B), block(K,R2,C2,B), select(V,D,NewD) | NewL is L-1, NewL > 0, varprimal(R2,C2,Var,NewL,NewD).
-primal(R,C,_) \ vardual1(R,V,L,D) # passive <=> select(C,D,NewD) | NewL is L-1, NewL > 0, vardual1(R,V,NewL,NewD).
-primal(R,C,_) \ vardual2(C,V,L,D) # passive <=> select(R,D,NewD) | NewL is L-1, NewL > 0, vardual2(C,V,NewL,NewD).
-primal(R,C,_), blocksize(K) # passive \ vardual3(B,V,L,D) # passive <=> block(K,R,C,B), position(K,R,C,P), select(P,D,NewD) | NewL is L-1, NewL > 0, vardual3(B,V,NewL,NewD).
-primal(_,_,_) <=> true.
-
-% First-fail + indomain_min heuristic
-first_fail(L,N), varprimal(R,C,Var,L,Domain) # passive
-    <=> member(V,Domain), primal(R,C,V), Var is V, first_fail(1,N).
-first_fail(I,N) <=> I < N | NewI is I + 1, first_fail(NewI,N).
-first_fail(_,_), blocksize(_) <=> true.
-
-% -----------------------------------------------
-%  Entry point + utility functions for the model
-% -----------------------------------------------
-
-% Solve the given Sudoku puzzle with the dual model.
-%
-% @param Puzzle     The input puzzle as a list of lists.
-% @param N          The dimension of the puzzle.
-% @param K          The dimension of blocks.
-solve(Puzzle, N, K) :-
-    blocksize(K),
-    register_puzzle(Puzzle, N, K),
-    first_fail(1,N).
-
-% Register the pre-filled cells in the given puzzle.
-%
-% @param Puzzle     The input puzzle as a list of lists.
-% @param N          The dimension of the puzzle.
-% @param K          The dimension of blocks.
-% @note No safety checks are done.
-register_puzzle(Puzzle, N, _K) :-
+register_puzzle(Puzzle,N,K) :-
     flatten(Puzzle, FlatPuzzle),
-    create_domain(N, D),
-    % Create domains and assign pre-filled cells
-    findall(R-C-N-D, (between(1,N,R),between(1,N,C)), Cells),
-    maplist(generate_domain, Cells, FlatPuzzle),
-    maplist(assign_value, Cells, FlatPuzzle).
+    create_domain(N, Dom),
+    reverse(Dom, D),
+    create_domain_4coord(K, D4c),
+    findall(X-Y-Z-W-N-D, (between(1,K,X),between(1,K,Y),between(1,K,Z),between(1,K,W)), Cells),
+    maplist(generate_primal_domains, Cells, FlatPuzzle),
+    findall(X-Y-V-N-D4c, (between(1,K,X),between(1,K,Y),between(1,N,V)), DualCells),
+    maplist(generate_dual_domains, DualCells),
+    maplist(assign_values, Cells, FlatPuzzle).
 
-% Generate the domain for the variables.
-% This sets up variable constraints.
-generate_domain(R-C-N-Domain, V) :-
-    vardual1(R,C,N,Domain),
-    vardual2(R,C,N,Domain),
-    vardual3(R,C,N,Domain),
-    (var(V) -> varprimal(R,C,V,N,Domain) ; true).
-% We used a constraint called pos/4 for conversion from RxC -> BxP
-%  But this just made the constraint store larger and it is apparently a problem
-%  for performance.
-% Fruhwirth basically addressed this by using a 4-coordinate approach.
-%  This is probably the way to go.
+generate_primal_domains(A-B-C-D-N-Dom, Var) :-
+    (var(Var) -> varprimal(A,B,C,D,Var,N,Dom) ; true).
 
-% Assign a value to a variable.
-% This sets assigned variables constraints.
-assign_value(R-C-_-_, V) :-
-    (nonvar(V) -> primal(R,C,V) ; true).
+generate_dual_domains(X-Y-V-N-D4c) :-
+    vardual1(X,Y,V,N,D4c),
+    vardual2(X,Y,V,N,D4c),
+    vardual3(X,Y,V,N,D4c).
+
+assign_values(A-B-C-D-_-_, Val) :-
+    (nonvar(Val) -> primal(A,B,C,D,Val) ; true).

@@ -48,6 +48,8 @@ column(K, Block, Cell, Column) :-
 % Generate domain for given N. This is simply the list of integers from 1 to N.
 create_domain(N, Domain) :-
     findall(V, between(1,N,V), Domain).
+create_domain_4coord(K, Domain) :- % Utility function for CHR 4 coordinate approach
+    findall(X-Y, (between(1,K,X), between(1,K,Y)), Domain).
 
 %
 % Print the given Sudoku puzzle.

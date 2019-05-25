@@ -14,7 +14,7 @@ X :: 0..6, \% Weekend constraints\\
 X + Duration \#< 6
 \end{snippet}
 
-Precedence constraints and constraints assuring that no meetings overlap are generated last. The corresponding code is fairly trivial\footnote{Note that all code for this third challenge can be found in \texttt{/src/scheduling/scheduling.pl}.}. The fact that the meeting with the minister should come last is equivalent to adding $N-1$ precedence constraints with $N$ the total number of persons.\\\par
+Precedence constraints and constraints assuring that no meetings overlap are generated last. The corresponding code is fairly trivial\footnote{All code for this third challenge can be found in \texttt{/src/scheduling/scheduling.pl}.}. The fact that the meeting with the minister should come last is equivalent to adding $N-1$ precedence constraints with $N$ the total number of persons.\\\par
 
 The cost function is defined as $(V_{max}\times E)+V$ where $V_{max}$ is the maximum number of rank violations, $E$ is the end time of the meeting with the minister and $V$ is the actual number of rank violations for a given solution. This ensures that whenever two solutions have a different $E$, the solution with the smallest $E$ will have the lowest cost (whatever the number of violations $V$). Yet if two solutions have the same end time $E$, then it's the number of violations $V$ that will determine what solution is best.
 
