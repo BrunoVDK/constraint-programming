@@ -55,8 +55,8 @@ sum(I,J,Sum), west(I,J,W) ==> Sum > 0 | W >= 0, W =< 2.
 sum(I,J,Sum), north(I,J,N), south(I,J,S) ==> Sum == 0 | N == S.
 sum(I,J,Sum), east(I,J,E), west(I,J,W) ==> Sum == 0 | E == W. 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%	Connectedness constraints																						%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%	Connectedness constraints																						% 
 % 1. A cell that isn't an island, neither a bridge, has no flow.													%
 % 2. The net flow in a bridge is 0.																					%
 % 3. If a cell has a flow n in the direction of a neighbor, that neighbor has a flow -n in the opposite direction.	%
@@ -103,16 +103,23 @@ solve(Name) :-
 	;
 		makeFromPuzzle(Name, Board)
 	),
-	dim(Board, [Imax,Jmax]),
+	length(Board,Imax), % get board dimensions
+	Board = [H|_],
+	length(H,Jmax),
 	size(Imax,Jmax),
 	getIslands(Board, Imax, Jmax, Islands),
     Islands = [[A,B]|_],  % pick a sink, always picks the first from the list, this is the island in the lowest row, in the furthest column
 	sink(A,B),
-    Total is length(Islands),
+    length(Islands,Total),
 	total(Total),
 	solve_board(Board,Imax,Jmax),
-	dim(NESW, [Imax,Jmax,4]),
+	length(NESW,Imax), % generate NESW
+	NESW = [NESWRow|_],
+	length(NESWRow,Jmax),
+	NESWRow = [NESWCol|_],
+	length(NESWCol,4),
 	form_solution(NESW,Imax,Jmax),
+	nl,
 	print_board(Board, NESW).
 
 solve_board(Board,Row,Col) :-
@@ -121,17 +128,16 @@ solve_board(Board,Row,Col) :-
 	solve_row(Board,1,MaxRow,MaxCol).
 
 solve_row(_,MaxRow,MaxRow,_).
-solve_row(Board,Acc,MaxRow,MaxCol) :-
-	solve_column(Board,Acc,1,MaxCol),
+solve_row([H|T],Acc,MaxRow,MaxCol) :-
+	solve_column(H,Acc,1,MaxCol),
 	NewAcc is Acc + 1,
-	solve_row(Board,NewAcc,MaxRow,MaxCol).
+	solve_row(T,NewAcc,MaxRow,MaxCol).
 	
 solve_column(_,_,MaxCol,MaxCol).
-solve_column(Board,Row,Acc,MaxCol) :-
-	Sum = Board[Row,Acc],
-	solve_cell(Row,Acc,Sum),
+solve_column([H|T],Row,Acc,MaxCol) :-
+	solve_cell(Row,Acc,H),
 	NewAcc is Acc + 1,
-	solve_column(Board,Row,NewAcc,MaxCol).
+	solve_column(T,Row,NewAcc,MaxCol).
 	
 solve_cell(I,J,Sum) :-
 	cell(I,J),
@@ -143,80 +149,127 @@ form_solution(NESW,Row,Col) :-
 	form_row(NESW,1,MaxRow,MaxCol).
 
 form_row(_,MaxRow,MaxRow,_).
-form_row(NESW,Acc,MaxRow,MaxCol) :-
-	form_column(NESW,Acc,1,MaxCol),
+form_row([H|T],Acc,MaxRow,MaxCol) :-
+	form_column(H,Acc,1,MaxCol),
 	NewAcc is Acc + 1,
-	form_row(NESW,NewAcc,MaxRow,MaxCol).
+	form_row(T,NewAcc,MaxRow,MaxCol).
 	
 form_column(_,_,MaxCol,MaxCol).
-form_column(NESW,Row,Acc,MaxCol) :-
-	N is north(Row,Acc),
-	E is east(Row,Acc),
-	S is south(Row,Acc),
-	W is west(Row,Acc),
-	NESW[Row,Acc,1] = N,
-	NESW[Row,Acc,2] = E,
-	NESW[Row,Acc,3] = S,
-	NESW[Row,Acc,4] = W,
+form_column([H|T],Row,Acc,MaxCol) :-
+	H = [N,E,S,W],
+	north(Row,Acc,N),
+	east(Row,Acc,E),
+	south(Row,Acc,S),
+	west(Row,Acc,W),
 	NewAcc is Acc + 1,
-	solve_column(NESW,Row,NewAcc,MaxCol).
+	solve_column(T,Row,NewAcc,MaxCol).
 	
-% For a puzzle, given as an array, returns a list containing all the islands. 
+% For a puzzle, given as list, returns a list containing all the islands. 
 % An island is represented as [X,Y], the coordinates in the board.
 getIslands(Name, Islands) :-
     board(Name, Board),
-    dim(Board, [Imax,Jmax]),
+	length(Board,I),
+	Board = [H|_T],
+	length(H,J),
+	Imax is I + 1,
+	Jmax is J + 1,
     getIslands(Board, Imax, Jmax, Islands).
-getIslands(Board, Imax, Jmax, Islands) :-
-    getIslands(Board, Imax, Jmax, 1, 1, [], Islands).
-getIslands(Board, Imax, Jmax, A, B, L, Islands) :-
-    ( Board[A,B] > 0 ->
-        Lnew = [[A,B]|L]
-        ;
-        Lnew = L
-    ),
-    Btemp is B+1,
-    (Btemp > Jmax ->
-        Bnew is 1,
-        Anew is A+1
-        ;
-        Bnew is Btemp,
-        Anew is A
-    ),
-    (Anew > Imax ->
-        Islands = Lnew
-        ;
-        getIslands(Board, Imax, Jmax, Anew, Bnew, Lnew, Islands)
-    ). 
 	
-
+getIslands(Board, Imax, Jmax, Islands) :-
+    getIslands_row(Board, 1, Imax, Jmax, [], Islands).
+	
+getIslands_row(_,Imax,Imax,_,Islands,Islands).
+getIslands_row([H|T],Acc,Imax,Jmax,L,Islands) :-
+	getIslands_column(H,Acc,1,Jmax,L,Islands),
+	NewAcc is Acc + 1,
+	getIslands_row(T,NewAcc,Imax,Jmax,L,Islands).
+	
+getIslands_column(_,_,_,Jmax,Jmax,Islands,Islands).
+getIslands_column([H|T],Row,Col,Jmax,L,Islands) :-
+	( H > 0 ->
+		append(L,[H],Lnew)
+	;
+		Lnew =  L
+	),
+	NewCol is Col + 1,
+	getIslands_column(T,Row,NewCol,Jmax,Lnew,Islands).
+	
+	
+% Get an element from a matrix
+getElement(M,I,J,El) :-
+	getRow(M,1,I,Row),
+	getColumn(Row,1,J,El).
+getRow([H|_],I,I,H).
+getRow([_|T],Acc,I,Row) :-
+	NewAcc is Acc + 1,
+	getRow(T,NewAcc,I,Row).
+getColumn([H|_],J,J,H).
+getColumn([_|T],Acc,J,El) :-
+	NewAcc is Acc + 1,
+	getColumn(T,NewAcc,J,El).
+	
 % Turns a puzzle given in the format of the benchmark puzzles into an array.
 makeFromPuzzle(Id, Board) :-
 	puzzle(Id, Imax, P),
-	dim(Board, [Imax,Imax]),
-	( foreachindex([I,J],Board), param(Board,P) do
-		( member((I,J,A), P) ->
-			Board[I,J] is A
-		;
-			Board[I,J] is 0 
-		)
-	).
+	length(Board,Imax),
+	Board = [H|_],
+	length(H,Imax),
+	puzzleToMtx(P,1,Imax,1,Imax,Board).
 	
-print_board(Board, NESW) :-
-        ( foreachindex([I,J],Board), param(Board,NESW) do
-            ( J > 1 -> true ; nl ),
-            Sum is Board[I,J],
-            ( Sum > 0 ->
-                write(Sum)
-            ; 
-                NS is NESW[I,J,1],
-                EW is NESW[I,J,2],
-                symbol(NS, EW, Char),
-                write(Char)
-            ),
-            write(' ')
-        ),
-        nl.
+puzzleToMtx(_,Imax,Imax,Imax,Imax,_).
+puzzleToMtx([(X,Y,V)|T],RowAcc,Imax,ColAcc,Imax,Board) :-
+	( X == RowAcc, Y == ColAcc ->
+		getElement(Board,X,Y,V),
+		Lnew = T
+	;
+		getElement(Board,X,Y,0),
+		Lnew = [(X,Y,V)|T]
+	),
+	TempNewColAcc is ColAcc + 1,
+	( NewColAcc > Imax ->
+		NewColAcc = 1,
+		NewRowAcc is RowAcc + 1
+	;
+		NewColAcc = TempNewColAcc,
+		NewRowAcc = RowAcc
+	),
+	puzzleToMtx(Lnew,NewRowAcc,Imax,NewColAcc,Imax,Board).
+
+% Print the solution usinf the board and the found NESW	
+print_board([],_) :-
+		nl.
+print_board([H|T], [V|W]) :-
+	print_row(H, V),
+	nl,
+	print_board(T,W).
+	
+print_row([],_).
+print_row([H|T], [V|W]) :-
+	( H > 0 ->
+		write(H)
+	;
+		V = [N,E,_,_],
+		( N > 0 ->
+			( N > 1 ->
+				write('X')
+			;
+				write('|')
+			)
+		;
+			( E > 0 ->
+				( E > 1 ->
+					write('=')
+				;
+					write('-')
+				)
+			;
+				true
+			)
+		)
+	),
+	write(' '),
+	print_row(T,W).
+	
 
 %%%%%%%%%%%%%%%%%	
 %	Examples	%
