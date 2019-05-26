@@ -1,4 +1,5 @@
 :- use_module(library(chr)).
+:- ['../benchmarks/hashi_benchmarks'].
 :- chr_constraint size/2, cell/2, sum/3, north/3, east/3, south/3, west/3, fnorth/3, feast/3, fsouth/3, fwest/3, sink/2, total/1.
 
 % size/2:
@@ -90,5 +91,232 @@ cell(I,J), sum(I,J,Sum), fnorth(I,J,N), feast(I,J,E), fsouth(I,J,S), fwest(I,J,W
 % Constraint 5
 
 cell(I,J), sum(I,J,Sum), fnorth(I,J,N), feast(I,J,E), fsouth(I,J,S), fwest(I,J,W), total(T) ==> Sum > 0, sink(I,J) | N + E + S + W == T - 1.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%	Solving a puzzle	%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+solve(Name) :-
+	(
+		board(Name, Board)
+	;
+		makeFromPuzzle(Name, Board)
+	),
+	dim(Board, [Imax,Jmax]),
+	size(Imax,Jmax),
+	getIslands(Board, Imax, Jmax, Islands),
+    Islands = [[A,B]|_],  % pick a sink, always picks the first from the list, this is the island in the lowest row, in the furthest column
+	sink(A,B),
+    Total is length(Islands),
+	total(Total),
+	solve_board(Board,Imax,Jmax),
+	dim(NESW, [Imax,Jmax,4]),
+	form_solution(NESW,Imax,Jmax),
+	print_board(Board, NESW).
+
+solve_board(Board,Row,Col) :-
+	MaxRow is Row + 1,
+	MaxCol is Col + 1,
+	solve_row(Board,1,MaxRow,MaxCol).
+
+solve_row(_,MaxRow,MaxRow,_).
+solve_row(Board,Acc,MaxRow,MaxCol) :-
+	solve_column(Board,Acc,1,MaxCol),
+	NewAcc is Acc + 1,
+	solve_row(Board,NewAcc,MaxRow,MaxCol).
+	
+solve_column(_,_,MaxCol,MaxCol).
+solve_column(Board,Row,Acc,MaxCol) :-
+	Sum = Board[Row,Acc],
+	solve_cell(Row,Acc,Sum),
+	NewAcc is Acc + 1,
+	solve_column(Board,Row,NewAcc,MaxCol).
+	
+solve_cell(I,J,Sum) :-
+	cell(I,J),
+	sum(I,J,Sum).
+	
+form_solution(NESW,Row,Col) :-
+	MaxRow is Row + 1,
+	MaxCol is Col + 1,
+	form_row(NESW,1,MaxRow,MaxCol).
+
+form_row(_,MaxRow,MaxRow,_).
+form_row(NESW,Acc,MaxRow,MaxCol) :-
+	form_column(NESW,Acc,1,MaxCol),
+	NewAcc is Acc + 1,
+	form_row(NESW,NewAcc,MaxRow,MaxCol).
+	
+form_column(_,_,MaxCol,MaxCol).
+form_column(NESW,Row,Acc,MaxCol) :-
+	N is north(Row,Acc),
+	E is east(Row,Acc),
+	S is south(Row,Acc),
+	W is west(Row,Acc),
+	NESW[Row,Acc,1] = N,
+	NESW[Row,Acc,2] = E,
+	NESW[Row,Acc,3] = S,
+	NESW[Row,Acc,4] = W,
+	NewAcc is Acc + 1,
+	solve_column(NESW,Row,NewAcc,MaxCol).
+	
+% For a puzzle, given as an array, returns a list containing all the islands. 
+% An island is represented as [X,Y], the coordinates in the board.
+getIslands(Name, Islands) :-
+    board(Name, Board),
+    dim(Board, [Imax,Jmax]),
+    getIslands(Board, Imax, Jmax, Islands).
+getIslands(Board, Imax, Jmax, Islands) :-
+    getIslands(Board, Imax, Jmax, 1, 1, [], Islands).
+getIslands(Board, Imax, Jmax, A, B, L, Islands) :-
+    ( Board[A,B] > 0 ->
+        Lnew = [[A,B]|L]
+        ;
+        Lnew = L
+    ),
+    Btemp is B+1,
+    (Btemp > Jmax ->
+        Bnew is 1,
+        Anew is A+1
+        ;
+        Bnew is Btemp,
+        Anew is A
+    ),
+    (Anew > Imax ->
+        Islands = Lnew
+        ;
+        getIslands(Board, Imax, Jmax, Anew, Bnew, Lnew, Islands)
+    ). 
+	
+
+% Turns a puzzle given in the format of the benchmark puzzles into an array.
+makeFromPuzzle(Id, Board) :-
+	puzzle(Id, Imax, P),
+	dim(Board, [Imax,Imax]),
+	( foreachindex([I,J],Board), param(Board,P) do
+		( member((I,J,A), P) ->
+			Board[I,J] is A
+		;
+			Board[I,J] is 0 
+		)
+	).
+	
+print_board(Board, NESW) :-
+        ( foreachindex([I,J],Board), param(Board,NESW) do
+            ( J > 1 -> true ; nl ),
+            Sum is Board[I,J],
+            ( Sum > 0 ->
+                write(Sum)
+            ; 
+                NS is NESW[I,J,1],
+                EW is NESW[I,J,2],
+                symbol(NS, EW, Char),
+                write(Char)
+            ),
+            write(' ')
+        ),
+        nl.
+
+%%%%%%%%%%%%%%%%%	
+%	Examples	%
+%%%%%%%%%%%%%%%%%
+
+board(simple,
+     []([](0,1),
+        [](0,1))
+    ).
+
+board(simple2,
+     []([](0,1),
+        [](0,0),
+        [](0,1))
+    ).
+
+board(simple3,
+     []([](1,0,2),
+        [](0,0,0),
+        [](0,0,1))
+    ).
+
+board(simple4,
+     []([](0,1),
+        [](0,0),
+        [](0,0),
+        [](0,1))
+    ).
+
+board(simple5,
+     []([](1,0,1),
+        [](0,0,0))
+    ).
+
+board(simple6,
+     []([](1,1),
+        [](0,0))
+    ).
+	
+board(simple7,
+     []([](1,1))
+    ).
+	
+board(simple8,
+     []([](1,0,0,1))
+    ).
+	
+board(simple9,
+     []([](0,0,0),
+        [](1,0,1))
+    ).
+	
+board(simple10,
+     []([](0,0,1,0,0),
+		[](0,0,0,0,0),
+        [](1,0,3,0,1))
+    ).
+
+board(simple11,
+     []([](0,1,0),
+        [](0,0,0),
+        [](0,1,0))
+    ).
+	
+board(simple12,
+     []([](2,0,2),
+        [](0,0,0),
+        [](1,0,1))
+    ).
+
+board(simple13,
+     []([](1,2),
+        [](0,1))
+    ).
+
+board(stackoverflow,
+     []([](4, 0, 6, 0, 0, 0, 6, 0, 3),
+        [](0, 0, 0, 0, 0, 0, 0, 0, 0),
+        [](0, 1, 0, 0, 0, 0, 0, 0, 0),
+        [](0, 0, 0, 0, 0, 0, 0, 0, 0),
+        [](3, 0, 0, 0, 0, 1, 0, 0, 0),
+        [](0, 0, 0, 0, 0, 0, 0, 0, 0),
+        [](0, 0, 0, 0, 0, 0, 0, 0, 0),
+        [](1, 0, 3, 0, 0, 2, 0, 0, 0),
+        [](0, 3, 0, 0, 0, 0, 4, 0, 1))
+    ).
+board(wikipedia,
+     []([](2, 0, 4, 0, 3, 0, 1, 0, 2, 0, 0, 1, 0),
+        [](0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1),
+        [](0, 0, 0, 0, 2, 0, 3, 0, 2, 0, 0, 0, 0),
+        [](2, 0, 3, 0, 0, 2, 0, 0, 0, 3, 0, 1, 0),
+        [](0, 0, 0, 0, 2, 0, 5, 0, 3, 0, 4, 0, 0),
+        [](1, 0, 5, 0, 0, 2, 0, 1, 0, 0, 0, 2, 0),
+        [](0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 4, 0, 2),
+        [](0, 0, 4, 0, 4, 0, 0, 3, 0, 0, 0, 3, 0),
+        [](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        [](2, 0, 2, 0, 3, 0, 0, 0, 3, 0, 2, 0, 3),
+        [](0, 0, 0, 0, 0, 2, 0, 4, 0, 4, 0, 3, 0),
+        [](0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0),
+        [](3, 0, 0, 0, 0, 3, 0, 1, 0, 2, 0, 0, 2))
+    ).
  
 
