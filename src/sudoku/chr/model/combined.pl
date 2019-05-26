@@ -64,6 +64,10 @@ first_fail(Counter,Max), vardual4(A,B,Val,Counter,Dom) # passive
 first_fail(Counter,Max) <=> Counter < Max | NewCounter is Counter + 1, first_fail(NewCounter,Max).
 first_fail(_,_), init_domain_primal(_,_), init_domain_dual(_,_) <=> true.
 
+%
+%   Entry point
+%
+
 % Solve the given puzzle (has to be a procedure, not a rule)
 solve(P,N,K) :-
     flatten(P, Puzzle),
@@ -77,9 +81,9 @@ solve(P,N,K) :-
     assign_values(1,1,1,1,K,Puzzle), % Register pre-filled cells
     first_fail(1,N).
 
-% -----------
-%   PRIMAL
-% -----------
+%
+%   PRIMAL setup (domain generation + register pre-filled cells)
+%
 
 % Make a list from 1 to N
 init_domain_primal(min,L,1,N) <=> init_domain_primal(N,[1|L]).
@@ -100,9 +104,9 @@ setup_row(dom,R,C,[X|Xs],K)
 setup_row(_,_,_,_,_) <=> true.
 setup(_,_,_,_) <=> true.
 
-% --------
-%   DUAL
-% --------
+%
+%   DUAL setup (domain generation + register pre-filled cells)
+%
 
 % Make a list with positions
 init_domain_dual(min,L,1,N) <=> init_domain_dual(N,[1-1|L]).

@@ -60,7 +60,7 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     Cost #> MaxViolations * (TotalDuration + Durations[N]) + MinViolations,
     % --- Branch and bound ---
     %minimize(labeling(StartTimes), Cost),
-    bb_min(search(StartTimes, 0, input_order, indomain_min, complete, [backtrack(Backtracks),node(daVinci)]), Cost, bb_options{strategy:continue}),
+    bb_min(search(StartTimes, 0, input_order, indomain_min, complete, [backtrack(Backtracks)]), Cost, bb_options{strategy:continue}),
     %write('Backtracks : '), write(Backtracks), nl,
     EndTime is StartTimes[N] + Durations[N].
 
