@@ -1,10 +1,10 @@
 \section{Hashiwokakero}
 
-Hashiwokakero is yet another Japanese logic puzzle published by the same company in which islands have to be connected by bridges. Six constraints are to be respected, the last one being the connectedness constraint, i.e. that all islands have to be connected. What follows is a discussion of an implementation of two solvers of Hashiwokakero puzzles. One written in ECLiPSe, the other in \texttt{CHR}.
+Hashiwokakero is another Japanese logic puzzle published by the same company in which islands have to be connected by bridges. Six constraints are to be respected, the last one being the connectedness constraint, i.e. that all islands have to be connected. What follows is a discussion of an implementation of two solvers of Hashiwokakero puzzles. One written in ECLiPSe, the other in \texttt{CHR}.
 
 \subsection{ECLiPSe implementation}
 
-A partial solution by ECLiPSe's creator Joachim Schimpf was provided. It did not enforce the connectedness constraint. Joachim defines four variables for each of the input puzzle's cells. They represent the number of bridges for each of the cell's directions (north, east, south, west). Then he enforces five of the constraints :
+A partial solution by ECLiPSe's creator Joachim Schimpf was provided. It did not enforce the connectedness constraint. Joachim defines four variables for each of the input puzzle's cells. They represent the number of bridges for each of the cell's directions (north, east, south, west). Then he enforces the five first constraints :
 \begin{enumerate}
 \item[1-2.] Bridges run in one straight line, horizontally or vertically. This is enforced with equality constraints, making sure that the number of bridges for a given direction of a given cell equals the number of bridges in the opposite direction of a neighbouring cell. A total of four equality constraints for every cell except those on the border, which may only have two or three neighbours\footnote{It can be noted that Joachim's code enforces both $A$\#=$B$ and $B$\#=$A$ in several cases. It has no effect on the runtimes.}.
 \item[3.] Bridges cannot cross other bridges or islands. This is enforced by making sure that any cell that does not represent an island either has no horizontal or no vertical bridges.
@@ -20,4 +20,4 @@ If one makes use of the \texttt{most\_constrained} or the \texttt{occurrence} va
 
 \subsection{CHR implementation}
 
-A \texttt{CHR} implementation was created, also. Because of the results of the previous experiments no fancy heuristic (such as \texttt{occurrence} or \texttt{most\_constrained}) was made use of. 
+A \texttt{CHR} implementation was also created. Because of the results of the previous experiments no special heuristic (such as \texttt{occurrence} or \texttt{most\_constrained}) was made use of. 

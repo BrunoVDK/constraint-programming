@@ -72,7 +72,7 @@ hashi(Board, Time, Backtracks, NESW) :-
         E #= 0 => FE #= 0,
         S #= 0 => FS #= 0,
         W #= 0 => FW #= 0,
-        % Flow constraint 2:
+        % Flow constraint 3:
         %  If a cell has a flow n in the direction of neighbor,
         %  that neighbor has a flow -n in the opposite direction.
         (I > 1      -> FN #= -(FlowNESW[I-1,J,3]) ; FN = 0),
@@ -134,7 +134,7 @@ symbol(2, 0, 'X').
 
 % Run tests on the provided benchmarks.
 %
-% @param Verbose Flag denoting whether or not
+% @param Verbose Flag denoting whether or not intermediate results should be displayed.
 benchmark(Verbose) :-
     findall(Name-Board, (board(Name,Board) ; puzzle(Name,_,_),read_puzzle(Name,Board)), Puzzles),
     (foreach(Name-Board, Puzzles),
