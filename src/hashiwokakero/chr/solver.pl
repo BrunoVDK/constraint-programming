@@ -9,11 +9,11 @@
 %   5. sum constraint
 %   6. connectedness constraint
 %
-% They're all active. In the case of 1 abd 2 it is done by
+% They're all active. In the case of 1 and 2 it is done by
 %   the sharing of variables between cells and islands.
 %   (e.g. any cell's 'north' variable is the same as the 'south' variable
 %       of the cell above it)
-% Constraint 4 is done by defining the domains to be 0..2
+% Constraint 4 is enforced by defining the domains to be 0..2
 %
 % @author   Michaël Dooreman & Bruno Vandekerkhove
 % @version  1.0
@@ -21,13 +21,17 @@
 :- use_module(library(chr)).
 :- ['../benchmarks/hashi_benchmarks'].
 
+% Domain declarations
 :- op(700,xfx,'in').
-:- chr_constraint solve_puzzle/3, read_puzzle/6.
+:- op(700,xfx,'inflow').
+:- op(600,xfx,'..').
+
+% CHR constraints
+:- chr_constraint solve_puzzle/3, read_puzzle/10, initialized/0.
 :- chr_constraint print_board/1, print_cell/3, symbol/2.
-:- chr_constraint initialized/0, search/0, island/7, cell/4.
-:- chr_constraint in/2, assign/2.
-:- chr_constraint sink/2, no_sink/0.
-:- chr_constraint sum/3.
+:- chr_constraint search/0, assign/2, island/7, cell/4, sum/3.
+:- chr_constraint flow_sum/3, assign_flow/2, bridge_flow/2.
+:- chr_constraint in/2, inflow/2.
 
 % Sum constraint (does forward checking)
 sum(4,[A,B,C,D],8) <=> A in [2], B in [2], C in [2], D in [2].
@@ -42,6 +46,21 @@ assign(Val,X) \ sum(N,Vars,Sum) # passive <=>
 assign(Val,X), cell(_,_,X,Y) # passive ==> Val > 0 | Y in [0].
 assign(Val,X), cell(_,_,Y,X) # passive ==> Val > 0 | Y in [0].
 
+% Flow constraints
+assign(0,X), bridge_flow(X,FX) # passive ==> FX inflow 0..0.
+assign(_,X) \ bridge_flow(X,_) # passive <=> true.
+%flow_sum(1,[S-FX],Sum) <=> (S == 1 -> Val is -Sum ; Val is Sum), FX inflow Val..Val.
+assign_flow(Val,FX) \ flow_sum(N,Vars,Sum) # passive <=>
+    N > 1, select(S-FX, Vars, NewVars)
+    | NewN is N - 1,
+    (S == 1 -> NewSum is Sum + Val ; NewSum is Sum - Val),
+    flow_sum(NewN,NewVars,NewSum).
+(FX inflow L1..U1), (FX inflow L2..U2) <=>
+    Min is max(L1,L2), Max is min(U1,U2), Min =< Max, (FX inflow Min..Max).
+%print_board(_) \ bridge_flow(_,_) <=> true. % Clean up constraints
+0 inflow _ <=> true.
+assign_flow(Val,FX) <=> FX is Val.
+
 % Domain updates
 _ in [] <=> fail.
 X in L1, X in L2 <=> intersection(L1,L2,L3) | X in L3.
@@ -52,10 +71,9 @@ X in L <=> nonvar(X) | member(X,L).
 %   We tried it, didn't improve speed.
 assign(Val,X) <=> X is Val.
 search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
+%search, (FX inflow Min..Max) # passive <=>
+%    between(Min,Max,Val), assign_flow(Val,FX), search.
 search <=> true.
-
-% Assign sink
-island(R,C,_,_,_,_,_) \ no_sink # passive <=> sink(R,C).
 
 % Print the solution
 % Assumes fixed-width font (change in Settings > Font ...)
@@ -75,37 +93,55 @@ symbol(0,2) <=> write('=').
 symbol(1,0) <=> write('|').
 symbol(2,0) <=> write('X').
 
-% Clean up sums (remove zeroes) after initialization
+% Clean up after initialization
 initialized \ sum(_,Vars,Sum) # passive <=>
     member(0,Vars)
-    | include(\==(0), Vars, NewVars), length(NewVars, L), sum(L,NewVars,Sum).
+    | include(\==(0),Vars,NewVars), length(NewVars,L), sum(L,NewVars,Sum).
+initialized \ flow_sum(_,Vars,Sum) # passive <=>
+    member(_-0,Vars)
+    | include(nontrivial,Vars,NewVars), length(NewVars,L), flow_sum(L,NewVars,Sum).
+nontrivial(_-X) :- X \== 0.
+initialized \ bridge_flow(0,0) <=> true.
 initialized <=> true.
 
 % Clean up pre-filled vars
 0 in _ <=> true.
 
 % Read the input puzzle
-solve_puzzle(P,Size,Verbose) <=>
+solve_puzzle(Puzzle,Size,Verbose) <=>
     findall(0, between(1,Size,_), PrecedingSouths),
-    no_sink,
-    read_puzzle(P,1,1,Size,PrecedingSouths,0),
+    findall(0-0, between(1,Size,_), PrecedingFlowSouths),
+    length(Puzzle, NbIslands),
+    Max is NbIslands - 1,
+    read_puzzle(Puzzle,Max,1,1,Size,PrecedingSouths,0,PrecedingFlowSouths,0-0,true),
     (Verbose -> print_board(Size) ; true).
-read_puzzle(_,R,_,Size,_,_) <=> R > Size | initialized, search.
-read_puzzle(Puzzle,R,C,Size,[N|PreviousSouths],W) <=>
-    (member((R,C,Sum), Puzzle) ->
+read_puzzle(_,_,R,_,Size,_,_,_,_,_) <=> R > Size | initialized, search.
+read_puzzle(P,Max,R,C,Size,[N|PrevSouths],W,[NegN-FN|PrevFlowSouths],NegW-FW,Sink) <=>
+    NN is 1 - NegN, NW is 1 - NegW,
+    (member((R,C,Sum), P) ->
         island(R,C,N,E,S,W,Sum),
+        (Sink ->
+            flow_sum(4,[NN-FN,0-FE,0-FS,NW-FW],Max)
+        ;
+            flow_sum(4,[NN-FN,0-FE,0-FS,NW-FW],-1)
+        ),
         sum(4,[N,E,S,W],Sum),
-        E in [0,1,2],
-        S in [0,1,2]
+        E in [0,1,2], S in [0,1,2],
+        Min is -Max,
+        FE inflow (Min..Max), FS inflow (Min..Max),
+        bridge_flow(E,FE), bridge_flow(S,FS),
+        NewSink = false
     ;
         cell(R,C,E,S),
-        E = W,
-        S = N
+        E = W, S = N,
+        FE = FW, FS = FN,
+        NewSink = Sink
     ),
-    (C is Size -> E is 0, NewR is R + 1, NewC is 1 ; NewC is C + 1, NewR is R),
-    (R is Size -> S is 0 ; true),
-    append(PreviousSouths, [S], NewPreviousSouths),
-    read_puzzle(Puzzle,NewR,NewC,Size,NewPreviousSouths,E).
+    (C is Size -> E is 0, FE is 0, NewR is R + 1, NewC is 1 ; NewC is C + 1, NewR is R),
+    (R is Size -> S is 0, FS is 0 ; true),
+    append(PrevSouths, [S], NewPrevSouths),
+    append(PrevFlowSouths, [NN-FS], NewPrevFlowSouths),
+    read_puzzle(P,Max,NewR,NewC,Size,NewPrevSouths,E,NewPrevFlowSouths,NW-FE,NewSink).
 
 %
 % Entry point
@@ -130,5 +166,5 @@ solve(Identifier, Time, Verbose) :-
     statistics(walltime, [_|[_]]),
     once(solve_puzzle(Puzzle,N,Verbose)),
     statistics(walltime, [_|[Time]]),
-    (Verbose -> write('Time : '), write(Time), nl ; true),
-    (Verbose -> print_solution : true).
+    (Verbose -> write('Time : '), write(Time), nl ; true).
+

@@ -9,10 +9,16 @@ A partial solution by ECLiPSe's creator Joachim Schimpf was provided. It did not
 \item[1-2.] Bridges run in one straight line, horizontally or vertically. This is enforced with equality constraints, making sure that the number of bridges for a given direction of a given cell equals the number of bridges in the opposite direction of a neighbouring cell. A total of four equality constraints for every cell except those on the border, which may only have two or three neighbours\footnote{It can be noted that Joachim's code enforces both $A$\#=$B$ and $B$\#=$A$ in several cases. It has no effect on the runtimes.}.
 \item[3.] Bridges cannot cross other bridges or islands. This is enforced by making sure that any cell that does not represent an island either has no horizontal or no vertical bridges.
 \item[4.] At most two bridges connect a pair of islands. Joachim imposes this constraint by declaring the domains of the variables to be $[0\dots 2]$.
-\item[5.] The number of bridges connected to an island must match the number $X$ on that island. A simple sum constraint ($N+E+S+W$\#=$X$) suffices to enforce this one.
+\item[5.] The number of bridges connected to an island must match the number $X$ on that island. A simple sum constraint ($N+E+S+W$\ \#=\ $X$) suffices to enforce this one.
 \end{enumerate}
 
-The connectedness constraint was enforced through the use of an analogous set of four variables ($FN,FE,FS,FW$) per cell, denoting the \textit{flow} for each of the cell's directions. Say the top left-most island is said to be the sink, then if a flow can be assigned to all islands such that the sink's incoming flow equals the total number of islands minus one, the islands are sure to be connected. [EXPLAIN CONSTRAINTS]\\\par
+The connectedness constraint was enforced through the use of an analogous set of four variables ($FN,FE,FS,FW$) per cell, denoting the \textit{flow} for each of the cell's directions. Say the top left-most island is said to be the sink, then if a flow can be assigned to all islands such that the sink's incoming flow equals the total number of islands minus one, the islands are sure to be connected. The net flow for each island needs to be one, for each cell it should be zero, and empty cells should have no flow. Most of these constraints can be implemented with equality constraints (the \texttt{ic} library enforces bound consistency for these), some of the others were implemented with the use of the => `implication' constraint.\\\par
+
+\begin{snippet}[H]
+\caption{Constraint stating that the flow in a bridge should be zero.}\label{hashi}
+\small
+N + E + S + W \#\textbackslash= 0 => FN \#= -(FS) \texttt{and} FE \#= -(FW) \texttt{and} FN + FE +FS + FW \#= 0
+\end{snippet}
 
 All of these constraints are active, meaning that when variables are, in a sense, `woken up', the domain of associated variables is updated accordingly.\\\par
 
@@ -20,4 +26,16 @@ If one makes use of the \texttt{most\_constrained} or the \texttt{occurrence} va
 
 \subsection{CHR implementation}
 
-A \texttt{CHR} implementation was also created. Because of the results of the previous experiments no special heuristic (such as \texttt{occurrence} or \texttt{most\_constrained}) was made use of. 
+A \texttt{CHR} implementation was also created. Because of the results of the previous experiments no special heuristic (such as \texttt{occurrence} or \texttt{most\_constrained}) was made use of. The solver generates \texttt{island/7} and \texttt{cell/4} constraints which represent islands and cells. Every island has a corresponding \texttt{sum/3} constraint which gets updated every time any of the variables in its list is assigned. This corresponds to forward checking. The variables represent the number of bridges for a given direction and a given cell (or island). Instead of defining all these variables separately and enforcing $V_1=V_2$ equality constraints whenever they're supposed to be equal, shared variables are defined instead. This is done in the pre-processing step when the board is read. Because of this decision all but the second and the fifth constraint have to be enforced. The sum constraint was just described. The way the second constraint is dealt with is shown in code snippet \ref{hashi2}. As can be seen, the \texttt{in/2} constraint (and operator) was used to update domains.
+
+\begin{snippet}[H]
+\caption{Enforcing that no bridges can cross in \texttt{CHR}.}\label{hashi2}
+\small
+assign(Val,X), cell(\_,\_,X,Y)\ \#\ passive ==> Val > 0\ |\ Y\ in\ [0].\\
+assign(Val,X), cell(\_,\_,Y,X)\ \#\ passive ==> Val > 0\ |\ Y\ in\ [0].
+\end{snippet}
+
+Two additional constraints were added to speed up the solver. The first is a generalised version of the \textit{`4 in the corner, 6 on the side and 8 in the middle'} technique. If an island's number equals twice its number of neighbours then it should be connected with each of these neighbours by a pair of bridges. This covers some of the special cases. As expected, it sped up the solver for all puzzles, almost cutting the total runtime in half.\par
+The second\\\par
+
+Some redundant constraints were already part of the basic solver. For example, if an island only has one neighbour, its sum constraint only contains one variable which can readily be assigned.
