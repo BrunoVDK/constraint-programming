@@ -32,6 +32,17 @@
 :- chr_constraint search/0, assign/2, island/7, cell/4, sum/3.
 :- chr_constraint check_connectedness/0, no_sink/0, sink/2, connects/5, connected/4.
 
+% Additional constraint : when two neighbouring islands have the number 1 or 2,
+%  they cannot be by that number of bridges.
+no_sink, island(_,C,Var,_,_,_,1) # passive, island(_,C,_,_,Var,_,1) # passive ==>
+    var(Var) | Var in [0].
+no_sink, island(R,_,_,Var,_,_,1) # passive, island(R,_,_,_,_,Var,1) # passive ==>
+    var(Var) | Var in [0].
+no_sink, island(_,C,Var,_,_,_,2) # passive, island(_,C,_,_,Var,_,2) # passive ==>
+    var(Var) | Var in [0,1].
+no_sink, island(R,_,_,Var,_,_,2) # passive, island(R,_,_,_,_,Var,2) # passive ==>
+    var(Var) | Var in [0,1].
+
 % Sum constraint (does forward checking)
 sum(4,[A,B,C,D],8) <=> A in [2], B in [2], C in [2], D in [2].
 sum(3,[A,B,C],6) <=> A in [2], B in [2], C in [2].
@@ -51,18 +62,18 @@ X in L1, X in L2 <=> intersection(L1,L2,L3) | X in L3.
 X in L <=> nonvar(X) | member(X,L).
 
 % Connectedness constraint (passive version)
-island(R,C,_,_,_,_,_) \ no_sink # passive <=> sink(R,C).
+island(R,C,_,_,_,_,_) # passive \ no_sink <=> sink(R,C).
 assign(Val,X) \ connects(X,R1,C1,R2,C2) # passive <=> Val > 0 | connected(R1,C1,R2,C2).
 assign(0,X) \ connects(X,_,_,_,_) # passive <=> true.
 check_connectedness, sink(R,C) # passive,
-    connected(R,C,R1,C1) \
+    connected(R1,C1,R,C) \
     connected(R1,C1,R2,C2) # passive <=>
-    (R1 \== R ; C1 \== C) | connected(R,C,R2,C2).
+    (R1 \== R ; C1 \== C) | connected(R2,C2,R,C).
 check_connectedness, sink(R,C) # passive,
-    connected(R,C,R1,C1) \
+    connected(R1,C1,R,C) \
     connected(R2,C2,R1,C1) # passive <=>
-    (R1 \== R ; C1 \== C) | connected(R,C,R2,C2).
-check_connectedness, sink(R,C) # passive \ connected(R,C,_,_) # passive <=> true.
+    (R1 \== R ; C1 \== C) | connected(R2,C2,R,C).
+check_connectedness, sink(R,C) # passive \ connected(_,_,R,C) # passive <=> true.
 check_connectedness, connected(_,_,_,_) # passive ==> fail.
 check_connectedness \ connects(_,_,_,_,_) # passive <=> true.
 check_connectedness, sink(_,_) # passive <=> true.
@@ -71,7 +82,9 @@ check_connectedness, sink(_,_) # passive <=> true.
 %   Implementing first-fail is easy because domains are very small.
 %   We tried it, didn't improve speed.
 assign(Val,X) <=> X is Val.
-search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
+%search, (X in [Val]) # passive <=> assign(Val,X), search.
+%search, (X in [Val1,Val2]) # passive <=> member(Val,[Val1,Val2]), assign(Val,X), search.
+search, (X in Dom) # passive <=> member(Val,NewDom), assign(Val,X), search.
 search <=> check_connectedness.
 
 % Print the solution
@@ -96,7 +109,6 @@ symbol(2,0) <=> write('X').
 initialized \ sum(_,Vars,Sum) # passive <=>
     member(0,Vars)
     | include(\==(0),Vars,NewVars), length(NewVars,L), sum(L,NewVars,Sum).
-nontrivial(_-X) :- X \== 0.
 initialized <=> true.
 
 % Clean up pre-filled vars
@@ -104,11 +116,10 @@ initialized <=> true.
 
 % Read the input puzzle
 solve_puzzle(Puzzle,Size,Verbose) <=>
-    no_sink,
     findall(0-0-0, between(1,Size,_), PrecedingSouths),
     read_puzzle(Puzzle,1,1,Size,PrecedingSouths,0-0-0),
     (Verbose -> print_board(Size) ; true).
-read_puzzle(_,R,_,Size,_,_) <=> R > Size | initialized, search.
+read_puzzle(_,R,_,Size,_,_) <=> R > Size | no_sink, initialized, search.
 read_puzzle(P,R,C,Size,[NR-NC-N|PrevSouths],WR-WC-W) <=>
     (member((R,C,Sum), P) ->
         island(R,C,N,E,S,W,Sum),

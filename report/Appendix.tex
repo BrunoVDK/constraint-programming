@@ -5,7 +5,9 @@
 \subsection*{Reflection}\label{sec:reflection}
 \addcontentsline{toc}{subsection}{\nameref{sec:reflection}}
 
-When implementing the Sudoku solver in CHR we took a glimpse at Thom's implementation. It's given in his book as a solution to some exercise. Once we understood his approach we had the tendency to implement the viewpoints by making use of the same strategy ; constraints representing variables, constraints representing values, a simple implementation of the \texttt{first\_fail} heuristic and forward checking. This worked well, but it wasn't the most creative thing to do. Further experimentation with other models, heuristics, redundant constraints, ... was our way to (hopefully) compensate for this.
+When implementing the Sudoku solver in CHR we took a glimpse at Thom's implementation. It's given in his book as a solution to some exercise. Once we understood his approach we had the tendency to implement the viewpoints by making use of the same strategy ; constraints representing variables, constraints representing values, a simple implementation of the \texttt{first\_fail} heuristic and forward checking. This worked well, but it wasn't the most creative thing to do. Further experimentation with other models, heuristics, redundant constraints, ... was our way to (hopefully) compensate for this.\\\par
+
+We also would have liked to implement bound consistency in the Hashiwokakero solver for all sum constraints. Making better use of the tracer would have saved us a lot of time which could have made this possible.
 
 \subsection*{Workload}\label{sec:workload}
 \addcontentsline{toc}{subsection}{\nameref{sec:workload}}
