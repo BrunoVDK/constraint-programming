@@ -1,9 +1,3 @@
-<object data="report/Report.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="report/Report.pdf">
-        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="report/Report.pdf">Download PDF</a>.</p>
-    </embed>
-</object>
-
 Repository for constraint programming assignments for the *Advanced Programming Languages for A.I.* course [H02A8A].
 
 [The assignment can be found here.](/docs/Assignment.pdf)
