@@ -12,7 +12,7 @@ A partial solution by ECLiPSe's creator Joachim Schimpf was provided. It did not
 \item[5.] The number of bridges connected to an island must match the number $X$ on that island. A simple sum constraint ($N+E+S+W$\ \#=\ $X$) suffices to enforce this one.
 \end{enumerate}
 
-The connectedness constraint was enforced through the use of an analogous set of four variables ($FN,FE,FS,FW$) per cell, denoting the \textit{flow} for each of the cell's directions. Say the top left-most island is said to be the sink, then if a flow can be assigned to all islands such that the sink's incoming flow equals the total number of islands minus one, the islands are sure to be connected. The net flow for each island needs to be one, for each cell it should be zero, and empty cells should have no flow. Most of these constraints can be implemented with equality constraints (the \texttt{ic} library enforces bound consistency for these), some of the others were implemented with the use of the => `implication' constraint.\\\par
+The connectedness constraint was enforced through the use of an analogous set of four variables ($FN,FE,FS,FW$) per cell, denoting the \textit{flow} for each of the cell's directions. Say the top left-most island is said to be the sink, then if a flow can be assigned to all islands such that the sink's incoming flow equals the total number of islands minus one, the islands are sure to be connected. The net flow for each island needs to be one, for each cell it should be zero, and empty cells should have no flow. Most of these constraints can be implemented with equality constraints (the \texttt{ic} library enforces bound consistency for these), some of the others were implemented with the use of the \href{http://eclipseclp.org/doc/bips/lib/ic/EG-2.html}{$\Rightarrow$} (`implication') constraint.\\\par
 
 \begin{snippet}[H]
 \caption{Constraint stating that the flow in a bridge should be zero.}\label{hashi}
@@ -22,20 +22,55 @@ N + E + S + W \#\textbackslash= 0 => FN \#= -(FS) \texttt{and} FE \#= -(FW) \tex
 
 All of these constraints are active, meaning that when variables are, in a sense, `woken up', the domain of associated variables is updated accordingly.\\\par
 
-If one makes use of the \texttt{most\_constrained} or the \texttt{occurrence} variable heuristic, runtimes increase. The \texttt{largest} or \texttt{smallest} heuristics perform even worse. This is due to the fact that these heuristics are more likely to target flow variables first. These variables have larger domains and most of the values in their domain cannot partake in a solution. As a result, backtracks increase and runtimes do, too.
+The provided benchmarks are solved rather quickly by the solver. It generally takes a few milliseconds, even for the biggest board. If one makes use of the \texttt{most\_constrained} or the \texttt{occurrence} variable heuristic, runtimes increase. The \texttt{largest} or \texttt{smallest} heuristics perform even worse. This is due to the fact that these heuristics are more likely to target flow variables first. These variables have larger domains and most of the values in their domain cannot partake in a solution. As a result, backtracks increase and runtimes do too.
 
 \subsection{CHR implementation}
 
-A \texttt{CHR} implementation was also created. Because of the results of the previous experiments no special heuristic (such as \texttt{occurrence} or \texttt{most\_constrained}) was made use of. The solver generates \texttt{island/7} and \texttt{cell/4} constraints which represent islands and cells. Every island has a corresponding \texttt{sum/3} constraint which gets updated every time any of the variables in its list is assigned. This corresponds to forward checking. The variables represent the number of bridges for a given direction and a given cell (or island). Instead of defining all these variables separately and enforcing $V_1=V_2$ equality constraints whenever they're supposed to be equal, shared variables are defined instead. This is done in the pre-processing step when the board is read. Because of this decision all but the second and the fifth constraint have to be enforced. The sum constraint was just described. The way the second constraint is dealt with is shown in code snippet \ref{hashi2}. As can be seen, the \texttt{in/2} constraint (and operator) was used to update domains.
+A \texttt{CHR} solver was also created. Because of the results of the previous experiments no special heuristic (such as \texttt{occurrence} or \texttt{most\_constrained}) was made use of. The solver generates \texttt{island/7} and \texttt{cell/4} constraints which associates islands and cells with their variables (representing the number of bridges in a given direction) and their number (in the case of islands). Every island has a corresponding \texttt{sum/3} constraint which gets updated every time any of the variables in its list is assigned. This corresponds to forward checking. The variables represent the number of bridges for a given direction and a given cell (or island). Instead of defining all these variables separately and enforcing $V_1=V_2$ equality constraints whenever they're supposed to be equal, shared variables are defined instead. This is done in the pre-processing step when the board is read. Because of this decision all but the second and the fifth constraint have to be enforced. The sum constraint was just described. The way the second constraint is dealt with is shown in code snippet \ref{hashi2}. As can be seen, the \texttt{in/2} constraint (and operator) was used to update domains.
 
 \begin{snippet}[H]
 \caption{Enforcing that no bridges can cross in \texttt{CHR}.}\label{hashi2}
 \small
-assign(Val,X), cell(\_,\_,X,Y)\ \#\ passive ==> Val > 0\ |\ Y\ in\ [0].\\
-assign(Val,X), cell(\_,\_,Y,X)\ \#\ passive ==> Val > 0\ |\ Y\ in\ [0].
+assign(Val,X), cell(\_,\_,X,Y)\ \#\ passive $\Longrightarrow$ Val > 0\ |\ Y\ in\ [0].\\
+assign(Val,X), cell(\_,\_,Y,X)\ \#\ passive $\Longrightarrow$ Val > 0\ |\ Y\ in\ [0].
 \end{snippet}
 
-Two additional constraints were added to speed up the solver. The first is a generalised version of the \textit{`4 in the corner, 6 on the side and 8 in the middle'} technique. If an island's number equals twice its number of neighbours then it should be connected with each of these neighbours by a pair of bridges. This covers some of the special cases. As expected, it sped up the solver for all puzzles, almost cutting the total runtime in half.\par
-The second\\\par
+Two additional constraints were added to speed up the solver. The first is a generalised version of the \textit{`4 in the corner, 6 on the side and 8 in the middle'} technique. If an island's number equals twice its number of neighbours then it should be connected with each of these neighbours by a pair of bridges. This covers some of the special cases as \textit{`neighbour'} is defined more broadly as  \textit{`any island to which the island can still be connected with at a certain point'}\footnote{Let's give a concrete example. Say, an island has the number four and three neighbors. Nothing could be concluded before doing any searching. If at any point during search it becomes clear that one of the three neighbors can't be connected to the island, then two pairs of bridges need to be added to form connections with the remaining neighbours.}. As expected, it sped up the solver for all puzzles, almost cutting the total runtime by half.\\\par
 
-Some redundant constraints were already part of the basic solver. For example, if an island only has one neighbour, its sum constraint only contains one variable which can readily be assigned.
+The second constraint prevents isolation of some islands by stating that any two neighbouring islands, both with the number one or two, cannot be connected with that same number of bridges\footnote{In the case of trivial boards with nothing else than two such islands enforcing this constraint would prevent the solution from being found.}.\\\par
+
+Some redundant constraints were already part of the basic solver. For example, if an island only has one neighbour, its sum constraint only contains one variable which can readily be assigned.\\\par
+
+As for the connectedness constraints, both passive - and active versions were implemented. Because any initial solution generated without enforcing connectedness still tends to be connected anyways, any constraint propagation relating to flow tends to slow down the search procedure. Because of this the passive versions of the connectedness constraints outperform the active versions (having a total runtime of about 6 seconds for all six puzzles).\\\par
+
+In the case of puzzle six no solution is found in a reasonable amount of time when the active connectedness constraints are used. This is due to the fact that the domain of any flow variable is quite large as the number of islands equals 140. While for most of these islands the flow can uniquely be determined, 37 flow sum constraints are less trivial. Generally speaking, when a bunch of islands are connected in a circle (meaning that there is no \textit{`tail'}, i.e. every island is connected to at least 2 other islands) the solution isn't unique. It's what happens in puzzle six, where after cutting all the \textit{`tails'} a few circles remain (see figure \ref{fig:circles}).
+
+\begin{figure}
+\centering
+\begin{BVerbatim}[fontsize=\footnotesize]
+              5 = = 4 = = 4 - - 3 = = 3
+              |           |           |
+              3 = 3 - 3 = 5           |
+                                      3
+                                      X
+                                      X
+          5 - - 2                     3
+          X     |                     |
+          5 = = 6 - - 6               |
+                      X               2
+                      X               |
+                      6               |
+                      X               3
+            3 - 4     X               X
+            X   X     X               X
+            6 = 6 = = 7               4
+                      |               X
+4 - 4                 |               4
+X   |                 |               X
+4 = 5                 4 = 3 - 5 = 6 = 4
+\end{BVerbatim}
+\caption{Puzzle 6's remnant structure after removing all \textit{`tails'} for which the value of the flow variables is trivial to determine.}
+\label{fig:circles}
+\end{figure}
+
+If the sum constraints relating to flow would enforce bound-consistency (as is the case in ECLiPSe), wrong values could easily be filtered out. 
