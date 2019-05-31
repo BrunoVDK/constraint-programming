@@ -89,8 +89,8 @@ assign(Val,X) <=> X is Val.
 search, (X in [Val]) # passive <=> assign(Val,X), search.
 search, (FX inflow Val..Val) # passive <=> assign_flow(Val,FX), search.
 search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
-search, (FX inflow Min..Max) # passive <=>
-    between(Min,Max,Val), assign_flow(Val,FX), search.
+%search, (FX inflow Min..Max) # passive <=>
+%    between(Min,Max,Val), assign_flow(Val,FX), search.
 search <=> true.
 
 % Print the solution

@@ -34,14 +34,14 @@
 
 % Additional constraint : when two neighbouring islands have the number 1 or 2,
 %  they cannot be by that number of bridges.
-no_sink, island(_,C,Var,_,_,_,1) # passive, island(_,C,_,_,Var,_,1) # passive ==>
-    var(Var) | Var in [0].
-no_sink, island(R,_,_,Var,_,_,1) # passive, island(R,_,_,_,_,Var,1) # passive ==>
-    var(Var) | Var in [0].
-no_sink, island(_,C,Var,_,_,_,2) # passive, island(_,C,_,_,Var,_,2) # passive ==>
-    var(Var) | Var in [0,1].
-no_sink, island(R,_,_,Var,_,_,2) # passive, island(R,_,_,_,_,Var,2) # passive ==>
-    var(Var) | Var in [0,1].
+%no_sink, island(_,C,Var,_,_,_,1) # passive, island(_,C,_,_,Var,_,1) # passive ==>
+%    var(Var) | Var in [0].
+%no_sink, island(R,_,_,Var,_,_,1) # passive, island(R,_,_,_,_,Var,1) # passive ==>
+%    var(Var) | Var in [0].
+%no_sink, island(_,C,Var,_,_,_,2) # passive, island(_,C,_,_,Var,_,2) # passive ==>
+%    var(Var) | Var in [0,1].
+%no_sink, island(R,_,_,Var,_,_,2) # passive, island(R,_,_,_,_,Var,2) # passive ==>
+%    var(Var) | Var in [0,1].
 
 % Sum constraint (does forward checking)
 sum(4,[A,B,C,D],8) <=> A in [2], B in [2], C in [2], D in [2].
@@ -84,7 +84,7 @@ check_connectedness, sink(_,_) # passive <=> true.
 assign(Val,X) <=> X is Val.
 %search, (X in [Val]) # passive <=> assign(Val,X), search.
 %search, (X in [Val1,Val2]) # passive <=> member(Val,[Val1,Val2]), assign(Val,X), search.
-search, (X in Dom) # passive <=> member(Val,NewDom), assign(Val,X), search.
+search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
 search <=> check_connectedness.
 
 % Print the solution

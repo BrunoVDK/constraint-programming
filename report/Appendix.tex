@@ -14,7 +14,7 @@ We also would have liked to implement bound consistency in the Hashiwokakero sol
 
 Some questions were asked online after all the code had been written. There were four of them, all about Sudoku. One on how to enforce equality of lists (we already had the solution but wanted to be sure there was no better alternative). One on looping through a list which is a subscript of an array (we found the appropriate solution ourselves). One on the inner workings of \href{http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html}{\texttt{occurrences/3}}. And a final one on memory usage. Aside from a quick experiment with \href{https://eclipseclp.org/doc/bips/kernel/termcomp/TE-2.html}{\texttt{$\sim$=/2}} no code was rewritten as a result. None of the questions mentioned Sudoku. All the viewpoints were either thought of by ourselves or come from the literature that was cited in this report.\\\par
 
-We started working in mid-April and finished a few days before the deadline, each having worked about ??? hours in total. This includes reading (parts of) the educational material, researching, tinkering, programming, debugging and writing the report.
+We started working in mid-April and finished a few days before the deadline, each having worked about 100 hours in total. This includes reading (parts of) the educational material, researching, programming, debugging and writing the report.
 
 \subsection*{Overview of the Code}\label{sec:code}
 \addcontentsline{toc}{subsection}{\nameref{sec:code}}
@@ -35,11 +35,11 @@ Folder & File & Description \\ \hline
 \texttt{/src/sudoku/eclipse/model/} & \texttt{*} & \textit{Sudoku viewpoints (ECLiPSe)} \\\hline
 \texttt{/src/hashiwokakero/eclipse/} & \texttt{solver.pl} & \textit{Hashiwokakero solver (ECLiPSe)} \\
 \texttt{/src/hashiwokakero/chr/} & \texttt{solver.pl} & \textit{Hashiwokakero solver (CHR)} \\
-\texttt{/src/hashiwokakero/benchmarks/} & \texttt{*} & \textit{Hashiwokakero benchmarks}  \\\hline
+\texttt{/src/hashiwokakero/benchmarks/} & \texttt{hashi\_benchmarks.pl} & \textit{Hashiwokakero benchmarks}  \\\hline
 \texttt{/src/scheduling/} & \texttt{scheduling.pl} & \textit{Scheduling meetings solution} \\\hline  
 \end{tabular}
 \egroup
-\caption{Overview of the source code.}
+\caption{Overview of the source code. Any files in folders named \texttt{misc} have experimental code that isn't discussed in the report.}
 \label{tab:code}
 \end{table}
 
