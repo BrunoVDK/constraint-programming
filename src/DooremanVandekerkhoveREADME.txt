@@ -1,5 +1,7 @@
 Below is an overview of the source code for the final project of the *Advanced Programming Languages for A.I.* course [H02A8A]. Every procedure is preceded by documentation.
 
+To run benchmarks for any problem, the benchmark procedure can be used (call 'benchmark(true)').
+
 Authors : Michaël Dooreman & Bruno Vandekerkhove
 
 ## Sudoku
@@ -19,11 +21,12 @@ The benchmarks and automated benchmarking code is in /src/sudoku/benchmarks.
 
 ## Hashiwokakero
 
-
+ECLiPSe solver in /src/hashiwokakero/eclipse/solver.pl.
+CHR solver in /src/hashiwokakero/chr/solver.pl.
 
 ## Scheduling Meetings
 
-All the code lies in /src/scheduiing/scheduling.pl.
+All the code lies in /src/scheduling/scheduling.pl.
 The first procedure is the entry point.
 The next procedures generate constraints (including implied constraints).
 The last procedure automates benchmarking.
