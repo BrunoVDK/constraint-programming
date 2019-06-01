@@ -1,7 +1,5 @@
 %
 % Hashiwokakero CHR solver.
-%   An attempt was made at enforcing bound consistency to solve slowness of the solver for
-%   puzzle 6.
 %
 % Imposed constraints
 %   1. bridges run horizontally or vertically
@@ -48,16 +46,10 @@ assign(Val,X) \ sum(N,Vars,Sum) # passive <=>
 assign(Val,X), cell(_,_,X,Y) # passive ==> Val > 0 | Y in [0].
 assign(Val,X), cell(_,_,Y,X) # passive ==> Val > 0 | Y in [0].
 
-% Flow domain bound consistency (attempt, short on time)
-%flow_sum(2,[SA-FA,SB-FB],Sum), (FA inflow MinA..MaxA), (FB inflow MinB..MaxB) ==>
-%    E1B is Sum - MinA + (2*SA*MinA), E2B is Sum - MaxA + (2*SA*MaxA),
-%    E1A is Sum - MinB + (2*SB*MinB), E2A is Sum - MaxB + (2*SB*MaxB),
-%    NewMinA is min(E1A,E2A), NewMaxA is max(E1A,E2A),
-%    NewMinB is min(E1B,E2B), NewMaxB is max(E1B,E2B),
-%    writeln(FA inflow MinA..MaxA),
-%    writeln(FA inflow NewMinA..NewMaxA),
-%    (MinA \= NewMinA ; MaxA \= NewMaxA -> FA inflow NewMinA..NewMaxA ; true),
-%    (MinB \= NewMinB ; MaxB \= NewMaxB -> FB inflow NewMinB..NewMaxB ; true).
+% Domain updates
+_ in [] <=> fail.
+X in L1, X in L2 <=> intersection(L1,L2,L3) | X in L3.
+X in L <=> nonvar(X) | member(X,L).
 
 % Flow constraints
 assign_flow(Val,FX), bridge_flow(X,FX), X in [0|Dom] ==> Val \= 0 | X in Dom.
@@ -77,11 +69,6 @@ assign_flow(Val,FX) \ flow_sum(N,Vars,Sum) # passive <=>
 0 inflow _ <=> true.
 assign_flow(Val,FX) <=> FX is Val.
 
-% Domain updates
-_ in [] <=> fail.
-X in L1, X in L2 <=> intersection(L1,L2,L3) | X in L3.
-X in L <=> nonvar(X) | member(X,L).
-
 % Search procedure
 %   Implementing first-fail is easy because domains are very small.
 %   We tried it, didn't improve speed.
@@ -89,9 +76,27 @@ assign(Val,X) <=> X is Val.
 search, (X in [Val]) # passive <=> assign(Val,X), search.
 search, (FX inflow Val..Val) # passive <=> assign_flow(Val,FX), search.
 search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
-%search, (FX inflow Min..Max) # passive <=>
-%    between(Min,Max,Val), assign_flow(Val,FX), search.
-search <=> true.
+:- chr_constraint clean_sums/0, cleaned_sums/0.
+search <=> print_board(20), nl, writeln('-------'), clean_sums.
+
+% Flow domain bound consistency (attempt, short on time)
+clean_sums, (FA inflow MinA..MaxA), (FB inflow MinB..MaxB) \ flow_sum(2,[SA-FA,SB-FB],Sum) # passive <=>
+    E1B is Sum - MinA + (2*SA*MinA), E2B is Sum - MaxA + (2*SA*MaxA),
+    E1A is Sum - MinB + (2*SB*MinB), E2A is Sum - MaxB + (2*SB*MaxB),
+    (SA == 1 -> NewE1A is -E1A, NewE2A is -E2A ; NewE1A is E1A, NewE2A is E2A),
+    (SB == 1 -> NewE1B is -E1B, NewE2B is -E2B ; NewE1B is E1B, NewE2B is E2B),
+    NewMinA is min(NewE1A,NewE2A), NewMaxA is max(NewE1A,NewE2A),
+    NewMinB is min(NewE1B,NewE2B), NewMaxB is max(NewE1B,NewE2B),
+    LA is max(MinA,NewMinA), UA is min(MaxA,NewMaxA), LA =< UA,
+    LB is max(MinB,NewMinB), UB is min(MaxB,NewMaxB), LB =< UB,
+    (\+((LA == MinA, UA == MaxA)) -> FA inflow LA..UA ; true),
+    (\+((LB == MinB, UB == MaxB)) -> FB inflow LB..UB ; true),
+    flow_sum(2,[SA-FA,SB-FB],Sum).
+clean_sums <=> cleaned_sums.
+cleaned_sums, (FX inflow Val..Val) # passive <=> assign_flow(Val,FX), cleaned_sums.
+cleaned_sums, (FX inflow Min..Max) # passive <=>
+    between(Min,Max,Val), assign_flow(Val,FX), cleaned_sums.
+cleaned_sums <=> true.
 
 % Print the solution
 % Assumes fixed-width font (change in Settings > Font ...)

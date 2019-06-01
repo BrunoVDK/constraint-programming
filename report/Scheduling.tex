@@ -44,10 +44,7 @@ An additional constraint was used for the cost function, stating that it cannot 
 
 Some implied constraints were added to increase performance. In case two persons have a different rank but the same meeting duration and weekend preferences, a corresponding order on their start times can safely be imposed. This mustn't override the precedence constraints.\\\par
 
-Table \ref{tab:sche1} shows the runtime for each benchmark. Two versions are considered ; one ensures that no two meetings overlap by imposing a \texttt{(}$S_1$+$D_1$ $\leq$ $S_2$\ \texttt{or}\ $S_2$+$D_2$ $\leq$ $S_1$\texttt{)} constraint for every such pair, the other version uses a global version of these same constraints provided by the \href{http://eclipseclp.org/doc/bips/lib/ic_edge_finder/index.html}{\texttt{ic\_edge\_finder}} library. It's clear that the global version outperforms the other one. The time it takes to propagate the constraints is usually compensated for by the reduction in nodes having to be considered due to the pruning of the search tree.\\\par
-
-Instead of making use of implied constraints one can also tinker with the various heuristics provided by the \href{http://eclipseclp.org/doc/bips/lib/ic/search-6.html}{\texttt{search/5}} procedure. Some of those lend themselves to some benchmarks but not to others.\par
-The \texttt{indomain\_min} heuristic performed better than \texttt{indomain\_max} as it is an optimisation problem after all, meaning that selecting the minimum starting time selects solutions with a smaller cost first. A solution with a lower cost will prune the search tree more.
+Table \ref{tab:sche1} shows the runtime for each benchmark. Two versions are considered ; one ensures that no two meetings overlap by imposing a \texttt{(}$S_1$+$D_1$ $\leq$ $S_2$\ \texttt{or}\ $S_2$+$D_2$ $\leq$ $S_1$\texttt{)} constraint for every such pair, the other version uses a global version of these same constraints provided by the \href{http://eclipseclp.org/doc/bips/lib/ic_edge_finder/index.html}{\texttt{ic\_edge\_finder}} library. It's clear that the global version outperforms the other one. The time it takes to propagate the constraints is usually compensated for by the reduction in nodes having to be considered due to the pruning of the search tree.
 
 \begin{table}[H]
 \footnotesize
@@ -75,3 +72,6 @@ Total/Average     & 26422/2033   & 7721/594
 \caption{Benchmark results for the Scheduling Meetings challenge, shown in milliseconds.}
 \label{tab:sche1}
 \end{table}
+
+Instead of making use of implied constraints one can also tinker with the various heuristics provided by the \href{http://eclipseclp.org/doc/bips/lib/ic/search-6.html}{\texttt{search/5}} procedure. Some of those lend themselves to some benchmarks but not to others.\par
+The \texttt{indomain\_min} heuristic performed better than \texttt{indomain\_max} as solutions with smaller end times are prioritised during backtracking. A first solution necessarily has the smallest end time. The corresponding maximum value imposed on the cost function proceeds to prune a large part of the search tree and only the number of violations remains to be optimised.

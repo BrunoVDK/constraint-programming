@@ -9,7 +9,7 @@
 %   5. sum constraint
 %   6. connectedness constraint
 %
-% They're all active. In the case of 1 and 2 it is done by
+% All but the last one are active. In the case of 1 and 2 it is done by
 %   the sharing of variables between cells and islands.
 %   (e.g. any cell's 'north' variable is the same as the 'south' variable
 %       of the cell above it)
@@ -34,16 +34,19 @@
 
 % Additional constraint : when two neighbouring islands have the number 1 or 2,
 %  they cannot be by that number of bridges.
-%no_sink, island(_,C,Var,_,_,_,1) # passive, island(_,C,_,_,Var,_,1) # passive ==>
-%    var(Var) | Var in [0].
-%no_sink, island(R,_,_,Var,_,_,1) # passive, island(R,_,_,_,_,Var,1) # passive ==>
-%    var(Var) | Var in [0].
+no_sink, island(_,C,Var,_,_,_,1) # passive, island(_,C,_,_,Var,_,1) # passive ==>
+    var(Var) | Var in [0].
+no_sink, island(R,_,_,Var,_,_,1) # passive, island(R,_,_,_,_,Var,1) # passive ==>
+    var(Var) | Var in [0].
 %no_sink, island(_,C,Var,_,_,_,2) # passive, island(_,C,_,_,Var,_,2) # passive ==>
 %    var(Var) | Var in [0,1].
 %no_sink, island(R,_,_,Var,_,_,2) # passive, island(R,_,_,_,_,Var,2) # passive ==>
 %    var(Var) | Var in [0,1].
 
 % Sum constraint (does forward checking)
+% First 3 rules are an additional constraint ; if the number of neighbors
+%  of an island equals half its number, then the island
+%  should be connected to all these neighbours by a pair of bridges.
 sum(4,[A,B,C,D],8) <=> A in [2], B in [2], C in [2], D in [2].
 sum(3,[A,B,C],6) <=> A in [2], B in [2], C in [2].
 sum(2,[A,B],4) <=> A in [2], B in [2].
@@ -85,7 +88,7 @@ assign(Val,X) <=> X is Val.
 %search, (X in [Val]) # passive <=> assign(Val,X), search.
 %search, (X in [Val1,Val2]) # passive <=> member(Val,[Val1,Val2]), assign(Val,X), search.
 search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
-search <=> check_connectedness.
+search <=> writeln('Checking connectedness ... '), check_connectedness.
 
 % Print the solution
 % Assumes fixed-width font (change in Settings > Font ...)
@@ -109,6 +112,7 @@ symbol(2,0) <=> write('X').
 initialized \ sum(_,Vars,Sum) # passive <=>
     member(0,Vars)
     | include(\==(0),Vars,NewVars), length(NewVars,L), sum(L,NewVars,Sum).
+% Experiment with tighter sum constraints
 initialized <=> true.
 
 % Clean up pre-filled vars

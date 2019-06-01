@@ -15,7 +15,7 @@ The model with nothing but channeling constraints is in channeling.pl.
 The other filenames should be obvious.
 
 All the CHR models are in /src/sudoku/chr/model/.
-Note that not all of the models mentioned in the report were implemented in this language.
+Not all of the models mentioned in the report were implemented in this language.
 
 The benchmarks and automated benchmarking code is in /src/sudoku/benchmarks.
 
