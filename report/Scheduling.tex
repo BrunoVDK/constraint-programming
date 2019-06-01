@@ -40,7 +40,7 @@ violations(N, Ranks, StartTimes, Violations, MaxViolations) :-\\
     \qquad Violations \#= sum(ViolationList).
 \end{snippet}
 
-An additional constraint was used for the cost function, stating that it cannot be smaller than $V_{max}\times D_{tot}$ with $D_{tot}$ the sum of all meeting durations. This makes a difference\footnote{In our tests the total runtime was reduced by a factor of 4 (not when making use of the \texttt{ic\_edge\_finder} version).}.\\\par
+An additional constraint was used for the cost function, stating that it cannot be smaller than $V_{max}\times D_{tot}$ with $D_{tot}$ the sum of all meeting durations. This makes a difference\footnote{The total runtime was reduced by a factor of 4 (not when making use of the \texttt{ic\_edge\_finder} version).}.\\\par
 
 Some implied constraints were added to increase performance. In case two persons have a different rank but the same meeting duration and weekend preferences, a corresponding order on their start times can safely be imposed. This mustn't override the precedence constraints.\\\par
 

@@ -1,0 +1,28 @@
+*** INPUT ORDER ***
+
+Classical viewpoint :
+
+	Total time : 3.21784043312073 s
+	Average time : 0.229845745222909 s
+	Total backtracks : 44443
+	Average backtracks : 3174.5
+
+Classical viewpoint (redundant constraints removed) :
+
+	Not doable, too slow.
+
+*** FIRST FAIL ***
+
+Classical viewpoint :
+
+	Total time : 1.51187324523926 s
+	Average time : 0.107990946088518 s
+	Total backtracks : 16690
+	Average backtracks : 1192.14285714286
+
+Classical viewpoint (redundant constraints removed) :
+
+	Total time : 507.534684896469 s
+	Average time : 36.2524774926049 s
+	Total backtracks : 7939412
+	Average backtracks : 567100.857142857
