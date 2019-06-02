@@ -81,6 +81,11 @@ search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
 
 % Flow domain bound consistency (attempt, short on time)
 % Puzzle 7 is interesting to test out with
+% However, when we test it out when flow variables are assigned as above (i.e.
+%   if only one value remains, it is assigned) then the first solution is
+%   connected from the get-go. When commenting it out, quite a few
+%   non-connected solutions are generated until the correct one is found.
+% Puzzle 2 and 6 are rather difficult to debug ...
 (FA inflow MinA..MaxA), (FB inflow MinB..MaxB), flow_sum(2,[SA-FA,SB-FB],Sum) ==>
     E1B is Sum - MinA + (2*SA*MinA), E2B is Sum - MaxA + (2*SA*MaxA),
     E1A is Sum - MinB + (2*SB*MinB), E2A is Sum - MaxB + (2*SB*MaxB),
