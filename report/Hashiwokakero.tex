@@ -1,6 +1,6 @@
 \section{Hashiwokakero}
 
-Hashiwokakero is another Japanese logic puzzle published by the same company in which islands have to be connected by bridges. Six constraints are to be respected, the last one being the connectedness constraint, i.e. that all islands have to be connected. What follows is a discussion of an implementation of two solvers of Hashiwokakero puzzles. One written in ECLiPSe, the other in \texttt{CHR}.
+Hashiwokakero is another Japanese logic puzzle published by the same company, in which islands have to be connected by bridges. Six constraints are to be respected, the last one being the connectedness constraint, i.e. that all islands have to be connected. What follows is a discussion of an implementation of two solvers of Hashiwokakero puzzles. One written in ECLiPSe, the other in \texttt{CHR}.
 
 \subsection{ECLiPSe implementation}
 
@@ -12,7 +12,7 @@ A partial solution by Joachim Schimpf was provided. It did not enforce the conne
 \item[5.] The number of bridges connected to an island must match the number $X$ on that island. A simple sum constraint ($N+E+S+W$\ \#=\ $X$) suffices to enforce this one.
 \end{enumerate}
 
-The connectedness constraint was enforced through the use of an analogous set of four variables ($FN,FE,FS,FW$) per cell, denoting the \textit{flow} for each of the cell's directions. Say the island at the upper left is said to be the sink, then if a flow can be assigned to all islands such that the sink's incoming flow equals the total number of islands minus one, the islands are sure to be connected. The net flow for each island needs to be one, for each cell it should be zero, and empty cells should have no flow. Most of these constraints can be implemented with equality constraints (the \texttt{ic} library enforces bound consistency for these), some of the others were implemented with the use of the \href{http://eclipseclp.org/doc/bips/lib/ic/EG-2.html}{$\Rightarrow$} (`implication') constraint.\\\par
+The connectedness constraint was enforced through the use of an analogous set of four variables ($FN,FE,FS,FW$) per cell, denoting the \textit{flow} for each of the cell's directions. Say the island at the upper left is said to be the sink, then if a flow can be assigned to all islands such that the sink's incoming flow equals the total number of islands minus one, the islands are sure to be connected. The net flow for each non-sink island needs to be one, for each cell it should be zero, and empty cells should have no flow. Most of these constraints can be implemented with equality constraints (the \texttt{ic} library enforces bound consistency for these), some of the others were implemented with the use of the \href{http://eclipseclp.org/doc/bips/lib/ic/EG-2.html}{$\Rightarrow$} (`implication') constraint.\\\par
 
 \begin{snippet}[H]
 \caption{Constraint stating that the flow in a bridge should be zero.}\label{hashi}
@@ -74,4 +74,4 @@ X   |                 |               X
 \label{fig:circles}
 \end{figure}
 
-If the sum constraints relating to flow would enforce bound consistency (as is the case in ECLiPSe), wrong values could more quickly be filtered out\footnote{A limited form of bound consistency was implemented. A correct solution was generated much more quickly due to that as it helped to realize that a given solution isn't connected. Eventually the search procedure still got stuck on puzzle 6, looking for a valid way to label flow variables. It's harder to ascertain that a given solution \textit{is} connected.}. Doing the same for the other sum constraints (relating to the number of bridges connected to each island) should also reduce the number of backtracks and, therefor, reduce total runtime.
+If the sum constraints relating to flow would enforce bound consistency (as is the case in ECLiPSe), wrong values could more quickly be filtered out\footnote{A limited form of bound consistency was implemented. A correct solution was generated much more quickly due to that as it helped to realize that a given solution isn't connected. Eventually the search procedure still got stuck on puzzle 6, looking for a valid way to label flow variables. It's harder to ascertain that a given solution \textit{is} connected.}. Doing the same for the other sum constraints (relating to the number of bridges connected to each island) should also reduce the number of backtracks and, therefore, reduce total runtime.
