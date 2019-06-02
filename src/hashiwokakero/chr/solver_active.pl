@@ -74,13 +74,14 @@ assign_flow(Val,FX) <=> FX is Val.
 %   We tried it, didn't improve speed.
 assign(Val,X) <=> X is Val.
 search, (X in [Val]) # passive <=> assign(Val,X), search.
+% If you comment out the following line the first solution isn't connected
+%  (it makes it clear that the constraints are active)
 search, (FX inflow Val..Val) # passive <=> assign_flow(Val,FX), search.
 search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
-:- chr_constraint clean_sums/0, cleaned_sums/0.
-search <=> print_board(20), nl, writeln('-------'), clean_sums.
 
 % Flow domain bound consistency (attempt, short on time)
-clean_sums, (FA inflow MinA..MaxA), (FB inflow MinB..MaxB) \ flow_sum(2,[SA-FA,SB-FB],Sum) # passive <=>
+% Puzzle 7 is interesting to test out with
+(FA inflow MinA..MaxA), (FB inflow MinB..MaxB), flow_sum(2,[SA-FA,SB-FB],Sum) ==>
     E1B is Sum - MinA + (2*SA*MinA), E2B is Sum - MaxA + (2*SA*MaxA),
     E1A is Sum - MinB + (2*SB*MinB), E2A is Sum - MaxB + (2*SB*MaxB),
     (SA == 1 -> NewE1A is -E1A, NewE2A is -E2A ; NewE1A is E1A, NewE2A is E2A),
@@ -89,14 +90,11 @@ clean_sums, (FA inflow MinA..MaxA), (FB inflow MinB..MaxB) \ flow_sum(2,[SA-FA,S
     NewMinB is min(NewE1B,NewE2B), NewMaxB is max(NewE1B,NewE2B),
     LA is max(MinA,NewMinA), UA is min(MaxA,NewMaxA), LA =< UA,
     LB is max(MinB,NewMinB), UB is min(MaxB,NewMaxB), LB =< UB,
-    (\+((LA == MinA, UA == MaxA)) -> FA inflow LA..UA ; true),
-    (\+((LB == MinB, UB == MaxB)) -> FB inflow LB..UB ; true),
-    flow_sum(2,[SA-FA,SB-FB],Sum).
-clean_sums <=> cleaned_sums.
-cleaned_sums, (FX inflow Val..Val) # passive <=> assign_flow(Val,FX), cleaned_sums.
-cleaned_sums, (FX inflow Min..Max) # passive <=>
-    between(Min,Max,Val), assign_flow(Val,FX), cleaned_sums.
-cleaned_sums <=> true.
+    ((LA \= MinA ; UA \= MaxA) -> FA inflow LA..UA ; true),
+    ((LB \= MinB ; UB \= MaxB) -> FB inflow LB..UB ; true).
+search, (FX inflow Min..Max) # passive <=>
+    between(Min,Max,Val), assign_flow(Val,FX), search.
+search <=> true.
 
 % Print the solution
 % Assumes fixed-width font (change in Settings > Font ...)
