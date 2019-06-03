@@ -17,6 +17,10 @@
 :- lib(ic).  % uses the integer constraint library
 :- compile('../benchmarks/hashi_benchmarks.pl').
 
+test(name) :-
+	board(name, Board),
+	hashi(Board, _T, _B, _NESW).
+
 % Solve the given hashiwokakero puzzle.
 %
 % @param Board      The board to solve.
@@ -89,13 +93,30 @@ hashi(Board, Time, Backtracks, NESW) :-
                 % Flow constraint 4:
                 %  Every non-sink island has a net flow is +1.
                 FN + FE + FS + FW #= 1
+				
+				% Implied Constraint
+				%	A non-sink island with only 1 bridge, has a flow of only 1.
+				%(Sum == 1 -> [FN,FE,FS,FW] #:: 0..1 ; true), 	% small speedup?
+				
+				% Implied Constraint
+				%	A non-sink island with only 2 bridges (in the same direction), will only have flow 1 in that direction.  %small speedup?
+				%(Sum == 2 -> 
+				%	N #= 2 => FN #= 1,
+				%	E #= 2 => FE #= 1,
+				%	S #= 2 => FS #= 1,
+				%	W #= 2 => FW #= 1
+				%;
+				%	true
+				%)
+					
             )
         ; % Bridge or empty cell
             % Flow constraint 2:
             %  The net flow in a bridge is 0.
             %  (this constraint is also valid for empty cells)
-            N + E + S + W #\= 0 => FN #= -(FS) and FE #= -(FW) and FN + FE +FS + FW #= 0
+            N + E + S + W #\= 0 => FN #= -(FS) and FE #= -(FW) and FN + FE + FS + FW #= 0
         )
+		
     ),
     % --- Search procedure
     statistics(hr_time, Start),
@@ -235,6 +256,10 @@ board(simple12,
 board(simple13,
      []([](1,2),
         [](0,1))
+    ).
+	
+board(simple14,
+     []([](2,4,2))
     ).
 
 board(stackoverflow,
