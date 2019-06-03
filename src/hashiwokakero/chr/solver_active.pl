@@ -76,16 +76,16 @@ assign(Val,X) <=> X is Val.
 search, (X in [Val]) # passive <=> assign(Val,X), search.
 search, (FX inflow Val..Val) # passive <=> assign_flow(Val,FX), search.
 
-% Bound consistency for number of bridges constraints.
-:- chr_constraint bounds/0.
-search <=> bounds.
-bounds, (A in DomA), (B in DomB), sum(2,[A,B],Sum) ==>
+% Arc consistency for number of bridges constraints.
+:- chr_constraint arc/0.
+search <=> arc.
+arc, (A in DomA), (B in DomB), sum(2,[A,B],Sum) ==>
     findall(VA, (member(VA,DomA),member(VB,DomB),Sum is VA+VB), NewDomA),
     findall(VB, (member(VB,DomB),member(VA,DomA),Sum is VA+VB), NewDomB),
     (NewDomA \= DomA -> A in NewDomA ; true),
     (NewDomB \= DomB -> B in NewDomB ; true).
-bounds, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
-bounds <=> bounds_flow.
+arc, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
+arc <=> bounds_flow.
 
 % Flow domain bound consistency.
 % Puzzle 7 is interesting to test out with
