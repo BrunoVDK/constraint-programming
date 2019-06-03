@@ -92,14 +92,20 @@ hashi(Board, Time, Backtracks, NESW) :-
             ;
                 % Flow constraint 4:
                 %  Every non-sink island has a net flow is +1.
-                FN + FE + FS + FW #= 1
+                FN + FE + FS + FW #= 1,
 				
 				% Implied Constraint
-				%	A non-sink island with only 1 bridge, has a flow of only 1.
-				%(Sum == 1 -> [FN,FE,FS,FW] #:: 0..1 ; true), 	% small speedup?
-				
+				%	A non-sink island with only 1 bridge, has a flow of only 1 in the direction of that bridge.
+				(Sum == 1 -> 
+					N #= 1 => FN #= 1,
+					E #= 1 => FE #= 1,
+					S #= 1 => FS #= 1,
+					W #= 1 => FW #= 1
+				;
+					true
+				)
 				% Implied Constraint
-				%	A non-sink island with only 2 bridges (in the same direction), will only have flow 1 in that direction.  %small speedup?
+				%	A non-sink island with only 2 bridges (in the same direction), will only have flow 1 in that direction.
 				%(Sum == 2 -> 
 				%	N #= 2 => FN #= 1,
 				%	E #= 2 => FE #= 1,
