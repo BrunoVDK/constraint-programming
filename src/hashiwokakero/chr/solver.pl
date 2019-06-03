@@ -88,7 +88,8 @@ assign(Val,X) <=> X is Val.
 %search, (X in [Val]) # passive <=> assign(Val,X), search.
 %search, (X in [Val1,Val2]) # passive <=> member(Val,[Val1,Val2]), assign(Val,X), search.
 search, (X in Dom) # passive <=> member(Val,Dom), assign(Val,X), search.
-search <=> writeln('Checking connectedness ... '), check_connectedness.
+%search <=> writeln('Checking connectedness ... '), check_connectedness.
+search <=> check_connectedness.
 
 % Print the solution
 % Assumes fixed-width font (change in Settings > Font ...)

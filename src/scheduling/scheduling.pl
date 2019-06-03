@@ -46,7 +46,7 @@ meeting(N, Durations, OnWeekend, Ranks, Pcs, StartingDay, StartTimes, EndTime, V
     % --- Declare domains ---
     dim(StartTimes, [N]),
     sum(Durations[1..(N-1)], TotalDuration),
-    StartTimes :: 0..7*(N-1), % Needn't be tighter, doesn't speed up
+    StartTimes :: 0..(7*N)+TotalDuration+1, % Needn't be tighter, doesn't speed up
     % --- Generate constraints ---
     timing_constraints(N, StartTimes, Durations, OnWeekend, StartingDay),
     non_overlapping(N, StartTimes, Durations),
