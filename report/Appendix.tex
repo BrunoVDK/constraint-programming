@@ -5,7 +5,7 @@
 \subsection*{Reflection}\label{sec:reflection}
 \addcontentsline{toc}{subsection}{\nameref{sec:reflection}}
 
-When implementing the Sudoku solver in CHR we took a glimpse at Thom's implementation. It's given in his book as a solution to some exercise. Once we understood his approach we had the tendency to implement the viewpoints by making use of the same strategy ; constraints representing variables, constraints representing values, a simple implementation of the \texttt{first\_fail} heuristic and forward checking. This worked well, but it wasn't the most creative thing to do. Further experimentation with other models, heuristics, redundant constraints, ... was our way to (hopefully) compensate for this.\\\par
+When implementing the Sudoku solver in \texttt{CHR} we took a glimpse at Thom's implementation. It's given in his book as a solution to some exercise. Once we understood his approach we had the tendency to implement the viewpoints by making use of the same strategy ; constraints representing variables, constraints representing values, a simple implementation of the \texttt{first\_fail} heuristic and forward checking. This worked well, but it wasn't the most creative thing to do. Further experimentation with other models, heuristics, redundant constraints, ... was our way to (hopefully) compensate for this.\\\par
 
 We also would have liked to have improved the bound (and arc) consistency logic in the \texttt{CHR} Hashiwokakero solver for all sum constraints. Making better use of the tracer would have saved us a lot of time which could have made this possible.\\\par
 
@@ -24,15 +24,15 @@ Some questions were asked online after all the code had been written. There were
 \def\arraystretch{1.3}
 \begin{tabular}{llc}
 Folder & File & Description \\ \hline
-\texttt{/src/sudoku/} & \texttt{utils.pl} & \textit{Utility functions for Sudoku (CHR \& ECLiPSe)} \\    
+\texttt{/src/sudoku/} & \texttt{utils.pl} & \textit{Utility functions for Sudoku (\texttt{CHR} \& \texttt{ECLiPSe})} \\    
 \texttt{/src/sudoku/benchmarks/} & \texttt{benchmarks.pl} & \textit{Automatic benchmarking code} \\    
 \texttt{/src/sudoku/benchmarks/puzzles/} & \texttt{*} & \textit{Sudoku benchmarks} \\    
-\texttt{/src/sudoku/chr/} & \texttt{solver.pl} & \textit{Sudoku solver (CHR)} \\    
-\texttt{/src/sudoku/chr/model/} & \texttt{*} & \textit{Sudoku viewpoints (CHR)} \\    
-\texttt{/src/sudoku/eclipse/} & \texttt{solver.pl} & \textit{Sudoku solver (ECLiPSe)} \\    
-\texttt{/src/sudoku/eclipse/model/} & \texttt{*} & \textit{Sudoku viewpoints (ECLiPSe)} \\\hline
-\texttt{/src/hashiwokakero/eclipse/} & \texttt{solver.pl} & \textit{Hashiwokakero solver (ECLiPSe)} \\
-\texttt{/src/hashiwokakero/chr/} & \texttt{solver.pl} & \textit{Hashiwokakero solver (CHR)} \\
+\texttt{/src/sudoku/chr/} & \texttt{solver.pl} & \textit{Sudoku solver (\texttt{CHR})} \\    
+\texttt{/src/sudoku/chr/model/} & \texttt{*} & \textit{Sudoku viewpoints (\texttt{CHR})} \\    
+\texttt{/src/sudoku/eclipse/} & \texttt{solver.pl} & \textit{Sudoku solver (\texttt{ECLiPSe})} \\    
+\texttt{/src/sudoku/eclipse/model/} & \texttt{*} & \textit{Sudoku viewpoints (\texttt{ECLiPSe})} \\\hline
+\texttt{/src/hashiwokakero/eclipse/} & \texttt{solver.pl} & \textit{Hashiwokakero solver (\texttt{ECLiPSe})} \\
+\texttt{/src/hashiwokakero/chr/} & \texttt{solver.pl} & \textit{Hashiwokakero solver (\texttt{CHR})} \\
 \texttt{/src/hashiwokakero/benchmarks/} & \texttt{hashi\_benchmarks.pl} & \textit{Hashiwokakero benchmarks}  \\\hline
 \texttt{/src/scheduling/} & \texttt{scheduling.pl} & \textit{Scheduling meetings solution} \\\hline  
 \end{tabular}
