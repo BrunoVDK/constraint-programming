@@ -1,3 +1,5 @@
+# Overview
+
 Repository for constraint programming assignments for the *Advanced Programming Languages for A.I.* course [H02A8A].
 
 [The assignment can be found here.](/docs/Assignment.pdf)
@@ -64,7 +66,7 @@ Royle[^4]. These are puzzles with a minimal amount of pre-filled cells
 (17 to be precise), which does not mean that they are
 harder to solve.
 
-The dual models hold a $N\times N$ array with all the decision
+The dual models hold a $N x N$ array with all the decision
 variables. Whereas in the classic viewpoint the rows, columns and values
 of this array correspond to those of the input puzzle, every one of the
 four dual models changes their roles. The first two switch the role of
@@ -82,8 +84,8 @@ model for every level of difficulty of the input puzzle. An attempt was
 made at implementing his recommendation for 'difficult' puzzles. It
 decreased the average number of backtracks but increased the runtime.\
 
-The boolean models include the natural combined model [@article:natural]
-and a more intuitive characterisation resembling an integer programming or a SAT model (using [`occurrences/3`](http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html) instead of sums, disjunctions and conjunctions). Both of them have $N\times N\times N$ boolean variables $b_{rcv}$ which are true if the cell at row $r$ and column $c$ holds the value $v$. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by `ECLiPSe`[^5].
+The boolean models include the natural combined model
+and a more intuitive characterisation resembling an integer programming or a SAT model (using [`occurrences/3`](http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html) instead of sums, disjunctions and conjunctions). Both of them have $N x N x N$ boolean variables $b_{rcv}$ which are true if the cell at row $r$ and column $c$ holds the value $v$. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by `ECLiPSe`[^5].
 
 Note that it is usually not recommended to use a boolean model when
 integers can be used instead (as pointed out by Rossi).
@@ -94,7 +96,7 @@ makes use of the previously mentioned [`occurrences/3`](http://eclipseclp.org/do
 The second one generates nothing but channeling constraints. It has been
 demonstrated that this can provide good results despite such constraints
 being less 'tight' than `all_different` constraints[^6]. When Dotú
-discussed it he was considering QuasiGroups [@article:quasi]. This was
+discussed it he was considering QuasiGroups. This was
 extended[^7] to Sudoku puzzles by making use of three instead of two
 dual models (since blocks need to be considered as well). The variant in
 which channeling constraints between all models (one primal, three dual)
@@ -523,7 +525,7 @@ optimised.
     toggle redundancy elimination on and off.
 
 [^9]: The difference between unequality constraints and channeling is
-    explained in more detail in [@article:channeling]. Adding
+    explained in more detail in. Adding
     unequalities to the implementation slows down the search procedure
     because the channeling constraints already do this propagation and
     more.
