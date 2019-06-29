@@ -307,7 +307,7 @@ supposed to be equal, shared variables are defined instead. This is done
 in the pre-processing step when the board is read. Because of this
 decision all but the second and the fifth constraint have to be
 enforced. The sum constraint was just described. The way the second
-constraint is dealt with is shown in code snippet [\[hashi2\]](#hashi2){reference-type="ref" reference="hashi2"}. As can be seen, the `in/2` constraint (and operator) is used to update domains.
+constraint is dealt with is shown in code snippet 2. As can be seen, the `in/2` constraint (and operator) is used to update domains.
 
 <p align="center">
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/snippet3.png?raw=true">
@@ -417,7 +417,7 @@ of violations is of secondary importance.
 Weekend constraints are generated first. If a person doesn't want to
 meet on weekends then his or her meeting is not allowed to overlap with
 the first weekend that follows :
-``((S + *StartingDay*) mod 7) + D <  5`` In the above constraint `S` and `D` represent the start and duration of the person's meeting. Making direct use of [`mod/3`](https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html) leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.
+``((S + StartingDay) mod 7) + D <  5`` In the above constraint `S` and `D` represent the start and duration of the person's meeting. Making direct use of [`mod/3`](https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html) leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.
 
 <p align="center">
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/snippet4.png?raw=true">
@@ -429,7 +429,7 @@ fact that the meeting with the minister should come last is equivalent
 to adding `N-1` precedence constraints with `N` the total number of
 persons.
 
-The cost function is defined as `(V_{max} x E)+V` where `V_{max}` is
+The cost function is defined as `(V_{max} x E) + V` where `V_{max}` is
 the maximum number of rank violations, `E` is the end time of the
 meeting with the minister and `V` is the actual number of rank
 violations for a given solution. This ensures that whenever two
@@ -453,7 +453,7 @@ imposed. This mustn't override the precedence constraints.
 
 Table 5 shows the runtime for each benchmark. Two
 versions are considered ; one ensures that no two meetings overlap by
-imposing a (`S_1`+`D_1` ≤ `S_2` or `S_2`+`D_2` ≤ `S_1`)
+imposing a (`S_1` + `D_1` ≤ `S_2` or `S_2` + `D_2` ≤ `S_1`)
 constraint for every such pair, the other version uses a global version
 of these same constraints provided by the [`ic_edge_finder`](http://eclipseclp.org/doc/bips/lib/ic_edge_finder/index.html) library. It's clear that the global version outperforms the other one. The time it takes to propagate the constraints is usually compensated for by the reduction in nodes having to be considered due to the pruning of the search tree.
 
@@ -473,17 +473,9 @@ optimised.
 
 ## Overview of the Code
 
- `/src/sudoku/`                      `utils.pl`               *Utility functions for Sudoku (`CHR` & `ECLiPSe`)*
-  `/src/sudoku/benchmarks/`           `benchmarks.pl`                    *Automatic benchmarking code*
-  `/src/sudoku/benchmarks/puzzles/`   `*`                                     *Sudoku benchmarks*
-  `/src/sudoku/chr/`                  `solver.pl`                           *Sudoku solver (`CHR`)*
-  `/src/sudoku/chr/model/`            `*`                                 *Sudoku viewpoints (`CHR`)*
-  `/src/sudoku/eclipse/`              `solver.pl`                         *Sudoku solver (`ECLiPSe`)*
-  `/src/sudoku/eclipse/model/`        `*`                               *Sudoku viewpoints (`ECLiPSe`)*
-  `/src/hashiwokakero/eclipse/`       `solver.pl`                      *Hashiwokakero solver (`ECLiPSe`)*
-  `/src/hashiwokakero/chr/`           `solver.pl`                        *Hashiwokakero solver (`CHR`)*
-  `/src/hashiwokakero/benchmarks/`    `hashi_benchmarks.pl`                *Hashiwokakero benchmarks*
-  `/src/scheduling/`                  `scheduling.pl`                    *Scheduling meetings solution*
+<p align="center">
+<img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/table6.png?raw=true">
+</p>
 
 
 [^1]: `ECLiPSe` and `CHR` implementations are available in
