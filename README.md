@@ -75,14 +75,14 @@ column of the array corresponds to a block and a position. In the fourth
 dual model every row represents a block, every column a value and every
 value a position within a block. For each of them it was harder to
 implement the necessary constraints, usually necessitating the use of
-auxiliary variables together with appropriate channeling constraints.\
+auxiliary variables together with appropriate channeling constraints.
 
 In one of his works Laburthe discusses various rules that can be used to
 resolve Sudoku puzzles, after which he details three models that he
 associates with the rules. He ends up proposing a
 model for every level of difficulty of the input puzzle. An attempt was
 made at implementing his recommendation for 'difficult' puzzles. It
-decreased the average number of backtracks but increased the runtime.\
+decreased the average number of backtracks but increased the runtime.
 
 The boolean models include the natural combined model
 and a more intuitive characterisation resembling an integer programming or a SAT model (using [`occurrences/3`](http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html) instead of sums, disjunctions and conjunctions). Both of them have `N x N x N` boolean variables `b_{rcv}` which are true if the cell at row `r` and column `c` holds the value `v`. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by `ECLiPSe`[5].
