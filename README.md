@@ -51,7 +51,7 @@ Sudoku is a well-known puzzle game which needs no introduction. It is
 typically modelled as a constraint satisfaction problem through the use
 of `all_different` constraints on rows, columns and blocks. Such global
 inequalities tend to improve upon the use of binary inequalities. The
-constraint generating code[^1] is fairly trivial and needn't be detailed
+constraint generating code[1] is fairly trivial and needn't be detailed
 here.
 
 There are several other ways one could model Sudoku. The widely cited
@@ -60,9 +60,9 @@ provide some ideas. Four *'dual'* models, two approaches based on a
 boolean characterisation, a combination of models provided by Laburthe,
 a model enforcing the singular occurrence of every value in every row,
 column and block, as well as a model with nothing but channeling
-constraints were considered[^2]. Tests were run on the provided
-puzzles[^3] as well as some minimum puzzles provided by Gordon
-Royle[^4]. These are puzzles with a minimal amount of pre-filled cells
+constraints were considered[2]. Tests were run on the provided
+puzzles[3] as well as some minimum puzzles provided by Gordon
+Royle[4]. These are puzzles with a minimal amount of pre-filled cells
 (17 to be precise), which does not mean that they are
 harder to solve.
 
@@ -85,7 +85,7 @@ made at implementing his recommendation for 'difficult' puzzles. It
 decreased the average number of backtracks but increased the runtime.\
 
 The boolean models include the natural combined model
-and a more intuitive characterisation resembling an integer programming or a SAT model (using [`occurrences/3`](http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html) instead of sums, disjunctions and conjunctions). Both of them have `N x N x N` boolean variables `b_{rcv}` which are true if the cell at row `r` and column `c` holds the value `v`. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by `ECLiPSe`[^5].
+and a more intuitive characterisation resembling an integer programming or a SAT model (using [`occurrences/3`](http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html) instead of sums, disjunctions and conjunctions). Both of them have `N x N x N` boolean variables `b_{rcv}` which are true if the cell at row `r` and column `c` holds the value `v`. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by `ECLiPSe`[5].
 
 Note that it is usually not recommended to use a boolean model when
 integers can be used instead (as pointed out by Rossi).
@@ -95,9 +95,9 @@ makes use of the previously mentioned [`occurrences/3`](http://eclipseclp.org/do
 
 The second one generates nothing but channeling constraints. It has been
 demonstrated that this can provide good results despite such constraints
-being less 'tight' than `all_different` constraints[^6]. When Dotú
+being less 'tight' than `all_different` constraints[6]. When Dotú
 discussed it he was considering QuasiGroups. This was
-extended[^7] to Sudoku puzzles by making use of three instead of two
+extended[7] to Sudoku puzzles by making use of three instead of two
 dual models (since blocks need to be considered as well). The variant in
 which channeling constraints between all models (one primal, three dual)
 are generated performed better than the one in which only channeling
@@ -109,7 +109,7 @@ variants are analogous to what Dotú referred to as *'trichanneling'* and
 
 Number of backtracks and running time for most of the models are
 displayed in table 1. Removal of *'big'* (`all_different`) constraints
-in the classic model[^8] led to an increase in runtime which
+in the classic model[8] led to an increase in runtime which
 corroborates Demoen's experiences.
 
 <p align="center">
@@ -124,7 +124,7 @@ constraint which enforces arc-consistency. The first will detect when
 for a given *row-column*, *row-value*, *column-value* or *block-value*
 combination only one possible *value*, *column*, *row* or *position*
 remains. It will remove this value, column, ... from the domains of the
-other primal or dual variables[^9]. The second can do the same ; it can
+other primal or dual variables[9]. The second can do the same ; it can
 propagate unequalities when the domain of a variable is reduced to a
 singleton but also knows when a value can be put in only one particular
 cell of a row, column or block. It is probably slower because the
@@ -172,13 +172,13 @@ Initially the `first_fail` variable heuristic and the `indomain_min`
 value heuristic were used. These are easy to implement and generally
 perform quite nicely. Based on previous experiments with `ECLiPSe` it
 was concluded that (at least for the given benchmarks) `indomain_max`
-would be a better choice for the classic model[^10]. It cut runtime by
+would be a better choice for the classic model[10]. It cut runtime by
 about half, yet increased the runtime of the `dual4` model.
 
 Because the channeling-only viewpoint performed best in the `ECLiPSe`
 experiments an attempt was made at implementing it in `CHR`. The
 approach that was used led to complicated code and - ironically - the
-slowest runtimes seen yet. After a related failed experiment[^11] the
+slowest runtimes seen yet. After a related failed experiment[11] the
 focus was laid on keeping the code more simple and adding redundant
 constraints. A few of the rules discussed by Laburthe were tested out. 
 The *x-wing* rule was of no use, but adding a *single-position* rule 
@@ -189,7 +189,7 @@ sort of channeling-only model, or at least a model which would detect
 when values can only be put in one cell in a given row, column or block.
 By applying all the *single-position* rules, basically. While technically 
 speaking no channeling is done in the implementation of this experimental model, 
-the number of backtracks decreased starkly[^12] and the total runtime decreased 
+the number of backtracks decreased starkly[12] and the total runtime decreased 
 in comparison with the classic model.
 
 In example code Gonzalez & Christiansen use a 4-coordinate approach
@@ -235,7 +235,7 @@ the five first constraints :
     of bridges for a given direction of a given cell equals the number
     of bridges in the opposite direction of a neighbouring cell. A total
     of four equality constraints for every cell except those on the
-    border, which may only have two or three neighbours[^13].
+    border, which may only have two or three neighbours[13].
 
 2.  Bridges cannot cross other bridges or islands. This is enforced by
     making sure that any cell that does not represent an island either
@@ -319,17 +319,17 @@ in the middle'* technique. If an island's number equals twice its number
 of neighbours then it should be connected with each of these neighbours
 by a pair of bridges. This covers some of the special cases as
 *'neighbour'* is defined more broadly as *'any island to which the
-island can still be connected with at a certain point'*[^14]. As
+island can still be connected with at a certain point'*[14]. As
 expected, it sped up the solver for all puzzles, almost cutting the
 total runtime by half.
 
 The second constraint prevents isolation of some islands by stating that
 any two neighbouring islands, both with the number one or two, cannot be
-connected by that same number of bridges[^15]. Only in the sixth puzzle
+connected by that same number of bridges[15]. Only in the sixth puzzle
 did this speed up the search by about half a second due to the reduction
 in number of backtracks. Interestingly the constraint slows down puzzle
 two, as enforcing it changes the variable ordering leading to a stark
-increase in number of backtracks[^16].
+increase in number of backtracks[16].
 
 Some redundant constraints were already part of the basic solver. For
 example, if an island only has one neighbour, its sum constraint only
@@ -337,7 +337,7 @@ contains one variable which can readily be assigned.
 
 As for the connectedness constraints, both passive - and active versions
 were implemented. Because any initial solution generated without
-enforcing connectedness still tends to be connected anyways[^17], any
+enforcing connectedness still tends to be connected anyways[17], any
 constraint propagation relating to flow tends to slow down the search
 procedure. Because of this the passive versions of the connectedness
 constraints outperform the active versions (having a total runtime of
@@ -424,7 +424,7 @@ the first weekend that follows :
 </p>
 
 Precedence constraints and constraints assuring that no meetings overlap
-are generated last. The corresponding code is fairly trivial[^18]. The
+are generated last. The corresponding code is fairly trivial[18]. The
 fact that the meeting with the minister should come last is equivalent
 to adding `N-1` precedence constraints with `N` the total number of
 persons.
@@ -444,7 +444,7 @@ solutions have the same end time `E`, then it's the number of violations
 
 An additional constraint was used for the cost function, stating that it
 cannot be smaller than `V_{max} x D_{tot}` with `D_{tot}` the sum of
-all meeting durations. This makes a difference[^19].
+all meeting durations. This makes a difference[19].
 
 Some implied constraints were added to increase performance. In case two
 persons have a different rank but the same meeting duration and weekend
@@ -479,26 +479,26 @@ optimised.
 
 ## Footnotes
 
-[^1]: `ECLiPSe` and `CHR` implementations are available in
+[1]: `ECLiPSe` and `CHR` implementations are available in
     `/sudoku/model/classic.pl` and in `/sudoku/chr/model/classic.pl`.
 
-[^2]: These are implemented with `ECLiPSe` in the
+[2]: These are implemented with `ECLiPSe` in the
     `/sudoku/eclipse/model/` directory, and some `CHR` versions are in
     `/sudoku/chr/model/`.
 
-[^3]: `/sudoku/benchmarks/benchmarks.pl` provides automatic benchmarking
+[3]: `/sudoku/benchmarks/benchmarks.pl` provides automatic benchmarking
     code.
 
-[^4]: [These are available online.](http://rotor.di.unipi.it/cisterni/Shared%20Documents/minsudoku.html)
+[4]: [These are available online.](http://rotor.di.unipi.it/cisterni/Shared%20Documents/minsudoku.html)
 
-[^5]: A custom-made implementation as well as the
+[5]: A custom-made implementation as well as the
     [`\sim=/2`](https://eclipseclp.org/doc/bips/kernel/termcomp/TE-2.html)
     constraint which checks if two terms can be unified were tried.
     Channeling back to integers with
     [`ic_global:bool_channeling/3`](http://eclipseclp.org/doc/bips/lib/ic_global/bool_channeling-3.html)
     worked better (ironically).
 
-[^6]: *"The reason for this difference is that the primal not-equals
+[6]: *"The reason for this difference is that the primal not-equals
     constraints detect singleton variables (i.e. those variables with a
     single value), the channelling constraints detect singleton
     variables and singleton values (i.e. those values which occur in the
@@ -507,50 +507,50 @@ optimised.
     variables, singleton values and many other
     situations)\"
 
-[^7]: The code lies in `sudoku/model/channeling.pl` in which a flag
+[7]: The code lies in `sudoku/model/channeling.pl` in which a flag
     called `extended` can be used to opt for one of two variants.
 
-[^8]: In his study Demoen gives several *Missing(6)* examples, models in
+[8]: In his study Demoen gives several *Missing(6)* examples, models in
     which 6 of the `all_different` constraints are removed. *Missing(7)*
     models aren't Sudoku, and because of the stark rise in number of
     backtracks no further experimentation with the removal of '*small*'
     constraints was done. The `eliminate_redundancy` flag can be used to
     toggle redundancy elimination on and off.
 
-[^9]: The difference between unequality constraints and channeling is
+[9]: The difference between unequality constraints and channeling is
     explained in more detail in. Adding
     unequalities to the implementation slows down the search procedure
     because the channeling constraints already do this propagation and
     more.
 
-[^10]: For solving the provided puzzles, not in general.
+[10]: For solving the provided puzzles, not in general.
 
-[^11]: At some point a constraint `pos/4` was used to convert from
+[11]: At some point a constraint `pos/4` was used to convert from
     *row-column* combinations to the corresponding blocks and positions
     (e.g. `pos(2,3,1,6)`). This slowed down the algorithm a lot because
     it increased the size of the constraint store. Encoding positions
     with 4 coordinates worked better.
 
-[^12]: It's a little harder to count the number of backtracks in `CHR`.
+[12]: It's a little harder to count the number of backtracks in `CHR`.
     Because the channeling-only model solves the *extra2* puzzle with
     zero backtracks the `CHR` model was tested on that one, and it also
     did zero backtracking.
 
-[^13]: It can be noted that Joachim's code enforces both `A` \#= `B` and
+[13]: It can be noted that Joachim's code enforces both `A` \#= `B` and
     `B` \#= `A` in several cases. It has no effect on the runtimes.
 
-[^14]: Let's give a concrete example. Say, an island has the number four
+[14]: Let's give a concrete example. Say, an island has the number four
     and three neighbors. Nothing could be concluded before doing any
     searching. If at any point during search it becomes clear that one
     of the three neighbors can't be connected to the island, then two
     pairs of bridges need to be added to form connections with the
     remaining neighbours.
 
-[^15]: Note that in the case of trivial boards with nothing else than
+[15]: Note that in the case of trivial boards with nothing else than
     two such islands enforcing this constraint would prevent the
     solution from being found.
 
-[^16]: Experiments with value heuristics (`indomain_min`,
+[16]: Experiments with value heuristics (`indomain_min`,
     `indomain_max`) showed that changing the heuristic can have a large
     impact on the number of backtracks. The same holds true for variable
     heuristics. Part of the reason why ECLiPSe is a whole lot faster is
@@ -558,12 +558,12 @@ optimised.
     sum constraints of the basic `CHR` solver only forward checking is
     done.
 
-[^17]: At least in the case of the provided benchmarks. In the case of
+[17]: At least in the case of the provided benchmarks. In the case of
     puzzle six and a two smaller boards that were added, the first
     solution isn't connected.
 
-[^18]: All code for this third challenge can be found in
+[18]: All code for this third challenge can be found in
     `/src/scheduling/scheduling.pl`.
 
-[^19]: The total runtime was reduced by a factor of 4 (not when making
+[19]: The total runtime was reduced by a factor of 4 (not when making
     use of the `ic_edge_finder` version).
