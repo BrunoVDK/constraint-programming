@@ -1,7 +1,5 @@
 # Overview
 
-Repository for constraint programming assignments for the *Advanced Programming Languages for A.I.* course [H02A8A].
-
 [The assignment can be found here.](/docs/Assignment.pdf)
 
 ## Sources
