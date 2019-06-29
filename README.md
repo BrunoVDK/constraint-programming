@@ -477,6 +477,7 @@ optimised.
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/table6.png?raw=true">
 </p>
 
+## Footnotes
 
 [^1]: `ECLiPSe` and `CHR` implementations are available in
     `/sudoku/model/classic.pl` and in `/sudoku/chr/model/classic.pl`.
