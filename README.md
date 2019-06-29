@@ -1,4 +1,4 @@
-Repository for constraint programming assignments for the *Advanced Programming Languages for A.I.* course [H02A8A].
+# Overview
 
 [The assignment can be found here.](/docs/Assignment.pdf)
 
@@ -43,6 +43,8 @@ Repository for constraint programming assignments for the *Advanced Programming 
  
  # Report
  
+ [PDF version of the report can be found here.](/report/Report.pdf)
+ 
  ## Sudoku
 
 Sudoku is a well-known puzzle game which needs no introduction. It is
@@ -64,7 +66,7 @@ Royle[^4]. These are puzzles with a minimal amount of pre-filled cells
 (17 to be precise), which does not mean that they are
 harder to solve.
 
-The dual models hold a $N\times N$ array with all the decision
+The dual models hold a `N x N` array with all the decision
 variables. Whereas in the classic viewpoint the rows, columns and values
 of this array correspond to those of the input puzzle, every one of the
 four dual models changes their roles. The first two switch the role of
@@ -82,8 +84,8 @@ model for every level of difficulty of the input puzzle. An attempt was
 made at implementing his recommendation for 'difficult' puzzles. It
 decreased the average number of backtracks but increased the runtime.\
 
-The boolean models include the natural combined model [@article:natural]
-and a more intuitive characterisation resembling an integer programming or a SAT model (using [`occurrences/3`](http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html) instead of sums, disjunctions and conjunctions). Both of them have $N\times N\times N$ boolean variables $b_{rcv}$ which are true if the cell at row $r$ and column $c$ holds the value $v$. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by `ECLiPSe`[^5].
+The boolean models include the natural combined model
+and a more intuitive characterisation resembling an integer programming or a SAT model (using [`occurrences/3`](http://eclipseclp.org/doc/bips/lib/ic_global/occurrences-3.html) instead of sums, disjunctions and conjunctions). Both of them have `N x N x N` boolean variables `b_{rcv}` which are true if the cell at row `r` and column `c` holds the value `v`. The natural combined model was cumbersome to implement and performed badly. It was introduced together with an algorithm which was tailored after it, and a constraint for unequality of lists isn't really supported by `ECLiPSe`[^5].
 
 Note that it is usually not recommended to use a boolean model when
 integers can be used instead (as pointed out by Rossi).
@@ -94,7 +96,7 @@ makes use of the previously mentioned [`occurrences/3`](http://eclipseclp.org/do
 The second one generates nothing but channeling constraints. It has been
 demonstrated that this can provide good results despite such constraints
 being less 'tight' than `all_different` constraints[^6]. When Dotú
-discussed it he was considering QuasiGroups [@article:quasi]. This was
+discussed it he was considering QuasiGroups. This was
 extended[^7] to Sudoku puzzles by making use of three instead of two
 dual models (since blocks need to be considered as well). The variant in
 which channeling constraints between all models (one primal, three dual)
@@ -121,7 +123,7 @@ nothing but channeling constraints, the other uses the
 constraint which enforces arc-consistency. The first will detect when
 for a given *row-column*, *row-value*, *column-value* or *block-value*
 combination only one possible *value*, *column*, *row* or *position*
-remains. It will remove this value, column, \... from the domains of the
+remains. It will remove this value, column, ... from the domains of the
 other primal or dual variables[^9]. The second can do the same ; it can
 propagate unequalities when the domain of a variable is reduced to a
 singleton but also knows when a value can be put in only one particular
@@ -191,7 +193,7 @@ the number of backtracks decreased starkly[^12] and the total runtime decreased
 in comparison with the classic model.
 
 In example code Gonzalez & Christiansen use a 4-coordinate approach
-($a\times b\times c\times d$ with $a\times b$ designating a block, $c$ a row - and $d$ a column within that block). This looked like an elegant trick to try out as it makes it unnecessary to convert from *row-column* combinations to block numbers. A form of pre-processing which did decrease runtime (for the classic model) by a few seconds. Applying it in the experimental model reduced total runtime to about 4 seconds.
+(`a x b x c x d` with `a\times b` designating a block, `c` a row - and `d` a column within that block). This looked like an elegant trick to try out as it makes it unnecessary to convert from *row-column* combinations to block numbers. A form of pre-processing which did decrease runtime (for the classic model) by a few seconds. Applying it in the experimental model reduced total runtime to about 4 seconds.
 
 As in the previous section, two of the `CHR` viewpoints were combined in
 one single model. For every puzzle it generally performed at least as
@@ -241,14 +243,14 @@ the five first constraints :
 
 3.  At most two bridges connect a pair of islands. Joachim imposes this
     constraint by declaring the domains of the variables to be
-    $[0\dots 2]$.
+    `[0..2]`.
 
 4.  The number of bridges connected to an island must match the number
-    $X$ on that island. A simple sum constraint ($N+E+S+W$ \#= $X$)
+    `X` on that island. A simple sum constraint (`N+E+S+W` \#= `X`)
     suffices to enforce this one.
 
 The connectedness constraint was enforced through the use of an
-analogous set of four variables ($FN,FE,FS,FW$) per cell, denoting the
+analogous set of four variables (`FN,FE,FS,FW`) per cell, denoting the
 *flow* for each of the cell's directions. Say the island at the upper
 left is said to be the sink, then if a flow can be assigned to all
 islands such that the sink's incoming flow equals the total number of
@@ -257,7 +259,7 @@ for each non-sink island needs to be one, for each cell it should be
 zero, and empty cells should have no flow. Most of these constraints can
 be implemented with equality constraints (the `ic` library enforces
 bound consistency for these), some of the others were implemented with
-the use of the [$\Rightarrow$](http://eclipseclp.org/doc/bips/lib/ic/EG-2.html) (*'implication'*) constraint.
+the use of the [`\Rightarrow`](http://eclipseclp.org/doc/bips/lib/ic/EG-2.html) (*'implication'*) constraint.
 
 <p align="center">
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/snippet2.png?raw=true">
@@ -300,7 +302,7 @@ their number (in the case of islands). Every island has a corresponding
 its list is assigned. This corresponds to forward checking. The
 variables represent the number of bridges for a given direction and a
 given cell (or island). Instead of defining all these variables
-separately and enforcing $V_1=V_2$ equality constraints whenever they're
+separately and enforcing `V_1 = V_2` equality constraints whenever they're
 supposed to be equal, shared variables are defined instead. This is done
 in the pre-processing step when the board is read. Because of this
 decision all but the second and the fifth constraint have to be
@@ -415,7 +417,7 @@ of violations is of secondary importance.
 Weekend constraints are generated first. If a person doesn't want to
 meet on weekends then his or her meeting is not allowed to overlap with
 the first weekend that follows :
-$$((S + \textit{StartingDay})\ \texttt{mod}\ 7) + D <  5$$ In the above constraint $S$ and $D$ represent the start and duration of the person's meeting. Making direct use of [`mod/3`](https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html) leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.
+``((S + *StartingDay*) mod 7) + D <  5`` In the above constraint `S` and `D` represent the start and duration of the person's meeting. Making direct use of [`mod/3`](https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html) leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.
 
 <p align="center">
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/snippet4.png?raw=true">
@@ -424,24 +426,24 @@ $$((S + \textit{StartingDay})\ \texttt{mod}\ 7) + D <  5$$ In the above constrai
 Precedence constraints and constraints assuring that no meetings overlap
 are generated last. The corresponding code is fairly trivial[^18]. The
 fact that the meeting with the minister should come last is equivalent
-to adding $N-1$ precedence constraints with $N$ the total number of
+to adding `N-1` precedence constraints with `N` the total number of
 persons.
 
-The cost function is defined as $(V_{max}\times E)+V$ where $V_{max}$ is
-the maximum number of rank violations, $E$ is the end time of the
-meeting with the minister and $V$ is the actual number of rank
+The cost function is defined as `(V_{max} x E)+V` where `V_{max}` is
+the maximum number of rank violations, `E` is the end time of the
+meeting with the minister and `V` is the actual number of rank
 violations for a given solution. This ensures that whenever two
-solutions have a different $E$, the solution with the smallest $E$ will
-have the lowest cost (whatever the number of violations $V$). Yet if two
-solutions have the same end time $E$, then it's the number of violations
-$V$ that will determine what solution is best.
+solutions have a different `E`, the solution with the smallest `E` will
+have the lowest cost (whatever the number of violations `V`). Yet if two
+solutions have the same end time `E`, then it's the number of violations
+`V` that will determine what solution is best.
 
 <p align="center">
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/snippet5.png?raw=true">
 </p>
 
 An additional constraint was used for the cost function, stating that it
-cannot be smaller than $V_{max}\times D_{tot}$ with $D_{tot}$ the sum of
+cannot be smaller than `V_{max} x D_{tot}` with `D_{tot}` the sum of
 all meeting durations. This makes a difference[^19].
 
 Some implied constraints were added to increase performance. In case two
@@ -451,7 +453,7 @@ imposed. This mustn't override the precedence constraints.
 
 Table 5 shows the runtime for each benchmark. Two
 versions are considered ; one ensures that no two meetings overlap by
-imposing a ($S_1$+$D_1$ $\leq$ $S_2$ or $S_2$+$D_2$ $\leq$ $S_1$)
+imposing a (`S_1`+`D_1` ≤ `S_2` or `S_2`+`D_2` ≤ `S_1`)
 constraint for every such pair, the other version uses a global version
 of these same constraints provided by the [`ic_edge_finder`](http://eclipseclp.org/doc/bips/lib/ic_edge_finder/index.html) library. It's clear that the global version outperforms the other one. The time it takes to propagate the constraints is usually compensated for by the reduction in nodes having to be considered due to the pruning of the search tree.
 
@@ -523,7 +525,7 @@ optimised.
     toggle redundancy elimination on and off.
 
 [^9]: The difference between unequality constraints and channeling is
-    explained in more detail in [@article:channeling]. Adding
+    explained in more detail in. Adding
     unequalities to the implementation slows down the search procedure
     because the channeling constraints already do this propagation and
     more.
@@ -541,8 +543,8 @@ optimised.
     zero backtracks the `CHR` model was tested on that one, and it also
     did zero backtracking.
 
-[^13]: It can be noted that Joachim's code enforces both $A$ \#= $B$ and
-    $B$ \#= $A$ in several cases. It has no effect on the runtimes.
+[^13]: It can be noted that Joachim's code enforces both `A` \#= `B` and
+    `B` \#= `A` in several cases. It has no effect on the runtimes.
 
 [^14]: Let's give a concrete example. Say, an island has the number four
     and three neighbors. Nothing could be concluded before doing any
