@@ -123,7 +123,7 @@ nothing but channeling constraints, the other uses the
 constraint which enforces arc-consistency. The first will detect when
 for a given *row-column*, *row-value*, *column-value* or *block-value*
 combination only one possible *value*, *column*, *row* or *position*
-remains. It will remove this value, column, \... from the domains of the
+remains. It will remove this value, column, ... from the domains of the
 other primal or dual variables[^9]. The second can do the same ; it can
 propagate unequalities when the domain of a variable is reduced to a
 singleton but also knows when a value can be put in only one particular
@@ -243,7 +243,7 @@ the five first constraints :
 
 3.  At most two bridges connect a pair of islands. Joachim imposes this
     constraint by declaring the domains of the variables to be
-    `[0...2]`.
+    `[0..2]`.
 
 4.  The number of bridges connected to an island must match the number
     `X` on that island. A simple sum constraint (`N+E+S+W` \#= `X`)
