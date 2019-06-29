@@ -259,7 +259,7 @@ for each non-sink island needs to be one, for each cell it should be
 zero, and empty cells should have no flow. Most of these constraints can
 be implemented with equality constraints (the `ic` library enforces
 bound consistency for these), some of the others were implemented with
-the use of the [`\Rightarrow`](http://eclipseclp.org/doc/bips/lib/ic/EG-2.html) (*'implication'*) constraint.
+the use of the [`=>`](http://eclipseclp.org/doc/bips/lib/ic/EG-2.html) (*'implication'*) constraint.
 
 <p align="center">
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/snippet2.png?raw=true">
