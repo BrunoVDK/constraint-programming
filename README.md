@@ -193,7 +193,7 @@ the number of backtracks decreased starkly[^12] and the total runtime decreased
 in comparison with the classic model.
 
 In example code Gonzalez & Christiansen use a 4-coordinate approach
-(`a\times b\times c\times d` with `a\times b` designating a block, `c` a row - and `d` a column within that block). This looked like an elegant trick to try out as it makes it unnecessary to convert from *row-column* combinations to block numbers. A form of pre-processing which did decrease runtime (for the classic model) by a few seconds. Applying it in the experimental model reduced total runtime to about 4 seconds.
+(`a x b x c x d` with `a\times b` designating a block, `c` a row - and `d` a column within that block). This looked like an elegant trick to try out as it makes it unnecessary to convert from *row-column* combinations to block numbers. A form of pre-processing which did decrease runtime (for the classic model) by a few seconds. Applying it in the experimental model reduced total runtime to about 4 seconds.
 
 As in the previous section, two of the `CHR` viewpoints were combined in
 one single model. For every puzzle it generally performed at least as
@@ -243,7 +243,7 @@ the five first constraints :
 
 3.  At most two bridges connect a pair of islands. Joachim imposes this
     constraint by declaring the domains of the variables to be
-    `[0\dots 2]`.
+    `[0...2]`.
 
 4.  The number of bridges connected to an island must match the number
     `X` on that island. A simple sum constraint (`N+E+S+W` \#= `X`)
@@ -302,7 +302,7 @@ their number (in the case of islands). Every island has a corresponding
 its list is assigned. This corresponds to forward checking. The
 variables represent the number of bridges for a given direction and a
 given cell (or island). Instead of defining all these variables
-separately and enforcing `V_1=V_2` equality constraints whenever they're
+separately and enforcing `V_1 = V_2` equality constraints whenever they're
 supposed to be equal, shared variables are defined instead. This is done
 in the pre-processing step when the board is read. Because of this
 decision all but the second and the fifth constraint have to be
@@ -417,7 +417,7 @@ of violations is of secondary importance.
 Weekend constraints are generated first. If a person doesn't want to
 meet on weekends then his or her meeting is not allowed to overlap with
 the first weekend that follows :
-``((S + \textit{StartingDay})\ \texttt{mod}\ 7) + D <  5`` In the above constraint `S` and `D` represent the start and duration of the person's meeting. Making direct use of [`mod/3`](https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html) leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.
+``((S + *StartingDay*) mod 7) + D <  5`` In the above constraint `S` and `D` represent the start and duration of the person's meeting. Making direct use of [`mod/3`](https://www.eclipseclp.org/doc/bips/kernel/arithmetic/mod-3.html) leads to an instantiation error, necessitating the use of an auxiliary variable representing the result of the modulo operation.
 
 <p align="center">
 <img src="https://github.com/BrunoVandekerkhove/constraint-programming/blob/master/img/snippet4.png?raw=true">
@@ -429,7 +429,7 @@ fact that the meeting with the minister should come last is equivalent
 to adding `N-1` precedence constraints with `N` the total number of
 persons.
 
-The cost function is defined as `(V_{max}\times E)+V` where `V_{max}` is
+The cost function is defined as `(V_{max} x E)+V` where `V_{max}` is
 the maximum number of rank violations, `E` is the end time of the
 meeting with the minister and `V` is the actual number of rank
 violations for a given solution. This ensures that whenever two
@@ -443,7 +443,7 @@ solutions have the same end time `E`, then it's the number of violations
 </p>
 
 An additional constraint was used for the cost function, stating that it
-cannot be smaller than `V_{max}\times D_{tot}` with `D_{tot}` the sum of
+cannot be smaller than `V_{max} x D_{tot}` with `D_{tot}` the sum of
 all meeting durations. This makes a difference[^19].
 
 Some implied constraints were added to increase performance. In case two
@@ -453,7 +453,7 @@ imposed. This mustn't override the precedence constraints.
 
 Table 5 shows the runtime for each benchmark. Two
 versions are considered ; one ensures that no two meetings overlap by
-imposing a (`S_1`+`D_1` `\leq` `S_2` or `S_2`+`D_2` `\leq` `S_1`)
+imposing a (`S_1`+`D_1` ≤ `S_2` or `S_2`+`D_2` ≤ `S_1`)
 constraint for every such pair, the other version uses a global version
 of these same constraints provided by the [`ic_edge_finder`](http://eclipseclp.org/doc/bips/lib/ic_edge_finder/index.html) library. It's clear that the global version outperforms the other one. The time it takes to propagate the constraints is usually compensated for by the reduction in nodes having to be considered due to the pruning of the search tree.
 
