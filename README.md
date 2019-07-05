@@ -1,5 +1,3 @@
-# Overview
-
 [The assignment can be found here.](/docs/Assignment.pdf)
 
 ## Sources
