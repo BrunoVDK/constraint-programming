@@ -492,20 +492,20 @@ optimised.
 [4]: [These are available online.](http://rotor.di.unipi.it/cisterni/Shared%20Documents/minsudoku.html)
 
 [5]: A custom-made implementation as well as the
-    [`\sim=/2`](https://eclipseclp.org/doc/bips/kernel/termcomp/TE-2.html)
+    [`~=/2`](https://eclipseclp.org/doc/bips/kernel/termcomp/TE-2.html)
     constraint which checks if two terms can be unified were tried.
     Channeling back to integers with
     [`ic_global:bool_channeling/3`](http://eclipseclp.org/doc/bips/lib/ic_global/bool_channeling-3.html)
     worked better (ironically).
 
-[6]: *"The reason for this difference is that the primal not-equals
+[6]: "The reason for this difference is that the primal not-equals
     constraints detect singleton variables (i.e. those variables with a
     single value), the channelling constraints detect singleton
     variables and singleton values (i.e. those values which occur in the
     domain of a single variable), whilst the primal all-different
     constraint detects global consistency (which includes singleton
     variables, singleton values and many other
-    situations)\"
+    situations)"
 
 [7]: The code lies in `sudoku/model/channeling.pl` in which a flag
     called `extended` can be used to opt for one of two variants.
